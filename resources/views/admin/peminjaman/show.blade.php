@@ -1,7 +1,7 @@
 @php $p = $peminjaman; @endphp
 
 <x-app-layout>
-    <x-slot name="header"><span class="text-sm text-gray-500">Transaksi</span></x-slot>
+    <x-slot name="header"><span class="text-sm text-marian-500">Transaksi</span></x-slot>
 
     <x-admin.judul :judul="'Peminjaman '.$p->kode_peminjaman" :kembali="url()->previous() !== url()->current() ? url()->previous() : route('admin.riwayat.index')">
         @if ($p->status === 'disetujui')
@@ -21,27 +21,27 @@
         <div class="space-y-4">
             @if ($p->status === 'menunggu')
                 {{-- Panel verifikasi: identitas, ketersediaan, aturan --}}
-                <div class="rounded-lg bg-white p-5 shadow">
-                    <h3 class="font-semibold text-gray-800">Verifikasi</h3>
+                <div class="rounded-3xl bg-white p-5 shadow-lembut ring-1 ring-marian-100">
+                    <h3 class="font-semibold text-marian-900">Verifikasi</h3>
 
                     <ul class="mt-3 space-y-2 text-sm">
                         <li class="flex items-start gap-2">
-                            @if ($p->peminjam->isAktif()) <span class="text-green-600">✔</span> Akun aktif
+                            @if ($p->peminjam->isAktif()) <span class="text-marian-600">✔</span> Akun aktif
                             @else <span class="text-red-600">✖</span> Akun nonaktif @endif
                         </li>
                         <li class="flex items-start gap-2">
-                            @if ($p->peminjam->nomor_identitas) <span class="text-green-600">✔</span> Nomor identitas: {{ $p->peminjam->nomor_identitas }}
-                            @else <span class="text-amber-600">!</span> Nomor identitas belum diisi @endif
+                            @if ($p->peminjam->nomor_identitas) <span class="text-marian-600">✔</span> Nomor identitas: {{ $p->peminjam->nomor_identitas }}
+                            @else <span class="text-marian-600">!</span> Nomor identitas belum diisi @endif
                         </li>
                         <li class="flex items-start gap-2">
-                            @if (! $punyaTerlambat) <span class="text-green-600">✔</span> Tidak punya pinjaman terlambat
+                            @if (! $punyaTerlambat) <span class="text-marian-600">✔</span> Tidak punya pinjaman terlambat
                             @else <span class="text-red-600">✖</span> Masih punya pinjaman terlambat @endif
                         </li>
                     </ul>
 
-                    <h4 class="mt-4 text-sm font-semibold text-gray-700">Ketersediaan pada rentang tanggal</h4>
+                    <h4 class="mt-4 text-sm font-semibold text-marian-700">Ketersediaan pada rentang tanggal</h4>
                     <table class="mt-2 w-full text-sm">
-                        <thead class="text-left text-xs text-gray-500"><tr><th class="py-1">Barang</th><th class="py-1 text-right">Diminta</th><th class="py-1 text-right">Sisa</th></tr></thead>
+                        <thead class="text-left text-xs text-marian-500"><tr><th class="py-1">Barang</th><th class="py-1 text-right">Diminta</th><th class="py-1 text-right">Sisa</th></tr></thead>
                         <tbody>
                             @foreach ($p->detail as $d)
                                 @php $sisa = $stok[$d->barang_id]['sisa'] ?? 0; @endphp
@@ -53,24 +53,24 @@
                             @endforeach
                         </tbody>
                     </table>
-                    <p class="mt-1 text-xs text-gray-500">Sisa sudah memperhitungkan ajuan disetujui & pinjaman lain yang tanggalnya bertabrakan. Dicek ulang saat menekan Setujui.</p>
+                    <p class="mt-1 text-xs text-marian-500">Sisa sudah memperhitungkan ajuan disetujui & pinjaman lain yang tanggalnya bertabrakan. Dicek ulang saat menekan Setujui.</p>
 
                     <div class="mt-4 flex gap-2" x-data="{ tolak: {{ $errors->tolak->any() ? 'true' : 'false' }} }">
                         <form method="POST" action="{{ route('admin.ajuan.setujui', $p) }}" onsubmit="return confirm('Setujui ajuan {{ $p->kode_peminjaman }}?');">
                             @csrf
-                            <x-primary-button class="!bg-green-600 hover:!bg-green-700">Setujui</x-primary-button>
+                            <x-primary-button>Setujui</x-primary-button>
                         </form>
                         <x-danger-button type="button" @click="tolak = true">Tolak</x-danger-button>
 
                         {{-- Form tolak dengan alasan wajib --}}
                         <div x-show="tolak" x-transition class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 p-4" style="display: none;">
-                            <div @click.outside="tolak = false" class="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
-                                <h3 class="font-semibold text-gray-800">Tolak ajuan {{ $p->kode_peminjaman }}</h3>
+                            <div @click.outside="tolak = false" class="w-full max-w-md rounded-3xl bg-white p-6 shadow-xl">
+                                <h3 class="font-semibold text-marian-900">Tolak ajuan {{ $p->kode_peminjaman }}</h3>
                                 <form method="POST" action="{{ route('admin.ajuan.tolak', $p) }}" class="mt-4 space-y-3">
                                     @csrf
                                     <x-input-label for="alasan_penolakan" value="Alasan penolakan * (min. 10 karakter)" />
                                     <textarea id="alasan_penolakan" name="alasan_penolakan" rows="3" required minlength="10" maxlength="500"
-                                              class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ old('alasan_penolakan') }}</textarea>
+                                              class="block w-full rounded-2xl border-marian-200 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ old('alasan_penolakan') }}</textarea>
                                     <x-input-error :messages="$errors->tolak->get('alasan_penolakan')" />
                                     <div class="flex justify-end gap-2">
                                         <x-secondary-button type="button" @click="tolak = false">Batal</x-secondary-button>
@@ -82,12 +82,12 @@
                     </div>
                 </div>
             @elseif ($p->status === 'disetujui')
-                <div class="rounded-lg bg-indigo-50 p-5 text-sm text-indigo-800 shadow">
+                <div class="rounded-lg bg-indigo-50 p-5 text-sm text-indigo-800 shadow-lembut ring-1 ring-marian-100">
                     Siap diambil mulai <strong>{{ $p->tanggal_pinjam->translatedFormat('d M Y') }}</strong>
                     sampai <strong>{{ $batasAmbil->translatedFormat('d M Y') }}</strong>. Setelah itu otomatis kedaluwarsa.
                 </div>
             @elseif ($perkiraanDenda > 0)
-                <div class="rounded-lg bg-red-50 p-5 text-sm text-red-800 shadow">
+                <div class="rounded-lg bg-red-50 p-5 text-sm text-red-800 shadow-lembut ring-1 ring-marian-100">
                     Terlambat {{ $p->hariTerlambatBerjalan() }} hari. Perkiraan denda bila dikembalikan hari ini:
                     <strong>Rp{{ number_format($perkiraanDenda, 0, ',', '.') }}</strong>.
                 </div>

@@ -1,10 +1,10 @@
 <x-app-layout>
-    <x-slot name="header"><span class="text-sm text-gray-500">Data Barang</span></x-slot>
+    <x-slot name="header"><span class="text-sm text-marian-500">Data Barang</span></x-slot>
 
     <x-admin.judul judul="Tambah Unit Barang"
                    :kembali="$barangDipilih ? route('admin.barang.show', $barangDipilih) : route('admin.unit.index')" />
 
-    <div class="max-w-2xl rounded-lg bg-white p-6 shadow"
+    <div class="max-w-2xl rounded-3xl bg-white p-6 shadow-lembut ring-1 ring-marian-100"
          x-data="{ barang: '{{ old('barang_id', $barangDipilih) }}', kode: @js($kodeBerikutnya), jumlah: {{ (int) old('jumlah', 1) }} }">
         <form method="POST" action="{{ route('admin.unit.store') }}" class="space-y-4">
             @csrf
@@ -28,9 +28,9 @@
                 </div>
                 <div>
                     <x-input-label value="Kode Unit (otomatis)" />
-                    <div class="mt-1 rounded-md border border-dashed border-gray-300 bg-gray-50 px-3 py-2 font-mono text-sm text-gray-700">
+                    <div class="mt-1 rounded-2xl border border-dashed border-marian-200 bg-marian-50 px-3 py-2 font-mono text-sm text-marian-700">
                         <span x-show="barang && kode[barang]" x-text="kode[barang] + (jumlah > 1 ? ' s/d …' : '')"></span>
-                        <span x-show="!barang" class="text-gray-400">Pilih jenis barang</span>
+                        <span x-show="!barang" class="text-marian-400">Pilih jenis barang</span>
                     </div>
                 </div>
             </div>
@@ -65,7 +65,7 @@
 
             <div class="flex items-center gap-3">
                 <x-primary-button>Simpan</x-primary-button>
-                <a href="{{ $barangDipilih ? route('admin.barang.show', $barangDipilih) : route('admin.unit.index') }}" class="text-sm text-gray-600 hover:text-gray-800">Batal</a>
+                <a href="{{ $barangDipilih ? route('admin.barang.show', $barangDipilih) : route('admin.unit.index') }}" class="text-sm text-marian-600 hover:text-marian-900">Batal</a>
             </div>
         </form>
     </div>

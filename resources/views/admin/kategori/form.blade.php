@@ -1,11 +1,11 @@
 @php $edit = $kategori->exists; @endphp
 
 <x-app-layout>
-    <x-slot name="header"><span class="text-sm text-gray-500">Data Barang</span></x-slot>
+    <x-slot name="header"><span class="text-sm text-marian-500">Data Barang</span></x-slot>
 
     <x-admin.judul :judul="$edit ? 'Ubah Kategori' : 'Tambah Kategori'" :kembali="route('admin.kategori.index')" />
 
-    <div class="max-w-xl rounded-lg bg-white p-6 shadow">
+    <div class="max-w-xl rounded-3xl bg-white p-6 shadow-lembut ring-1 ring-marian-100">
         <form method="POST" action="{{ $edit ? route('admin.kategori.update', $kategori) : route('admin.kategori.store') }}" class="space-y-4">
             @csrf
             @if ($edit) @method('PUT') @endif
@@ -18,7 +18,7 @@
 
             <div class="flex items-center gap-3">
                 <x-primary-button>Simpan</x-primary-button>
-                <a href="{{ route('admin.kategori.index') }}" class="text-sm text-gray-600 hover:text-gray-800">Batal</a>
+                <a href="{{ route('admin.kategori.index') }}" class="text-sm text-marian-600 hover:text-marian-900">Batal</a>
             </div>
         </form>
     </div>

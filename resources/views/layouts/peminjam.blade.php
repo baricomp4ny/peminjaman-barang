@@ -1,91 +1,111 @@
 @php
     // Navbar publik untuk peminjam (tanpa login)
     $menu = [
-        ['label' => 'Katalog Barang', 'route' => 'peminjam.katalog.index', 'aktif' => 'peminjam.katalog.*'],
+        ['label' => 'Katalog Alat', 'route' => 'peminjam.katalog.index', 'aktif' => 'peminjam.katalog.*'],
         ['label' => 'Ajukan Peminjaman', 'route' => 'peminjam.ajuan.create', 'aktif' => 'peminjam.ajuan.*'],
         ['label' => 'Cek Status', 'route' => 'peminjam.status.form', 'aktif' => 'peminjam.status.*'],
     ];
     $admin = auth()->user()?->isAdmin();
 @endphp
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="scroll-smooth">
     <head>
         @include('layouts.partials.head')
     </head>
-    <body class="font-sans antialiased bg-gray-100">
+    <body class="bg-gradient-to-b from-marian-50 via-white to-marian-50 font-sans text-marian-950 antialiased">
         <div class="flex min-h-screen flex-col">
-            <nav x-data="{ open: false }" class="border-b border-gray-200 bg-white">
-                <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                    <div class="flex h-16 justify-between">
-                        <div class="flex">
-                            <a href="{{ route('peminjam.katalog.index') }}" class="flex shrink-0 items-center gap-2">
-                                <x-application-logo class="h-8 w-8 fill-current text-indigo-600" />
-                                <span class="hidden leading-tight md:block">
-                                    <span class="block text-sm font-semibold text-gray-800">Peminjaman Barang</span>
-                                    <span class="block text-xs text-gray-500">{{ config('peminjaman.mitra') }}</span>
-                                </span>
+            {{-- Navbar: pil putih melayang --}}
+            <header x-data="{ open: false }" class="sticky top-0 z-40 px-3 pt-3 sm:px-6">
+                <nav class="mx-auto flex max-w-7xl items-center justify-between gap-3 rounded-full bg-white/90 px-3 py-2 shadow-lembut ring-1 ring-marian-100 backdrop-blur sm:px-4">
+                    <a href="{{ route('peminjam.katalog.index') }}" class="flex min-w-0 items-center gap-2.5">
+                        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-marian-900 to-marian-600 text-white">
+                            <x-ikon-alat nama="labu" class="h-6 w-6" />
+                        </span>
+                        <span class="min-w-0 leading-tight">
+                            <span class="block truncate text-sm font-extrabold text-marian-900">Peminjaman Alat</span>
+                            <span class="block truncate text-[11px] font-medium text-marian-500">{{ config('peminjaman.mitra_singkat') }}</span>
+                        </span>
+                    </a>
+
+                    {{-- Menu desktop --}}
+                    <div class="hidden items-center gap-1 md:flex">
+                        @foreach ($menu as $item)
+                            @php $aktif = request()->routeIs($item['aktif']); @endphp
+                            <a href="{{ route($item['route']) }}" @if ($aktif) aria-current="page" @endif
+                               class="rounded-full px-4 py-2 text-sm font-semibold transition {{ $aktif ? 'bg-marian-800 text-white shadow-sm' : 'text-marian-700 hover:bg-marian-50' }}">
+                                {{ $item['label'] }}
                             </a>
-
-                            {{-- Menu desktop --}}
-                            <div class="hidden space-x-6 sm:-my-px sm:ms-8 sm:flex">
-                                @foreach ($menu as $item)
-                                    <x-nav-link :href="route($item['route'])" :active="request()->routeIs($item['aktif'])">
-                                        {{ $item['label'] }}
-                                    </x-nav-link>
-                                @endforeach
-                            </div>
-                        </div>
-
-                        <div class="hidden sm:flex sm:items-center">
-                            @if ($admin)
-                                <a href="{{ route('admin.dashboard') }}" class="text-sm font-medium text-indigo-600 hover:text-indigo-800">Dashboard Admin &rarr;</a>
-                            @else
-                                <a href="{{ route('login') }}" class="text-sm text-gray-500 hover:text-gray-700">Login Admin</a>
-                            @endif
-                        </div>
-
-                        {{-- Tombol menu mobile --}}
-                        <div class="-me-2 flex items-center sm:hidden">
-                            <button @click="open = ! open" class="inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500 focus:outline-none" aria-label="Buka menu">
-                                <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                                    <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                                    <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
-                        </div>
+                        @endforeach
                     </div>
-                </div>
+
+                    <div class="hidden md:block">
+                        <a href="{{ $admin ? route('admin.dashboard') : route('login') }}"
+                           class="rounded-full border border-marian-200 px-4 py-2 text-sm font-semibold text-marian-800 transition hover:bg-marian-800 hover:text-white">
+                            {{ $admin ? 'Dashboard Admin' : 'Login Admin' }}
+                        </a>
+                    </div>
+
+                    {{-- Tombol menu mobile --}}
+                    <button @click="open = ! open" class="flex h-10 w-10 items-center justify-center rounded-full text-marian-800 hover:bg-marian-50 md:hidden" :aria-expanded="open" aria-label="Buka menu">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                            <path x-show="!open" d="M4 7h16M4 12h16M4 17h16" />
+                            <path x-show="open" d="M6 6l12 12M18 6L6 18" style="display: none;" />
+                        </svg>
+                    </button>
+                </nav>
 
                 {{-- Menu mobile --}}
-                <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
-                    <div class="space-y-1 pb-3 pt-2">
-                        @foreach ($menu as $item)
-                            <x-responsive-nav-link :href="route($item['route'])" :active="request()->routeIs($item['aktif'])">
-                                {{ $item['label'] }}
-                            </x-responsive-nav-link>
-                        @endforeach
-                        <x-responsive-nav-link :href="$admin ? route('admin.dashboard') : route('login')">
-                            {{ $admin ? 'Dashboard Admin' : 'Login Admin' }}
-                        </x-responsive-nav-link>
-                    </div>
+                <div x-show="open" x-transition @click.outside="open = false" style="display: none;"
+                     class="mx-auto mt-2 max-w-7xl space-y-1 rounded-4xl bg-white p-3 shadow-lembut ring-1 ring-marian-100 md:hidden">
+                    @foreach ($menu as $item)
+                        <a href="{{ route($item['route']) }}"
+                           class="block rounded-full px-4 py-2.5 text-sm font-semibold {{ request()->routeIs($item['aktif']) ? 'bg-marian-800 text-white' : 'text-marian-800 hover:bg-marian-50' }}">
+                            {{ $item['label'] }}
+                        </a>
+                    @endforeach
+                    <a href="{{ $admin ? route('admin.dashboard') : route('login') }}" class="block rounded-full px-4 py-2.5 text-sm font-semibold text-marian-500 hover:bg-marian-50">
+                        {{ $admin ? 'Dashboard Admin' : 'Login Admin' }}
+                    </a>
                 </div>
-            </nav>
+            </header>
 
-            @isset($header)
-                <header class="bg-white shadow">
-                    <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-                        {{ $header }}
-                    </div>
-                </header>
-            @endisset
-
-            <main class="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 lg:px-8">
+            <main class="mx-auto w-full max-w-7xl flex-1 px-3 py-6 sm:px-6 lg:py-8">
                 @include('layouts.partials.flash')
+
+                @isset($header)
+                    <div class="mb-6">{{ $header }}</div>
+                @endisset
+
                 {{ $slot }}
             </main>
 
-            <footer class="border-t bg-white py-4 text-center text-xs text-gray-500">
-                {{ config('peminjaman.mitra') }} · Peminjam tidak perlu login: ajukan peminjaman, lalu cek status dengan kode peminjaman dan NIM.
+            {{-- Footer --}}
+            <footer class="mt-10 rounded-t-5xl bg-gradient-to-br from-marian-950 via-marian-900 to-marian-700 text-marian-100">
+                <div class="mx-auto grid max-w-7xl gap-8 px-6 py-10 [grid-template-columns:repeat(auto-fit,minmax(min(100%,15rem),1fr))]">
+                    <div>
+                        <div class="flex items-center gap-2.5">
+                            <span class="flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-white"><x-ikon-alat nama="labu" class="h-6 w-6" /></span>
+                            <span class="text-base font-extrabold text-white">Peminjaman Alat</span>
+                        </div>
+                        <p class="mt-3 text-sm leading-relaxed text-marian-200">{{ config('peminjaman.mitra') }}</p>
+                    </div>
+                    <div class="text-sm">
+                        <div class="font-semibold text-white">Lokasi & Layanan</div>
+                        <p class="mt-2 text-marian-200">{{ config('peminjaman.alamat') }}</p>
+                        <p class="mt-1 text-marian-200">{{ config('peminjaman.jam_layanan') }}</p>
+                    </div>
+                    <div class="text-sm">
+                        <div class="font-semibold text-white">Tautan</div>
+                        <ul class="mt-2 space-y-1.5">
+                            @foreach ($menu as $item)
+                                <li><a href="{{ route($item['route']) }}" class="text-marian-200 hover:text-white">{{ $item['label'] }}</a></li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+                <div class="border-t border-white/10 px-6 py-4 text-center text-xs text-marian-300">
+                    Peminjam tidak perlu login — ajukan, lalu cek status dengan kode peminjaman dan NIM.
+                </div>
             </footer>
         </div>
     </body>

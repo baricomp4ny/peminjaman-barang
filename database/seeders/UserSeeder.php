@@ -24,11 +24,11 @@ class UserSeeder extends Seeder
         // Peminjam tidak punya akun login; data identitasnya tersimpan dari form ajuan publik
 
         $peminjam = [
-            ['Andi Pratama', 'andi@peminjaman.test', '2201001', 'Teknik Informatika'],
-            ['Budi Santoso', 'budi@peminjaman.test', '2201002', 'Sistem Informasi'],
-            ['Citra Lestari', 'citra@peminjaman.test', '2201003', 'Teknik Informatika'],
-            ['Dewi Anggraini', 'dewi@peminjaman.test', '2201004', 'Manajemen'],
-            ['Eko Saputra', 'eko@peminjaman.test', '2201005', 'Akuntansi'],
+            ['Andi Pratama', 'andi@peminjaman.test', 'J0301201001', 'Teknologi Industri Benih'],
+            ['Budi Santoso', 'budi@peminjaman.test', 'J0301201002', 'Teknologi Industri Benih'],
+            ['Citra Lestari', 'citra@peminjaman.test', 'J0302201003', 'Teknologi Produksi dan Pengembangan Masyarakat Pertanian'],
+            ['Dewi Anggraini', 'dewi@peminjaman.test', 'J0303201004', 'Manajemen Agribisnis'],
+            ['Eko Saputra', 'eko@peminjaman.test', 'J0304201005', 'Analisis Kimia'],
         ];
 
         foreach ($peminjam as [$nama, $email, $nim, $unit]) {

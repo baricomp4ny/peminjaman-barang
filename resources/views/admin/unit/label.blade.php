@@ -12,11 +12,11 @@
         }
     </style>
 </head>
-<body class="bg-gray-100 font-sans antialiased">
+<body class="bg-marian-50 font-sans antialiased">
     <div class="no-print border-b bg-white">
         <div class="mx-auto flex max-w-5xl flex-wrap items-end gap-3 px-4 py-4">
-            <a href="{{ route('admin.unit.index') }}" class="text-sm text-gray-500 hover:text-gray-700">&larr; Unit Barang</a>
-            <h1 class="text-lg font-semibold text-gray-800">Cetak Label QR</h1>
+            <a href="{{ route('admin.unit.index') }}" class="text-sm text-marian-500 hover:text-marian-700">&larr; Unit Barang</a>
+            <h1 class="text-lg font-semibold text-marian-900">Cetak Label QR</h1>
 
             <form method="GET" class="ms-auto flex flex-wrap items-end gap-2">
                 @foreach (request('unit', []) as $id)
@@ -57,7 +57,7 @@
                     <div class="w-full [&>svg]:h-auto [&>svg]:w-full">{!! $svg[$u->id] !!}</div>
                     <div class="mt-1 font-mono text-sm font-bold tracking-wide">{{ $u->kode_unit }}</div>
                     <div class="text-xs leading-tight">{{ $u->barang->nama }}</div>
-                    <div class="text-[9px] leading-tight text-gray-500">{{ config('peminjaman.mitra') }}</div>
+                    <div class="text-[9px] leading-tight text-marian-500">{{ config('peminjaman.mitra') }}</div>
                 </div>
             @endforeach
         </div>

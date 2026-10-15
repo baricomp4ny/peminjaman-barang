@@ -3,10 +3,10 @@
         <x-link-button :href="route('admin.akun-admin.create')">+ Tambah Admin</x-link-button>
     </x-admin.judul>
 
-    <div class="rounded-lg bg-white shadow">
+    <div class="rounded-3xl bg-white shadow-lembut ring-1 ring-marian-100">
         <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200 text-sm">
-                <thead class="bg-gray-50 text-left text-xs font-semibold uppercase text-gray-500">
+            <table class="min-w-full divide-y divide-marian-100 text-sm">
+                <thead class="bg-marian-50 text-left text-xs font-semibold uppercase text-marian-500">
                     <tr>
                         <th class="px-4 py-3">Nama</th>
                         <th class="px-4 py-3">Email</th>
@@ -16,10 +16,10 @@
                         <th class="px-4 py-3 text-right">Aksi</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-100">
+                <tbody class="divide-y divide-marian-50">
                     @foreach ($admin as $a)
                         <tr>
-                            <td class="px-4 py-3 font-medium text-gray-800">
+                            <td class="px-4 py-3 font-medium text-marian-900">
                                 {{ $a->name }}
                                 @if ($a->is(auth()->user())) <span class="ms-1 rounded bg-indigo-100 px-1.5 text-xs text-indigo-700">Anda</span> @endif
                             </td>
@@ -39,5 +39,5 @@
             </table>
         </div>
     </div>
-    <p class="mt-3 text-xs text-gray-500">Akun admin dipakai untuk login ke panel ini. Peminjam tidak memiliki akun login.</p>
+    <p class="mt-3 text-xs text-marian-500">Akun admin dipakai untuk login ke panel ini. Peminjam tidak memiliki akun login.</p>
 </x-app-layout>

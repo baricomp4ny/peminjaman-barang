@@ -1,21 +1,21 @@
 <x-app-layout>
-    <x-slot name="header"><span class="text-sm text-gray-500">Transaksi</span></x-slot>
+    <x-slot name="header"><span class="text-sm text-marian-500">Transaksi</span></x-slot>
 
     <x-admin.judul judul="Peminjaman" />
 
     <div class="mb-4 flex flex-wrap gap-2 text-sm">
         @foreach (['disetujui' => 'Siap diambil', 'dipinjam' => 'Sedang dipinjam', 'terlambat' => 'Terlambat'] as $nilai => $label)
             <a href="{{ route('admin.peminjaman.index', ['tab' => $nilai]) }}"
-               class="rounded-full px-3 py-1 {{ $tab === $nilai ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700 shadow-sm hover:bg-gray-50' }}">
+               class="rounded-full px-3 py-1 {{ $tab === $nilai ? 'bg-indigo-600 text-white' : 'bg-white text-marian-700 shadow-sm hover:bg-marian-50' }}">
                 {{ $label }} <span class="ms-1 opacity-75">({{ $jumlah[$nilai] }})</span>
             </a>
         @endforeach
     </div>
 
-    <div class="rounded-lg bg-white shadow">
+    <div class="rounded-3xl bg-white shadow-lembut ring-1 ring-marian-100">
         <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200 text-sm">
-                <thead class="bg-gray-50 text-left text-xs font-semibold uppercase text-gray-500">
+            <table class="min-w-full divide-y divide-marian-100 text-sm">
+                <thead class="bg-marian-50 text-left text-xs font-semibold uppercase text-marian-500">
                     <tr>
                         <th class="px-4 py-3">Kode</th>
                         <th class="px-4 py-3">Peminjam</th>
@@ -25,7 +25,7 @@
                         <th class="px-4 py-3 text-right">Aksi</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-100">
+                <tbody class="divide-y divide-marian-50">
                     @forelse ($peminjaman as $p)
                         <tr>
                             <td class="whitespace-nowrap px-4 py-3 font-mono"><a href="{{ route('admin.peminjaman.show', $p) }}" class="hover:text-indigo-600">{{ $p->kode_peminjaman }}</a></td>
@@ -54,7 +54,7 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="6" class="px-4 py-8 text-center text-gray-500">Tidak ada data.</td></tr>
+                        <tr><td colspan="6" class="px-4 py-8 text-center text-marian-500">Tidak ada data.</td></tr>
                     @endforelse
                 </tbody>
             </table>

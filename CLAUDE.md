@@ -22,7 +22,7 @@
 - spatie/laravel-activitylog (audit log, opsional)
 
 ## Konteks
-Mitra: [nama laboratorium/unit/organisasi]. Peminjaman barang masih manual; sulit melacak peminjam, ketersediaan, dan keterlambatan.
+Mitra: Laboratorium Kultur Jaringan, Sekolah Vokasi IPB University (web khusus peminjaman alat lab). Peminjaman barang masih manual; sulit melacak peminjam, ketersediaan, dan keterlambatan.
 Metode: Agile Scrum, 5 sprint. Tim 3 orang.
 
 ## Peran
@@ -56,7 +56,7 @@ Cabang: ajuan disetujui tapi tidak diambil dalam [1] hari → kedaluwarsa (sched
 - peminjaman_unit: peminjaman_id, unit_barang_id, diserahkan_pada, dikembalikan_pada, kondisi_kembali, hari_terlambat, denda, catatan
 - pengaturan: key, value
 "Terlambat" dihitung otomatis, bukan kolom.
-Seeder: 2 admin (admin@, petugas@), 5 peminjam (tanpa akun login), 4 kategori, 3 lokasi, 10 jenis barang, 30 unit, contoh transaksi di semua status.
+Seeder: 2 admin (admin@, petugas@), 5 peminjam tanpa akun login (NIM format SV IPB, mis. J0301201001), 4 kategori alat lab (Alat Ukur & Analisis, Peralatan Inokulasi, Persiapan Media & Sterilisasi, Wadah & Gelas Kultur), 3 lokasi (Ruang Persiapan Media, Ruang Tanam Aseptik, Gudang Alat), 10 jenis alat kultur jaringan (MKR, PHM, HPS, TBA, BNS, PSN, MPP, CTP, ERL, STR), 30 unit, contoh transaksi di semua status.
 
 ## Menu
 Admin (sidebar, urutan & deskripsi sebagai subjudul halaman):
@@ -118,3 +118,10 @@ Responsif, menu aktif ditandai, pesan sukses/gagal jelas.
 - Notifikasi peminjam hanya email (+ AjuanTerkirim berisi kode); tetap dicatat di tabel notifications.
 - Pengaturan > Data Admin (AkunAdminController, {akunAdmin} hanya role admin): tidak bisa menonaktifkan/menghapus diri sendiri, minimal satu admin aktif, admin yang pernah memverifikasi tidak bisa dihapus.
 - Kartu QR peminjam diganti QR kode peminjaman; scan kartu PMJ lama masih dikenali.
+
+## Catatan desain tampilan (disetujui)
+- Warna tunggal: gradasi Marian Blue, skala `marian-50 … marian-950` (#263C92 = marian-800) di tailwind.config.js; `indigo` dipetakan ke skala yang sama. Merah hanya untuk pesan gagal/ditolak/hilang.
+- Gaya halaman publik mengikuti referensi kartu membulat (rounded-4xl/5xl, shadow-lembut): navbar pil, hero gradasi + ilustrasi SVG kultur jaringan (ganti foto: taruh public/images/hero-lab.jpg), kartu fitur, kartu aturan, kategori bento, katalog `x-kartu-alat`, banner alur, footer gradasi.
+- Responsif & fleksibel: grid `repeat(auto-fit|auto-fill, minmax(min(100%,Xrem),1fr))` dan ukuran huruf `clamp()`; tanpa scroll horizontal di 360 px.
+- Komponen: `x-ikon-alat` (ikon garis per jenis alat/kategori), `x-ilustrasi-lab`, `x-kartu-alat`. Font: Plus Jakarta Sans (bunny.net).
+- Info lab di config/peminjaman.php: MITRA_NAMA, MITRA_SINGKAT, MITRA_ALAMAT, MITRA_JAM_LAYANAN.

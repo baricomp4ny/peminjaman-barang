@@ -2,8 +2,8 @@
 
 | Item | Keterangan |
 |---|---|
-| Aplikasi | Sistem Informasi Peminjaman Barang Berbasis Web dengan QR Code |
-| Mitra | (isi sesuai `MITRA_NAMA` di `.env`) |
+| Aplikasi | Sistem Informasi Peminjaman Alat Berbasis Web dengan QR Code — Laboratorium Kultur Jaringan Sekolah Vokasi IPB University |
+| Mitra | Laboratorium Kultur Jaringan, Sekolah Vokasi IPB University (`MITRA_NAMA` di `.env`) |
 | Versi yang diuji | Commit setelah Sprint 5 — peminjam tanpa login & navigasi baru (`git log --oneline -1`) |
 | Metode pengembangan | Agile Scrum, 5 sprint |
 | Teknologi | Laravel 10, PHP 8.1, MySQL 8, Blade + Tailwind + Alpine.js, html5-qrcode, simple-qrcode, dompdf, Laravel Excel |
@@ -19,10 +19,11 @@
 | Sprint | Fitur utama |
 |---|---|
 | 1 — Analisis & perancangan | Laravel 10 + Breeze; 9 tabel (users, kategori, lokasi, barang, unit_barang, peminjaman, peminjaman_detail, peminjaman_unit, pengaturan); model & relasi; seeder (1 admin, 5 peminjam, 4 kategori, 3 lokasi, 10 jenis barang, 30 unit, transaksi di 7 status); middleware `role` (403 bila peran tidak cocok, akun nonaktif dikeluarkan); layout admin (sidebar) & peminjam (navbar) responsif |
-| 2 — Web dasar | CRUD kategori, lokasi, jenis barang (+ foto, kode prefix), unit barang (kode otomatis `PRJ-001`, tambah 1–50 unit sekaligus), data peminjam (tambah, ubah, reset password, nonaktifkan), pengaturan aturan bisnis; larangan hapus data yang masih dipakai; pesan validasi bahasa Indonesia |
+| 2 — Web dasar | CRUD kategori, lokasi, jenis barang (+ foto, kode prefix), unit barang (kode otomatis `MKR-001`, tambah 1–50 unit sekaligus), data peminjam (tambah, ubah, reset password, nonaktifkan), pengaturan aturan bisnis; larangan hapus data yang masih dipakai; pesan validasi bahasa Indonesia |
 | 3 — Transaksi & laporan | Ajuan peminjaman (multi-barang, cek sisa unit langsung), verifikasi admin (setujui/tolak dengan alasan wajib), pembatalan, serah-terima, pengembalian (boleh sebagian, kondisi baik/rusak/hilang), keterlambatan & denda, riwayat, dashboard admin & beranda peminjam, laporan peminjaman/pengembalian/inventaris/keterlambatan/denda (web, PDF, Excel), notifikasi aplikasi + email, scheduler kedaluwarsa & pengingat H-1 |
 | 4 — QR Code & scan | QR SVG per unit, cetak label massal A4, kartu QR peminjam bertanda tangan (HMAC), halaman Scan QR (kamera html5-qrcode lokal + input manual) untuk serah-terima & pengembalian, pencocokan hasil scan dengan ajuan |
 | 5 — Hardware & pengujian | Dukungan scanner USB 2D (penangkap ketikan cepat global, auto-focus + indikator "Scanner siap", proses saat Enter/Tab, antrean, cegah scan ganda, pembersihan kode, pesan error jaringan/sesi), aturan pinjaman terlambat memblokir stok sampai unit kembali, Feature Test terfokus, dokumen STLC |
+| Pasca Sprint 5 — tampilan | Desain ulang halaman publik (gaya kartu membulat, hero gradasi, kategori bento, katalog kartu) dan seluruh warna aplikasi memakai **gradasi Marian Blue (#263C92)**; data contoh diganti alat Laboratorium Kultur Jaringan SV IPB |
 | Pasca Sprint 5 — perubahan konsep | **Peminjam tidak perlu login**: katalog, form ajuan (isi identitas), dan Cek Status (kode + NIM / tautan email) bersifat publik; QR kode peminjaman menggantikan kartu QR; notifikasi peminjam lewat email. Login hanya untuk admin (registrasi dihapus). **Navigasi admin** disusun ulang dengan subjudul deskripsi; **Pengaturan > Data Admin** untuk mengelola akun admin |
 
 ### 1.2 Per peran
@@ -116,13 +117,13 @@ Akun **admin** memakai password **`password`**. Peminjam **tidak punya akun logi
 |---|---|---|
 | admin@peminjaman.test | Admin (login) | — |
 | petugas@peminjaman.test | Admin (login) | — |
-| andi@peminjaman.test | Peminjam (2201001) | Ajuan **menunggu** Proyektor×1 + Layar×1 (H+2 s/d H+4); riwayat **selesai** (PRJ-004 terlambat 1 hari Rp1.000, KBL-003 kembali rusak) |
-| budi@peminjaman.test | Peminjam (2201002) | Ajuan **disetujui** Kamera×1 + Tripod×1 (H s/d H+2); ajuan **dibatalkan** |
-| citra@peminjaman.test | Peminjam (2201003) | Ajuan **ditolak** (dengan alasan); ajuan **kedaluwarsa** |
-| dewi@peminjaman.test | Peminjam (2201004) | **Dipinjam** MIC-001, MIC-002 (rencana kembali H+2) |
-| eko@peminjaman.test | Peminjam (2201005) | **Dipinjam & terlambat** LPT-001 (rencana kembali H−2) |
+| andi@peminjaman.test | Peminjam (J0301201001) | Ajuan **menunggu** Mikroskop Stereo×1 + Set Erlenmeyer×1 (H+2 s/d H+4); riwayat **selesai** (MKR-004 terlambat 1 hari Rp1.000, STR-003 kembali rusak) |
+| budi@peminjaman.test | Peminjam (J0301201002) | Ajuan **disetujui** Timbangan Analitik×1 + Bunsen Burner×1 (H s/d H+2); ajuan **dibatalkan** |
+| citra@peminjaman.test | Peminjam (J0302201003) | Ajuan **ditolak** (dengan alasan); ajuan **kedaluwarsa** |
+| dewi@peminjaman.test | Peminjam (J0303201004) | **Dipinjam** CTP-001, CTP-002 (rencana kembali H+2) |
+| eko@peminjaman.test | Peminjam (J0304201005) | **Dipinjam & terlambat** PHM-001 (rencana kembali H−2) |
 
-Unit khusus: `SPK-003` rusak/perbaikan, `SLD-002` hilang, `KBL-003` rusak/perbaikan. Jenis barang & kode: Proyektor PRJ(4), Laptop LPT(4), Speaker SPK(3), Kamera DSLR KMR(3), Tripod TRP(3), Multimeter MLT(3), Solder SLD(2), Mikrofon MIC(3), Layar Proyektor LYR(2), Kabel Roll KBL(3).
+Unit khusus: `HPS-003` rusak/perbaikan, `MPP-002` hilang, `STR-003` rusak/perbaikan. Jenis barang & kode: Mikroskop Stereo MKR(4), pH Meter PHM(4), Hot Plate Stirrer HPS(3), Timbangan Analitik TBA(3), Bunsen Burner BNS(3), Set Pinset & Scalpel PSN(3), Mikropipet MPP(2), Set Cawan Petri CTP(3), Set Erlenmeyer ERL(2), Bead Sterilizer STR(3).
 
 ---
 
@@ -151,6 +152,8 @@ Prasyarat: seed baru. Penguji: ________ Tanggal: ________
 | AU-14 ★ | Urutan sidebar | Login admin | Dashboard, Data Barang, Data Peminjam, Transaksi, Scan Barcode, Laporan, Pengaturan | P | — | | |
 | AU-15 ★ | Subjudul halaman | Buka tiap menu | Header menampilkan nama menu + deskripsi (mis. Dashboard: "Ringkasan inventaris dan transaksi aktif") | P | RoleAccessTest, AkunAdminTest | | |
 | AU-16 | Menu aktif & responsif | Buka submenu; perkecil < 640 px | Menu aktif ditandai, grup terbuka; sidebar jadi ☰; navbar publik jadi menu mobile | P | — | | |
+| AU-18 | Tampilan responsif publik | Buka beranda, form ajuan, status di lebar 360 px, 768 px, 1280 px | Tidak ada scroll horizontal; kartu menyusun ulang otomatis (auto-fit); teks tetap terbaca | P | — | | |
+| AU-19 | Konsistensi warna | Telusuri halaman publik & admin | Seluruh aksen memakai gradasi biru Marian; merah hanya untuk pesan gagal/ditolak | P | — | | |
 | AU-17 | Tautan antar-area | Navbar publik "Login Admin"; sidebar "Lihat situs"; navbar publik saat admin login | Login / katalog / "Dashboard Admin" | P | — | | |
 ### 4.2 Kategori (KT)
 Prasyarat: login admin. Penguji: ________ Tanggal: ________
@@ -159,21 +162,21 @@ Prasyarat: login admin. Penguji: ________ Tanggal: ________
 |---|---|---|---|---|---|---|---|
 | KT-01 | Tambah kategori | "Alat Olahraga" | Tersimpan, pesan sukses | P | KategoriLokasiTest | | |
 | KT-02 | Nama kosong | "" | "Nama kategori wajib diisi." | N | KategoriLokasiTest | | |
-| KT-03 | Nama duplikat | "Elektronik" | "Nama kategori sudah digunakan." | N | KategoriLokasiTest | | |
+| KT-03 | Nama duplikat | "Alat Ukur & Analisis" | "Nama kategori sudah digunakan." | N | KategoriLokasiTest | | |
 | KT-04 | Nama terlalu panjang | 101 karakter | Ditolak (maks 100) | B | KategoriLokasiTest | | |
-| KT-05 | Simpan ulang tanpa ubah nama | Edit "Fotografi" → Simpan | Tersimpan, tidak dianggap duplikat | P | KategoriLokasiTest | | |
-| KT-06 ★ | Hapus kategori yang dipakai | Hapus "Elektronik" | Ditolak, pesan merah | N | KategoriLokasiTest | | |
+| KT-05 | Simpan ulang tanpa ubah nama | Edit "Peralatan Inokulasi" → Simpan | Tersimpan, tidak dianggap duplikat | P | KategoriLokasiTest | | |
+| KT-06 ★ | Hapus kategori yang dipakai | Hapus "Alat Ukur & Analisis" | Ditolak, pesan merah | N | KategoriLokasiTest | | |
 | KT-07 | Hapus kategori kosong | Hapus KT-01 | Terhapus | P | KategoriLokasiTest | | |
-| KT-08 | Cari | "foto" | Hanya Fotografi | P | — | | |
+| KT-08 | Cari | "gelas" | Hanya Wadah & Gelas Kultur | P | — | | |
 
 ### 4.3 Lokasi (LK)
 
 | ID | Skenario | Langkah / Data uji | Hasil yang diharapkan | J | Tes otomatis | Hasil aktual | Status |
 |---|---|---|---|---|---|---|---|
 | LK-01 | Tambah lokasi | "Ruang Rapat", "Lt. 4" | Tersimpan | P | KategoriLokasiTest | | |
-| LK-02 | Nama kosong / duplikat | "" / "Gudang Utama" | Ditolak | N | KategoriLokasiTest | | |
+| LK-02 | Nama kosong / duplikat | "" / "Gudang Alat" | Ditolak | N | KategoriLokasiTest | | |
 | LK-03 | Keterangan > 255 | 256 karakter | Ditolak | B | — | | |
-| LK-04 ★ | Hapus lokasi berisi unit | Hapus "Gudang Utama" | Ditolak | N | KategoriLokasiTest | | |
+| LK-04 ★ | Hapus lokasi berisi unit | Hapus "Gudang Alat" | Ditolak | N | KategoriLokasiTest | | |
 | LK-05 | Jumlah unit bisa diklik | Klik angka unit | Daftar unit terfilter lokasi | P | — | | |
 
 ### 4.4 Jenis Barang (BR)
@@ -182,33 +185,33 @@ Prasyarat: login admin. Penguji: ________ Tanggal: ________
 |---|---|---|---|---|---|---|---|
 | BR-01 | Tambah barang + foto | "Printer", kode "prt", foto .jpg 500 KB | Tersimpan, kode "PRT", foto tampil | P | BarangUnitTest | | |
 | BR-02 | Field wajib kosong | nama/kode/kategori kosong | Ketiganya ditolak | N | BarangUnitTest | | |
-| BR-03 | Kode duplikat | "PRJ" | Ditolak | N | BarangUnitTest | | |
+| BR-03 | Kode duplikat | "MKR" | Ditolak | N | BarangUnitTest | | |
 | BR-04 | Format kode salah | "P1", "A", "ABCDEF" | Ditolak: 2–5 huruf | B | BarangUnitTest | | |
 | BR-05 | Foto bukan gambar | .pdf | Ditolak | N | BarangUnitTest | | |
 | BR-06 | Foto > 2 MB | .jpg 3 MB | Ditolak | B | BarangUnitTest | | |
-| BR-07 ★ | Ubah kode barang yang sudah punya unit | PRJ → PRY | Ditolak, kode terkunci | N | BarangUnitTest | | |
+| BR-07 ★ | Ubah kode barang yang sudah punya unit | MKR → PRY | Ditolak, kode terkunci | N | BarangUnitTest | | |
 | BR-08 | Hapus foto | Centang "Hapus foto" | Foto hilang | P | — | | |
-| BR-09 ★ | Hapus barang yang punya unit | Hapus Proyektor | Ditolak | N | BarangUnitTest | | |
+| BR-09 ★ | Hapus barang yang punya unit | Hapus Mikroskop Stereo | Ditolak | N | BarangUnitTest | | |
 | BR-10 | Hapus barang tanpa unit | Hapus Printer | Terhapus | P | — | | |
-| BR-11 | Filter + cari | Kategori Fotografi, "tri" | Hanya Tripod | P | — | | |
+| BR-11 | Filter + cari | Kategori Peralatan Inokulasi, "bun" | Hanya Bunsen Burner | P | — | | |
 
 ### 4.5 Unit Barang (UN)
 
 | ID | Skenario | Langkah / Data uji | Hasil yang diharapkan | J | Tes otomatis | Hasil aktual | Status |
 |---|---|---|---|---|---|---|---|
-| UN-01 ★ | Tambah 1 unit | Proyektor, jumlah 1 | `PRJ-005`, tersedia | P | BarangUnitTest | | |
-| UN-02 ★ | Tambah banyak unit | Proyektor, jumlah 3 | `PRJ-006`–`PRJ-008`, pesan menyebut rentang | P | BarangUnitTest | | |
+| UN-01 ★ | Tambah 1 unit | Mikroskop Stereo, jumlah 1 | `MKR-005`, tersedia | P | BarangUnitTest | | |
+| UN-02 ★ | Tambah banyak unit | Mikroskop Stereo, jumlah 3 | `MKR-006`–`MKR-008`, pesan menyebut rentang | P | BarangUnitTest | | |
 | UN-03 | Pratinjau kode | Pilih jenis barang | Kode berikutnya tampil | P | BarangUnitTest | | |
 | UN-04 | Nomor setelah unit dihapus | Hapus unit terakhir tanpa riwayat, tambah 1 | Lanjut dari nomor terbesar yang ada | B | BarangUnitTest | | |
-| UN-05 | Nomor > 999 | (data uji) PRJ-999 lalu tambah 2 | PRJ-1000, PRJ-1001 | B | BarangUnitTest | | |
+| UN-05 | Nomor > 999 | (data uji) MKR-999 lalu tambah 2 | MKR-1000, MKR-1001 | B | BarangUnitTest | | |
 | UN-06 | Jumlah di luar batas | 0, 51, -1, "abc" | Ditolak 1–50 | B | BarangUnitTest | | |
 | UN-07 | Tanggal perolehan masa depan | Besok | Ditolak | N | BarangUnitTest | | |
 | UN-08 | Unit baru kondisi rusak | Kondisi rusak | Status otomatis perbaikan | P | BarangUnitTest | | |
 | UN-09 ★ | Kombinasi kondisi/status salah | Rusak + tersedia; hilang + perbaikan | Ditolak | N | BarangUnitTest | | |
-| UN-10 ★ | Ubah unit sedang dipinjam | Edit MIC-001 | Form terkunci; paksa kirim ditolak | N | BarangUnitTest | | |
-| UN-11 ★ | Hapus unit yang punya riwayat | Hapus PRJ-004 | Ditolak | N | BarangUnitTest | | |
+| UN-10 ★ | Ubah unit sedang dipinjam | Edit CTP-001 | Form terkunci; paksa kirim ditolak | N | BarangUnitTest | | |
+| UN-11 ★ | Hapus unit yang punya riwayat | Hapus MKR-004 | Ditolak | N | BarangUnitTest | | |
 | UN-12 | Hapus unit tanpa riwayat | Hapus unit UN-01 | Terhapus | P | BarangUnitTest | | |
-| UN-13 | Filter status | Status perbaikan | SPK-003, KBL-003 | P | — | | |
+| UN-13 | Filter status | Status perbaikan | HPS-003, STR-003 | P | — | | |
 
 ### 4.6 Data Peminjam (PJ)
 Peminjam tidak punya akun login; datanya terbentuk dari form ajuan publik atau ditambah admin.
@@ -216,7 +219,7 @@ Peminjam tidak punya akun login; datanya terbentuk dari form ajuan publik atau d
 | ID | Skenario | Langkah / Data uji | Hasil yang diharapkan | J | Tes otomatis | Hasil aktual | Status |
 |---|---|---|---|---|---|---|---|
 | PJ-01 | Tambah peminjam oleh admin | Nama, NIM, email, no. HP | Tersimpan sebagai peminjam tanpa password | P | PeminjamPengaturanTest | | |
-| PJ-02 | Email / NIM duplikat | andi@… / 2201001 | Ditolak | N | PeminjamPengaturanTest | | |
+| PJ-02 | Email / NIM duplikat | andi@… / J0301201001 | Ditolak | N | PeminjamPengaturanTest | | |
 | PJ-03 | Email format salah | "andi@" | Ditolak | N | PeminjamPengaturanTest | | |
 | PJ-04 | No. HP berisi huruf / NIM kosong | "08abc" / "" | Ditolak | N | PeminjamPengaturanTest | | |
 | PJ-05 | Ubah kontak peminjam | Ubah No. HP Andi | Tersimpan; dipakai di ajuan berikutnya | P | PeminjamPengaturanTest | | |
@@ -239,23 +242,23 @@ Peminjam tidak punya akun login; datanya terbentuk dari form ajuan publik atau d
 Prasyarat: **tanpa login** (tamu), buka menu Ajukan Peminjaman. Identitas uji: data peminjam seeder atau NIM baru. Penguji: ________ Tanggal: ________
 
 | ID | Skenario | Langkah / Data uji | Hasil yang diharapkan | J | Tes otomatis | Hasil aktual | Status |
-|---|---|---|---|---|---|---|---|| AJ-01 ★ | Ajuan valid tanpa login | Identitas Andi, Laptop×1, besok s/d lusa | Diarahkan ke halaman status: kode PJM-YYYYMMDD-NNNN + QR; email bukti ke peminjam & email ke admin | P | AjuanVerifikasiTest | | |
+|---|---|---|---|---|---|---|---|| AJ-01 ★ | Ajuan valid tanpa login | Identitas Andi, pH Meter×1, besok s/d lusa | Diarahkan ke halaman status: kode PJM-YYYYMMDD-NNNN + QR; email bukti ke peminjam & email ke admin | P | AjuanVerifikasiTest | | |
 | AJ-02 | Kode berurutan per hari | Dua ajuan hari ini | Nomor urut naik | P | AjuanVerifikasiTest | | |
 | AJ-03 | Tanggal pinjam kemarin | (inspect element) | Ditolak | N | AjuanVerifikasiTest | | |
 | AJ-04 | Kembali < pinjam | tgl 20 → tgl 19 | Ditolak | N | AjuanVerifikasiTest | | |
 | AJ-05 ★ | Lama > maks | tgl 1 → tgl 9 | Ditolak "maksimal 7 hari" | B | AjuanVerifikasiTest | | |
 | AJ-06 ★ | Lama = maks | tgl 1 → tgl 8 | Diterima | B | AjuanVerifikasiTest | | |
 | AJ-07 | Pinjam & kembali hari sama | H → H | Diterima | B | AjuanVerifikasiTest | | |
-| AJ-08 ★ | Total unit > maks | Laptop 2 + Tripod 2 | Ditolak "maksimal 3 unit" | B | AjuanVerifikasiTest | | |
-| AJ-09 | Barang sama dua baris | Proyektor 1 + 1 | Ditolak "gabungkan jumlahnya" | N | AjuanVerifikasiTest | | |
+| AJ-08 ★ | Total unit > maks | pH Meter 2 + Bunsen Burner 2 | Ditolak "maksimal 3 unit" | B | AjuanVerifikasiTest | | |
+| AJ-09 | Barang sama dua baris | Mikroskop Stereo 1 + 1 | Ditolak "gabungkan jumlahnya" | N | AjuanVerifikasiTest | | |
 | AJ-10 | Jumlah 0 / tanpa barang / tujuan kosong | — | Ditolak | N | AjuanVerifikasiTest | | |
-| AJ-11 ★ | Stok kurang pada rentang | Kamera×3, H s/d H+1 | Peringatan merah "Sisa 2"; server menolak | N | AjuanVerifikasiTest | | |
-| AJ-12 | Rentang tidak bertabrakan | Kamera×3 setelah H+2 | Diterima | P | AjuanVerifikasiTest | | |
-| AJ-13 | Ajuan menunggu tidak mengikat stok | Dua akun ajukan Kamera×3 tanggal sama | Keduanya diterima sebagai menunggu | P | KetersediaanTest | | |
-| AJ-14 ★ | Peminjam terlambat mengajukan | NIM Eko (2201005) + eko@… | Ditolak di kolom NIM: masih punya pinjaman terlambat | N | AjuanVerifikasiTest | | |
+| AJ-11 ★ | Stok kurang pada rentang | Timbangan Analitik×3, H s/d H+1 | Peringatan merah "Sisa 2"; server menolak | N | AjuanVerifikasiTest | | |
+| AJ-12 | Rentang tidak bertabrakan | Timbangan Analitik×3 setelah H+2 | Diterima | P | AjuanVerifikasiTest | | |
+| AJ-13 | Ajuan menunggu tidak mengikat stok | Dua akun ajukan Timbangan Analitik×3 tanggal sama | Keduanya diterima sebagai menunggu | P | KetersediaanTest | | |
+| AJ-14 ★ | Peminjam terlambat mengajukan | NIM Eko (J0304201005) + eko@… | Ditolak di kolom NIM: masih punya pinjaman terlambat | N | AjuanVerifikasiTest | | |
 | AJ-15 | Katalog | Katalog → cari, filter kategori | Sisa unit hari ini tampil; tombol Pinjam mengisi barang | P | SchedulerNotifikasiLaporanTest | | |
 | AJ-16 ★ | NIM baru | NIM 2301777, email baru | Data peminjam baru dibuat (tanpa password) | P | AjuanVerifikasiTest | | |
-| AJ-17 ★ | NIM terdaftar, email berbeda | NIM 2201001 + email lain | Ditolak; email tersimpan disamarkan (a***i@…) | N | AjuanVerifikasiTest | | |
+| AJ-17 ★ | NIM terdaftar, email berbeda | NIM J0301201001 + email lain | Ditolak; email tersimpan disamarkan (a***i@…) | N | AjuanVerifikasiTest | | |
 | AJ-18 | Email dipakai NIM lain | NIM baru + andi@peminjaman.test | Ditolak | N | AjuanVerifikasiTest | | |
 | AJ-19 | Nama berbeda untuk NIM terdaftar | NIM Andi, nama lain, no. HP baru | Diterima; nama tersimpan tetap, no. HP diperbarui | P | AjuanVerifikasiTest | | |
 | AJ-20 | Validasi identitas | Nama/NIM kosong, email salah, HP "abc", NIM berisi `<script>` | Ditolak per kolom | N | AjuanVerifikasiTest | | |
@@ -283,8 +286,8 @@ Prasyarat: login admin.
 |---|---|---|---|---|---|---|---|
 | VR-01 | Panel verifikasi | Buka ajuan menunggu Andi | Cek akun, NIM, keterlambatan, tabel sisa stok | P | AjuanVerifikasiTest | | |
 | VR-02 ★ | Setujui | Klik Setujui | Status disetujui, verifikator tercatat, notifikasi + email ke peminjam | P | AjuanVerifikasiTest | | |
-| VR-03 ★ | Cegah overbooking | Dua ajuan Kamera×2 bertabrakan; setujui keduanya | Pertama sukses, kedua "Stok tidak cukup…" | N | AjuanVerifikasiTest, PersetujuanAjuanTest | | |
-| VR-04 ★ | Persetujuan atomik | Ajuan Proyektor×1 + Solder×2 (sisa 1) | Gagal; status tetap menunggu; tidak ada notifikasi | N | PersetujuanAjuanTest | | |
+| VR-03 ★ | Cegah overbooking | Dua ajuan Timbangan Analitik×2 bertabrakan; setujui keduanya | Pertama sukses, kedua "Stok tidak cukup…" | N | AjuanVerifikasiTest, PersetujuanAjuanTest | | |
+| VR-04 ★ | Persetujuan atomik | Ajuan Mikroskop Stereo×1 + Mikropipet×2 (sisa 1) | Gagal; status tetap menunggu; tidak ada notifikasi | N | PersetujuanAjuanTest | | |
 | VR-05 | Setujui dua kali | Klik Setujui lagi (tab lain) | "status ajuan sekarang disetujui" | N | PersetujuanAjuanTest | | |
 | VR-06 ★ | Tolak tanpa alasan / alasan pendek / spasi saja | "", "pendek", "     " | Ditolak, form tolak tetap terbuka | N | AjuanVerifikasiTest, PersetujuanAjuanTest | | |
 | VR-07 ★ | Tolak dengan alasan | "Barang dipakai untuk ujian praktik." | Status ditolak, alasan tampil di peminjam, notifikasi | P | AjuanVerifikasiTest | | |
@@ -296,7 +299,7 @@ Prasyarat: login admin.
 
 | ID | Skenario | Langkah / Data uji | Hasil yang diharapkan | J | Tes otomatis | Hasil aktual | Status |
 |---|---|---|---|---|---|---|---|
-| BT-01 ★ | Cek status kode + NIM | Cek Status → kode ajuan Citra (ditolak) + 2201003 | Status ditolak + alasan penolakan | P | AjuanVerifikasiTest | | |
+| BT-01 ★ | Cek status kode + NIM | Cek Status → kode ajuan Citra (ditolak) + J0302201003 | Status ditolak + alasan penolakan | P | AjuanVerifikasiTest | | |
 | BT-02 ★ | NIM / kode salah | Kode benar + NIM lain; kode tidak ada | "Kode peminjaman atau nomor identitas tidak cocok." (pesan sama) | N | AjuanVerifikasiTest | | |
 | BT-03 | Buka /status/{kode} langsung tanpa akses | Ketik URL status orang lain | Diarahkan ke form Cek Status | N | AjuanVerifikasiTest | | |
 | BT-04 ★ | Tautan dari email | Klik "Lihat Detail" di email (log) | Halaman status terbuka tanpa login | P | AjuanVerifikasiTest, SchedulerNotifikasiLaporanTest | | |
@@ -312,11 +315,11 @@ Prasyarat: login admin; ajuan Budi disetujui.
 
 | ID | Skenario | Langkah / Data uji | Hasil yang diharapkan | J | Tes otomatis | Hasil aktual | Status |
 |---|---|---|---|---|---|---|---|
-| ST-01 ★ | Serah-terima lengkap | Centang KMR-001, TRP-001 | Status dipinjam, unit dipinjam | P | SerahPengembalianTest | | |
+| ST-01 ★ | Serah-terima lengkap | Centang TBA-001, BNS-001 | Status dipinjam, unit dipinjam | P | SerahPengembalianTest | | |
 | ST-02 | Ketik kode manual | "kmr-001, trp-001" | Diterima | P | SerahPengembalianTest | | |
-| ST-03 ★ | Jenis salah | LPT-002 | "tidak termasuk dalam ajuan" | N | SerahPengembalianTest | | |
-| ST-04 ★ | Jumlah kurang / lebih | KMR-001 saja / KMR-001+002+TRP-001 | "belum lengkap" / "sudah cukup" | N | SerahPengembalianTest | | |
-| ST-05 | Unit rusak / dipinjam orang lain | SPK-003 / MIC-001 | "tidak bisa dipinjam" | N | SerahPengembalianTest | | |
+| ST-03 ★ | Jenis salah | PHM-002 | "tidak termasuk dalam ajuan" | N | SerahPengembalianTest | | |
+| ST-04 ★ | Jumlah kurang / lebih | TBA-001 saja / TBA-001+002+BNS-001 | "belum lengkap" / "sudah cukup" | N | SerahPengembalianTest | | |
+| ST-05 | Unit rusak / dipinjam orang lain | HPS-003 / CTP-001 | "tidak bisa dipinjam" | N | SerahPengembalianTest | | |
 | ST-06 | Kode tidak dikenal | XYZ-999 | "Kode unit tidak dikenal" | N | SerahPengembalianTest | | |
 | ST-07 | Sebelum tanggal pinjam | Ajuan Andi (H+2) setelah disetujui | Peringatan; tombol nonaktif | N | SerahPengembalianTest | | |
 | ST-08 | Lewat batas ambil | (data uji) ajuan disetujui tgl pinjam H−2 | "Batas waktu pengambilan sudah lewat" | N | SerahPengembalianTest | | |
@@ -327,9 +330,9 @@ Prasyarat: login admin.
 | ID | Skenario | Langkah / Data uji | Hasil yang diharapkan | J | Tes otomatis | Hasil aktual | Status |
 |---|---|---|---|---|---|---|---|
 | PB-01 ★ | Tepat waktu | Dewi, semua baik | Denda Rp0, status selesai, unit tersedia | P | SerahPengembalianTest | | |
-| PB-02 ★ | Terlambat | Eko (LPT-001, terlambat 2 hari) | Denda Rp2.000 | P | SerahPengembalianTest | | |
+| PB-02 ★ | Terlambat | Eko (PHM-001, terlambat 2 hari) | Denda Rp2.000 | P | SerahPengembalianTest | | |
 | PB-03 ★ | Denda per unit | 2 unit terlambat 3 hari | Rp6.000 | P | SerahPengembalianTest | | |
-| PB-04 ★ | Pengembalian sebagian | Dewi: MIC-001 saja | Tetap dipinjam; berikutnya hanya MIC-002 | P | SerahPengembalianTest | | |
+| PB-04 ★ | Pengembalian sebagian | Dewi: CTP-001 saja | Tetap dipinjam; berikutnya hanya CTP-002 | P | SerahPengembalianTest | | |
 | PB-05 ★ | Kondisi rusak / hilang | Pilih rusak / hilang | Unit → perbaikan / hilang, tidak bisa dipinjam | P | SerahPengembalianTest | | |
 | PB-06 | Unit hilang tetap kena denda | Terlambat 2 hari, kondisi hilang | Denda Rp2.000 | P | PerhitunganDendaTest | | |
 | PB-07 | Tanggal kembali masa depan | Besok | Ditolak | N | SerahPengembalianTest | | |
@@ -385,8 +388,8 @@ Prasyarat: login admin.
 
 | ID | Skenario | Langkah / Data uji | Hasil yang diharapkan | J | Tes otomatis | Hasil aktual | Status |
 |---|---|---|---|---|---|---|---|
-| QR-01 | Unduh QR unit | Unit Barang → "QR" PRJ-001 | qr-PRJ-001.svg; di-scan HP berisi "PRJ-001" | P | QrLabelTest | | |
-| QR-02 | Label per jenis | Detail Proyektor → Cetak Label Barcode | Label PRJ-001…004 (QR, kode, nama, mitra) | P | QrLabelTest | | |
+| QR-01 | Unduh QR unit | Unit Barang → "QR" MKR-001 | qr-MKR-001.svg; di-scan HP berisi "MKR-001" | P | QrLabelTest | | |
+| QR-02 | Label per jenis | Detail Mikroskop Stereo → Cetak Label Barcode | Label MKR-001…004 (QR, kode, nama, mitra) | P | QrLabelTest | | |
 | QR-03 | Label sesuai filter | Filter lokasi → Cetak Label (sesuai filter) | Hanya unit lokasi itu | P | QrLabelTest | | |
 | QR-04 | Label terpilih | Centang 3 unit → Cetak label terpilih | Tepat 3 label; tombol nonaktif bila 0 | P | QrLabelTest | | |
 | QR-05 | Ukuran label | 3 / 4 / 5 per baris | Grid berubah; `?kolom=9` ditolak | B | QrLabelTest | | |
@@ -402,41 +405,41 @@ Prasyarat: login admin.
 | KQ-04 | Kartu QR lama (PMJ.…) palsu | `PMJ.3.0000000000` | "Kartu QR tidak valid atau sudah tidak berlaku." | N | ScanTest, QrLabelTest | | |
 | KQ-05 | Kartu milik admin | (data uji) isi kartu admin | Tidak berlaku | N | PencocokanScanTest | | |
 ### 4.19 Scan — Serah-terima (SS)
-Prasyarat: admin → Scan Barcode → mode Serah-terima; ajuan Budi (Kamera×1, Tripod×1). Input lewat kamera, scanner USB, atau ketik + Enter.
+Prasyarat: admin → Scan Barcode → mode Serah-terima; ajuan Budi (Timbangan Analitik×1, Bunsen Burner×1). Input lewat kamera, scanner USB, atau ketik + Enter.
 
 | ID | Skenario | Input | Hasil yang diharapkan | J | Tes otomatis | Hasil aktual | Status |
 |---|---|---|---|---|---|---|---|
-| SS-01 ★ | Buka dengan QR/kode peminjaman | QR di halaman status Budi atau ketik PJM-… | Transaksi terbuka, Kamera 0/1, Tripod 0/1 | P | ScanTest | | |
-| SS-02 | Kode unit sebelum transaksi | KMR-001 | "…Scan kartu peminjam atau kode peminjaman terlebih dahulu." | N | ScanTest | | |
+| SS-01 ★ | Buka dengan QR/kode peminjaman | QR di halaman status Budi atau ketik PJM-… | Transaksi terbuka, Timbangan Analitik 0/1, Bunsen Burner 0/1 | P | ScanTest | | |
+| SS-02 | Kode unit sebelum transaksi | TBA-001 | "…Scan kartu peminjam atau kode peminjaman terlebih dahulu." | N | ScanTest | | |
 | SS-03 ★ | **QR tidak dikenal** (buka transaksi) | ABC-123 | "QR tidak dikenal: ABC-123." + bunyi gagal + kotak merah berkedip | N | ScanTest | | |
 | SS-04 | Kode peminjaman beda status | PJM-… Dewi | "…berstatus "dipinjam", bukan "disetujui"." | N | ScanTest | | |
 | SS-05 ★ | **QR tidak dikenal** (scan unit) | XYZ-999 | "✖ QR tidak dikenal: XYZ-999." + saran periksa label | N | ScanTest, PencocokanScanTest | | |
-| SS-06 ★ | **Jenis tidak sesuai ajuan** | LPT-002 | "✖ Unit LPT-002 (Laptop) tidak termasuk dalam ajuan ini." | N | ScanTest | | |
-| SS-07 ★ | Unit sesuai | KMR-001 | "✔ … diterima.", Kamera 1/1 ✔ | P | ScanTest | | |
-| SS-08 ★ | **Jumlah scan melebihi ajuan** | KMR-002 setelah SS-07 | "✖ Jumlah Kamera DSLR sudah cukup (1 unit)." | N | ScanTest, PencocokanScanTest | | |
-| SS-09 | Unit sama diketik ulang | KMR-001 lagi (ketik manual) | "✖ Unit KMR-001 sudah dipilih." | N | ScanTest | | |
-| SS-10 | Unit rusak / dipinjam | SPK-003 / MIC-001 (pada ajuan yang sesuai) | "…tidak bisa dipinjam (…)" | N | ScanTest | | |
+| SS-06 ★ | **Jenis tidak sesuai ajuan** | PHM-002 | "✖ Unit PHM-002 (pH Meter) tidak termasuk dalam ajuan ini." | N | ScanTest | | |
+| SS-07 ★ | Unit sesuai | TBA-001 | "✔ … diterima.", Timbangan Analitik 1/1 ✔ | P | ScanTest | | |
+| SS-08 ★ | **Jumlah scan melebihi ajuan** | TBA-002 setelah SS-07 | "✖ Jumlah Timbangan Analitik sudah cukup (1 unit)." | N | ScanTest, PencocokanScanTest | | |
+| SS-09 | Unit sama diketik ulang | TBA-001 lagi (ketik manual) | "✖ Unit TBA-001 sudah dipilih." | N | ScanTest | | |
+| SS-10 | Unit rusak / dipinjam | HPS-003 / CTP-001 (pada ajuan yang sesuai) | "…tidak bisa dipinjam (…)" | N | ScanTest | | |
 | SS-11 | Scan kode peminjaman saat menunggu unit | PJM-… | "Yang di-scan bukan QR unit barang…" | N | ScanTest | | |
-| SS-12 | Tombol selesai belum lengkap | Baru Kamera 1/1 | Tombol nonaktif | N | ScanTest | | |
-| SS-13 | Hapus dari daftar | Hapus KMR-001 | Progres 0/1; bisa di-scan ulang segera | P | — | | |
-| SS-14 ★ | Selesaikan | KMR-001 + TRP-001 → Selesaikan | Sukses, kembali ke halaman scan, status dipinjam | P | ScanTest, PencocokanScanTest | | |
-| SS-15 | Unit berubah status sebelum disimpan | Scan PRJ-…, admin lain ubah unit jadi perbaikan, lalu simpan | Ditolak server, status tidak berubah | N | PencocokanScanTest | | |
+| SS-12 | Tombol selesai belum lengkap | Baru Timbangan Analitik 1/1 | Tombol nonaktif | N | ScanTest | | |
+| SS-13 | Hapus dari daftar | Hapus TBA-001 | Progres 0/1; bisa di-scan ulang segera | P | — | | |
+| SS-14 ★ | Selesaikan | TBA-001 + BNS-001 → Selesaikan | Sukses, kembali ke halaman scan, status dipinjam | P | ScanTest, PencocokanScanTest | | |
+| SS-15 | Unit berubah status sebelum disimpan | Scan MKR-…, admin lain ubah unit jadi perbaikan, lalu simpan | Ditolak server, status tidak berubah | N | PencocokanScanTest | | |
 | SS-16 | Transaksi dibatalkan saat scan | Peminjam membatalkan di tengah proses | Scan berikutnya ditolak "berstatus dibatalkan" | N | PencocokanScanTest | | |
-| SS-17 | Ajuan multi-barang lengkap | Proyektor×2 + Laptop×1 dengan salah scan di tengah | Hanya unit valid masuk; selesai → dipinjam | P | PencocokanScanTest | | |
+| SS-17 | Ajuan multi-barang lengkap | Mikroskop Stereo×2 + pH Meter×1 dengan salah scan di tengah | Hanya unit valid masuk; selesai → dipinjam | P | PencocokanScanTest | | |
 
 ### 4.20 Scan — Pengembalian (SK)
 
 | ID | Skenario | Input | Hasil yang diharapkan | J | Tes otomatis | Hasil aktual | Status |
 |---|---|---|---|---|---|---|---|
-| SK-01 ★ | Buka dari scan unit | MIC-001 | Pinjaman Dewi terbuka, MIC-001 langsung masuk daftar | P | ScanTest | | |
-| SK-02 | Unit tidak sedang dipinjam | PRJ-001 | "Unit PRJ-001 tidak sedang dipinjam." | N | ScanTest | | |
+| SK-01 ★ | Buka dari scan unit | CTP-001 | Pinjaman Dewi terbuka, CTP-001 langsung masuk daftar | P | ScanTest | | |
+| SK-02 | Unit tidak sedang dipinjam | MKR-001 | "Unit MKR-001 tidak sedang dipinjam." | N | ScanTest | | |
 | SK-03 ★ | **QR tidak dikenal** | ZZZ-000 | "QR tidak dikenal: ZZZ-000." | N | ScanTest | | |
-| SK-04 ★ | Unit milik pinjaman lain | Pinjaman Dewi terbuka, scan LPT-001 | "…bukan bagian dari peminjaman…" | N | ScanTest, PencocokanScanTest | | |
-| SK-05 | Scan ulang | MIC-001 lagi | "Unit MIC-001 sudah di-scan." | N | ScanTest | | |
-| SK-06 | Kondisi & catatan | MIC-001 rusak + catatan → Simpan | Unit perbaikan, catatan tersimpan | P | ScanTest | | |
-| SK-07 ★ | Sebagian | Simpan MIC-001 saja | Tetap dipinjam; "Belum kembali" MIC-002 | P | ScanTest | | |
-| SK-08 | Unit sudah kembali | MIC-001 lagi pada transaksi sama | "…sudah dikembalikan pada …" | N | ScanTest | | |
-| SK-09 | Terlambat via scan | LPT-001 → Simpan | Peringatan terlambat; denda Rp2.000, selesai | P | — | | |
+| SK-04 ★ | Unit milik pinjaman lain | Pinjaman Dewi terbuka, scan PHM-001 | "…bukan bagian dari peminjaman…" | N | ScanTest, PencocokanScanTest | | |
+| SK-05 | Scan ulang | CTP-001 lagi | "Unit CTP-001 sudah di-scan." | N | ScanTest | | |
+| SK-06 | Kondisi & catatan | CTP-001 rusak + catatan → Simpan | Unit perbaikan, catatan tersimpan | P | ScanTest | | |
+| SK-07 ★ | Sebagian | Simpan CTP-001 saja | Tetap dipinjam; "Belum kembali" CTP-002 | P | ScanTest | | |
+| SK-08 | Unit sudah kembali | CTP-001 lagi pada transaksi sama | "…sudah dikembalikan pada …" | N | ScanTest | | |
+| SK-09 | Terlambat via scan | PHM-001 → Simpan | Peringatan terlambat; denda Rp2.000, selesai | P | — | | |
 | SK-10 | Buka dengan QR kode peminjaman | QR status pinjaman Dewi | Pinjaman Dewi terbuka | P | ScanTest | | |
 | SK-11 | Kartu/kode peminjaman sebagai unit | Kartu / PJM saat transaksi terbuka | "bukan QR unit" | N | PencocokanScanTest | | |
 
@@ -446,13 +449,13 @@ Prasyarat: scanner USB mode keyboard (akhiran Enter, sebagian tes juga dengan ak
 | ID | Skenario | Langkah / Data uji | Hasil yang diharapkan | J | Tes otomatis | Hasil aktual | Status |
 |---|---|---|---|---|---|---|---|
 | SU-01 ★ | Auto-focus saat halaman dibuka | Buka Scan Barcode | Kursor di kolom scanner; indikator hijau "Scanner siap" | P | — | | |
-| SU-02 ★ | Proses otomatis saat Enter | Scan label PRJ-… | Diproses tanpa klik apa pun | P | — | | |
+| SU-02 ★ | Proses otomatis saat Enter | Scan label MKR-… | Diproses tanpa klik apa pun | P | — | | |
 | SU-03 | Scanner berakhiran Tab | Ubah setelan scanner ke suffix Tab | Tetap diproses, fokus tidak pindah | P | — | | |
 | SU-04 ★ | Fokus hilang (klik area kosong / tab lain) | Klik area abu-abu, lalu scan | Indikator kuning lalu kembali hijau; hasil scan tetap diproses | P | — | | |
 | SU-05 ★ | Fokus di kolom catatan | Ketik "retak" di catatan, lalu scan unit lain | Unit diproses; isi catatan tetap "retak" (tidak tercampur kode) | P | — | | |
 | SU-06 | Ketikan manusia di catatan + Enter | Ketik pelan "retak" + Enter | Tidak dianggap scan | N | — | | |
 | SU-07 ★ | Cegah scan ganda | Tekan pemicu scanner 2× cepat pada QR sama | Diproses sekali; info "diabaikan (scan ganda)" | N | — | | |
-| SU-08 ★ | Dua kode berbeda beruntun cepat | Scan XYZ-999 lalu TRP-001 < 1 detik | Keduanya diproses berurutan (antrean), tidak ada yang hilang | P | — | | |
+| SU-08 ★ | Dua kode berbeda beruntun cepat | Scan XYZ-999 lalu BNS-001 < 1 detik | Keduanya diproses berurutan (antrean), tidak ada yang hilang | P | — | | |
 | SU-09 ★ | **Kode tidak dikenal** dari scanner | Scan QR lain (mis. URL website) | Pesan "QR tidak dikenal: …" + saran periksa label + bunyi gagal | N | PencocokanScanTest | | |
 | SU-10 | Kode berkarakter sisa | Scanner menambah prefix "]Q1", spasi, CR/LF | Kode dibersihkan dan dikenali | B | PencocokanScanTest | | |
 | SU-11 | Kode terlalu panjang | QR berisi > 100 karakter | "Kode terlalu panjang (… karakter)…" | B | PencocokanScanTest | | |
@@ -522,7 +525,7 @@ php artisan schedule:work                                 # menjalankan jadwal s
 - Produksi (Windows): Task Scheduler menjalankan `php D:\Peminjaman_Barang\artisan schedule:run` setiap 1 menit.
 
 ### 6.2 Scanner USB 2D
-1. Pastikan scanner dalam mode **USB HID keyboard**, akhiran **Enter** (CR). Uji di Notepad: scan label → teks `PRJ-001` muncul lalu pindah baris.
+1. Pastikan scanner dalam mode **USB HID keyboard**, akhiran **Enter** (CR). Uji di Notepad: scan label → teks `MKR-001` muncul lalu pindah baris.
 2. Keyboard layout Windows dan scanner sama-sama **US** (bila tidak, tanda "-" bisa berubah).
 3. Buka Scan Barcode; indikator harus hijau. Jalankan SU-01 s/d SU-15.
 4. Bila scanner mengirim prefix simbologi (mis. `]Q1`), aplikasi otomatis membuangnya (SU-10).

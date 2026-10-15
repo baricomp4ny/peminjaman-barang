@@ -11,11 +11,11 @@
 @endphp
 
 <x-app-layout>
-    <x-slot name="header"><span class="text-sm text-gray-500">Pengaturan</span></x-slot>
+    <x-slot name="header"><span class="text-sm text-marian-500">Pengaturan</span></x-slot>
 
     <x-admin.judul judul="Aturan Peminjaman" />
 
-    <div class="max-w-2xl rounded-lg bg-white p-6 shadow">
+    <div class="max-w-2xl rounded-3xl bg-white p-6 shadow-lembut ring-1 ring-marian-100">
         <form method="POST" action="{{ route('admin.pengaturan.update') }}" class="space-y-5">
             @csrf
             @method('PUT')
@@ -26,14 +26,14 @@
                     <div class="mt-1 flex items-center gap-2">
                         <x-text-input :id="$key" type="number" :name="$key" :min="$min" :max="$maks" step="1" required
                                       class="block w-40" :value="old($key, $nilai[$key])" />
-                        <span class="text-sm text-gray-600">{{ $satuan }}</span>
+                        <span class="text-sm text-marian-600">{{ $satuan }}</span>
                     </div>
-                    <p class="mt-1 text-xs text-gray-500">{{ $ket }} (rentang {{ number_format($min, 0, ',', '.') }}–{{ number_format($maks, 0, ',', '.') }})</p>
+                    <p class="mt-1 text-xs text-marian-500">{{ $ket }} (rentang {{ number_format($min, 0, ',', '.') }}–{{ number_format($maks, 0, ',', '.') }})</p>
                     <x-input-error :messages="$errors->get($key)" class="mt-2" />
                 </div>
             @endforeach
 
-            <div class="rounded-md bg-gray-50 p-3 text-xs text-gray-600">
+            <div class="rounded-md bg-marian-50 p-3 text-xs text-marian-600">
                 Aturan tetap: peminjam yang masih punya pinjaman terlambat tidak bisa mengajukan peminjaman baru.
             </div>
 

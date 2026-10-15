@@ -8,34 +8,35 @@ use App\Models\Lokasi;
 use App\Models\UnitBarang;
 use Illuminate\Database\Seeder;
 
+/** Data contoh alat Laboratorium Kultur Jaringan (10 jenis, 30 unit). */
 class MasterBarangSeeder extends Seeder
 {
     public function run(): void
     {
-        $kategori = collect(['Elektronik', 'Fotografi', 'Alat Laboratorium', 'Perlengkapan Acara'])
+        $kategori = collect(['Alat Ukur & Analisis', 'Peralatan Inokulasi', 'Persiapan Media & Sterilisasi', 'Wadah & Gelas Kultur'])
             ->mapWithKeys(fn ($nama) => [$nama => Kategori::create(['nama' => $nama])]);
 
         $lokasi = collect([
-            ['Gudang Utama', 'Lantai 1, ruang 101'],
-            ['Laboratorium Komputer', 'Lantai 2, ruang 201'],
-            ['Ruang Multimedia', 'Lantai 3, ruang 305'],
-        ])->map(fn ($l) => Lokasi::create(['nama' => $l[0], 'keterangan' => $l[1]]))->values();
+            ['Ruang Persiapan Media', 'Lantai 1, ruang pembuatan media & sterilisasi'],
+            ['Ruang Tanam Aseptik', 'Lantai 1, ruang transfer/inokulasi (LAF)'],
+            ['Gudang Alat', 'Lantai 1, lemari alat & gelas'],
+        ])->mapWithKeys(fn ($l) => [$l[0] => Lokasi::create(['nama' => $l[0], 'keterangan' => $l[1]])]);
 
-        // [kategori, nama, prefix kode unit, jumlah unit, deskripsi] — total 30 unit
+        // [kategori, nama, prefix kode unit, jumlah unit, lokasi, deskripsi] — total 30 unit
         $daftar = [
-            ['Elektronik', 'Proyektor', 'PRJ', 4, 'Proyektor LCD 3000 lumen, lengkap dengan kabel HDMI.'],
-            ['Elektronik', 'Laptop', 'LPT', 4, 'Laptop Core i5, RAM 8 GB, untuk presentasi dan praktikum.'],
-            ['Elektronik', 'Speaker Portable', 'SPK', 3, 'Speaker aktif portable dengan baterai isi ulang.'],
-            ['Fotografi', 'Kamera DSLR', 'KMR', 3, 'Kamera DSLR dengan lensa kit 18-55 mm.'],
-            ['Fotografi', 'Tripod', 'TRP', 3, 'Tripod aluminium tinggi maksimal 160 cm.'],
-            ['Alat Laboratorium', 'Multimeter Digital', 'MLT', 3, 'Multimeter digital untuk praktikum elektronika.'],
-            ['Alat Laboratorium', 'Solder Station', 'SLD', 2, 'Solder station dengan pengatur suhu.'],
-            ['Perlengkapan Acara', 'Mikrofon Wireless', 'MIC', 3, 'Satu set mikrofon wireless dan receiver.'],
-            ['Perlengkapan Acara', 'Layar Proyektor', 'LYR', 2, 'Layar proyektor tripod 70 inci.'],
-            ['Perlengkapan Acara', 'Kabel Roll', 'KBL', 3, 'Kabel roll 10 meter, 4 lubang.'],
+            ['Alat Ukur & Analisis', 'Mikroskop Stereo', 'MKR', 4, 'Gudang Alat', 'Mikroskop stereo pembesaran 7–45× untuk mengamati eksplan, kalus, dan planlet.'],
+            ['Alat Ukur & Analisis', 'pH Meter Digital', 'PHM', 4, 'Ruang Persiapan Media', 'pH meter digital dengan elektroda dan larutan buffer kalibrasi pH 4, 7, 10.'],
+            ['Persiapan Media & Sterilisasi', 'Hot Plate Stirrer', 'HPS', 3, 'Ruang Persiapan Media', 'Pemanas sekaligus pengaduk magnetik untuk melarutkan media MS dan agar.'],
+            ['Alat Ukur & Analisis', 'Timbangan Analitik', 'TBA', 3, 'Ruang Persiapan Media', 'Timbangan analitik ketelitian 0,1 mg untuk menimbang bahan kimia dan ZPT.'],
+            ['Peralatan Inokulasi', 'Bunsen Burner', 'BNS', 3, 'Ruang Tanam Aseptik', 'Pembakar spiritus untuk sterilisasi alat diseksi di dalam Laminar Air Flow.'],
+            ['Peralatan Inokulasi', 'Set Pinset & Scalpel', 'PSN', 3, 'Ruang Tanam Aseptik', 'Satu set pinset panjang, gagang scalpel, dan gunting untuk memotong eksplan.'],
+            ['Alat Ukur & Analisis', 'Mikropipet', 'MPP', 2, 'Ruang Persiapan Media', 'Mikropipet volume variabel 100–1000 µL untuk menambahkan zat pengatur tumbuh.'],
+            ['Wadah & Gelas Kultur', 'Set Cawan Petri', 'CTP', 3, 'Gudang Alat', 'Satu set 20 cawan petri kaca diameter 90 mm untuk sterilisasi dan pemotongan eksplan.'],
+            ['Wadah & Gelas Kultur', 'Set Erlenmeyer', 'ERL', 2, 'Gudang Alat', 'Satu set erlenmeyer 250 mL dan 500 mL untuk pembuatan larutan stok dan media.'],
+            ['Persiapan Media & Sterilisasi', 'Bead Sterilizer', 'STR', 3, 'Ruang Tanam Aseptik', 'Sterilisator manik kaca (glass bead) untuk sterilisasi cepat pinset dan scalpel.'],
         ];
 
-        foreach ($daftar as $i => [$namaKategori, $nama, $prefix, $jumlah, $deskripsi]) {
+        foreach ($daftar as [$namaKategori, $nama, $prefix, $jumlah, $namaLokasi, $deskripsi]) {
             $barang = Barang::create([
                 'kategori_id' => $kategori[$namaKategori]->id,
                 'kode' => $prefix,
@@ -46,8 +47,8 @@ class MasterBarangSeeder extends Seeder
             for ($n = 1; $n <= $jumlah; $n++) {
                 UnitBarang::create([
                     'barang_id' => $barang->id,
-                    'lokasi_id' => $lokasi[$i % $lokasi->count()]->id,
-                    'kode_unit' => sprintf('%s-%03d', $prefix, $n), // contoh PRJ-001
+                    'lokasi_id' => $lokasi[$namaLokasi]->id,
+                    'kode_unit' => sprintf('%s-%03d', $prefix, $n), // contoh MKR-001
                     'kondisi' => UnitBarang::KONDISI_BAIK,
                     'status' => UnitBarang::STATUS_TERSEDIA,
                     'tanggal_perolehan' => now()->subMonths(rand(3, 36))->startOfMonth(),
@@ -56,10 +57,10 @@ class MasterBarangSeeder extends Seeder
         }
 
         // Contoh unit yang tidak bisa dipinjam
-        UnitBarang::where('kode_unit', 'SPK-003')->update([
+        UnitBarang::where('kode_unit', 'HPS-003')->update([
             'kondisi' => UnitBarang::KONDISI_RUSAK, 'status' => UnitBarang::STATUS_PERBAIKAN,
         ]);
-        UnitBarang::where('kode_unit', 'SLD-002')->update([
+        UnitBarang::where('kode_unit', 'MPP-002')->update([
             'kondisi' => UnitBarang::KONDISI_HILANG, 'status' => UnitBarang::STATUS_HILANG,
         ]);
     }

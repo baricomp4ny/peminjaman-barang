@@ -29,7 +29,7 @@ class UserFactory extends Factory
             'password' => null,
             'role' => User::ROLE_PEMINJAM,
             'nomor_identitas' => fake()->unique()->numerify('##########'),
-            'unit' => fake()->randomElement(['Teknik Informatika', 'Sistem Informasi', 'Manajemen', 'Akuntansi']),
+            'unit' => fake()->randomElement(['Teknologi Industri Benih', 'Manajemen Agribisnis', 'Analisis Kimia', 'Teknologi Produksi dan Pengembangan Masyarakat Pertanian']),
             'no_hp' => fake()->numerify('08##########'),
             'status' => User::STATUS_AKTIF,
             'remember_token' => null,

@@ -1,17 +1,17 @@
 <x-app-layout>
-    <x-slot name="header"><span class="text-sm text-gray-500">Transaksi</span></x-slot>
+    <x-slot name="header"><span class="text-sm text-marian-500">Transaksi</span></x-slot>
 
     <x-admin.judul judul="Pengembalian" />
 
-    <div class="rounded-lg bg-white shadow">
+    <div class="rounded-3xl bg-white shadow-lembut ring-1 ring-marian-100">
         <form method="GET" class="flex gap-2 border-b p-4">
             <x-text-input name="q" :value="request('q')" placeholder="Cari kode peminjaman / nama peminjam…" class="w-full sm:w-80" />
             <x-secondary-button type="submit">Cari</x-secondary-button>
         </form>
 
         <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200 text-sm">
-                <thead class="bg-gray-50 text-left text-xs font-semibold uppercase text-gray-500">
+            <table class="min-w-full divide-y divide-marian-100 text-sm">
+                <thead class="bg-marian-50 text-left text-xs font-semibold uppercase text-marian-500">
                     <tr>
                         <th class="px-4 py-3">Kode</th>
                         <th class="px-4 py-3">Peminjam</th>
@@ -21,7 +21,7 @@
                         <th class="px-4 py-3 text-right">Aksi</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-100">
+                <tbody class="divide-y divide-marian-50">
                     @forelse ($peminjaman as $p)
                         <tr class="{{ $p->isTerlambat() ? 'bg-red-50/50' : '' }}">
                             <td class="whitespace-nowrap px-4 py-3 font-mono">{{ $p->kode_peminjaman }}</td>
@@ -39,7 +39,7 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="6" class="px-4 py-8 text-center text-gray-500">Tidak ada barang yang sedang dipinjam.</td></tr>
+                        <tr><td colspan="6" class="px-4 py-8 text-center text-marian-500">Tidak ada barang yang sedang dipinjam.</td></tr>
                     @endforelse
                 </tbody>
             </table>

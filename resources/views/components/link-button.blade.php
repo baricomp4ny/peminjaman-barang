@@ -2,10 +2,10 @@
 
 @php
     $kelas = $variant === 'primary'
-        ? 'bg-indigo-600 text-white hover:bg-indigo-700 border-transparent'
-        : 'bg-white text-gray-700 hover:bg-gray-50 border-gray-300';
+        ? 'bg-gradient-to-r from-marian-900 to-marian-700 text-white hover:from-marian-950 hover:to-marian-800 border-transparent'
+        : 'bg-white text-marian-800 hover:bg-marian-50 border-marian-200';
 @endphp
 
-<a {{ $attributes->merge(['class' => "inline-flex items-center rounded-md border px-4 py-2 text-xs font-semibold uppercase tracking-widest shadow-sm transition $kelas"]) }}>
+<a {{ $attributes->merge(['class' => "inline-flex items-center justify-center gap-2 rounded-full border px-4 py-2 text-xs font-bold shadow-sm transition $kelas"]) }}>
     {{ $slot }}
 </a>

@@ -1,5 +1,5 @@
 <x-app-layout>
-    <x-slot name="header"><span class="text-sm text-gray-500">Laporan</span></x-slot>
+    <x-slot name="header"><span class="text-sm text-marian-500">Laporan</span></x-slot>
 
     <x-admin.judul :judul="$laporan['judul']">
         @php $q = request()->only(['dari', 'sampai']); @endphp
@@ -7,7 +7,7 @@
         <x-link-button :href="route('admin.laporan.show', array_merge(['jenis' => $laporan['jenis'], 'format' => 'excel'], $q))">Unduh Excel</x-link-button>
     </x-admin.judul>
 
-    <div class="rounded-lg bg-white shadow">
+    <div class="rounded-3xl bg-white shadow-lembut ring-1 ring-marian-100">
         @if ($laporan['jenis'] !== 'inventaris')
             <form method="GET" class="flex flex-wrap items-end gap-2 border-b p-4">
                 <div>
@@ -26,22 +26,22 @@
         @endif
 
         <div class="flex flex-wrap gap-x-6 gap-y-1 border-b px-4 py-3 text-sm">
-            <span class="text-gray-500">Periode: <strong class="text-gray-800">{{ $laporan['periode'] }}</strong></span>
+            <span class="text-marian-500">Periode: <strong class="text-marian-900">{{ $laporan['periode'] }}</strong></span>
             @foreach ($laporan['ringkasan'] as $label => $nilai)
-                <span class="text-gray-500">{{ $label }}: <strong class="text-gray-800">{{ $nilai }}</strong></span>
+                <span class="text-marian-500">{{ $label }}: <strong class="text-marian-900">{{ $nilai }}</strong></span>
             @endforeach
         </div>
 
         <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200 text-sm">
-                <thead class="bg-gray-50 text-left text-xs font-semibold uppercase text-gray-500">
+            <table class="min-w-full divide-y divide-marian-100 text-sm">
+                <thead class="bg-marian-50 text-left text-xs font-semibold uppercase text-marian-500">
                     <tr>
                         @foreach ($laporan['kolom'] as $k)
                             <th class="whitespace-nowrap px-3 py-2">{{ $k }}</th>
                         @endforeach
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-100">
+                <tbody class="divide-y divide-marian-50">
                     @forelse ($laporan['baris'] as $baris)
                         <tr>
                             @foreach ($baris as $sel)
@@ -49,7 +49,7 @@
                             @endforeach
                         </tr>
                     @empty
-                        <tr><td colspan="{{ count($laporan['kolom']) }}" class="px-4 py-8 text-center text-gray-500">Tidak ada data pada periode ini.</td></tr>
+                        <tr><td colspan="{{ count($laporan['kolom']) }}" class="px-4 py-8 text-center text-marian-500">Tidak ada data pada periode ini.</td></tr>
                     @endforelse
                 </tbody>
             </table>

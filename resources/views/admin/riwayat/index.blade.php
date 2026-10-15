@@ -1,9 +1,9 @@
 <x-app-layout>
-    <x-slot name="header"><span class="text-sm text-gray-500">Transaksi</span></x-slot>
+    <x-slot name="header"><span class="text-sm text-marian-500">Transaksi</span></x-slot>
 
     <x-admin.judul judul="Riwayat Peminjaman" />
 
-    <div class="rounded-lg bg-white shadow">
+    <div class="rounded-3xl bg-white shadow-lembut ring-1 ring-marian-100">
         <form method="GET" class="grid gap-2 border-b p-4 sm:grid-cols-2 lg:grid-cols-5">
             <x-text-input name="q" :value="request('q')" placeholder="Kode / nama / NIM…" />
             <x-select name="status">
@@ -21,8 +21,8 @@
         </form>
 
         <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200 text-sm">
-                <thead class="bg-gray-50 text-left text-xs font-semibold uppercase text-gray-500">
+            <table class="min-w-full divide-y divide-marian-100 text-sm">
+                <thead class="bg-marian-50 text-left text-xs font-semibold uppercase text-marian-500">
                     <tr>
                         <th class="px-4 py-3">Kode</th>
                         <th class="px-4 py-3">Peminjam</th>
@@ -32,7 +32,7 @@
                         <th class="px-4 py-3 text-right">Denda</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-100">
+                <tbody class="divide-y divide-marian-50">
                     @forelse ($riwayat as $r)
                         <tr>
                             <td class="whitespace-nowrap px-4 py-3 font-mono"><a href="{{ route('admin.peminjaman.show', $r) }}" class="text-indigo-600 hover:underline">{{ $r->kode_peminjaman }}</a></td>
@@ -49,7 +49,7 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="6" class="px-4 py-8 text-center text-gray-500">Tidak ada transaksi yang cocok.</td></tr>
+                        <tr><td colspan="6" class="px-4 py-8 text-center text-marian-500">Tidak ada transaksi yang cocok.</td></tr>
                     @endforelse
                 </tbody>
             </table>

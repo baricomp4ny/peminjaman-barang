@@ -28,62 +28,62 @@ class PeminjamanSeeder extends Seeder
         $hariIni = today();
 
         // 1. Menunggu verifikasi
-        $this->buat($andi, 'Presentasi tugas akhir di ruang seminar', $hariIni->copy()->addDays(2), $hariIni->copy()->addDays(4),
-            Peminjaman::STATUS_MENUNGGU, ['Proyektor' => 1, 'Layar Proyektor' => 1]);
+        $this->buat($andi, 'Pengamatan kalus anggrek untuk tugas akhir', $hariIni->copy()->addDays(2), $hariIni->copy()->addDays(4),
+            Peminjaman::STATUS_MENUNGGU, ['Mikroskop Stereo' => 1, 'Set Erlenmeyer' => 1]);
 
         // 2. Disetujui, belum diambil
-        $this->buat($budi, 'Dokumentasi kegiatan himpunan', $hariIni, $hariIni->copy()->addDays(2),
-            Peminjaman::STATUS_DISETUJUI, ['Kamera DSLR' => 1, 'Tripod' => 1], [
+        $this->buat($budi, 'Pembuatan media MS praktikum Kultur Jaringan Tanaman', $hariIni, $hariIni->copy()->addDays(2),
+            Peminjaman::STATUS_DISETUJUI, ['Timbangan Analitik' => 1, 'Bunsen Burner' => 1], [
                 'diverifikasi_oleh' => $admin->id,
                 'diverifikasi_pada' => now()->subHours(3),
             ]);
 
         // 3. Ditolak (alasan wajib)
-        $this->buat($citra, 'Acara pribadi', $hariIni->copy()->addDay(), $hariIni->copy()->addDays(10),
-            Peminjaman::STATUS_DITOLAK, ['Speaker Portable' => 2], [
-                'alasan_penolakan' => 'Lama pinjam melebihi batas maksimal 7 hari dan bukan untuk kegiatan resmi.',
+        $this->buat($citra, 'Keperluan pribadi di luar laboratorium', $hariIni->copy()->addDay(), $hariIni->copy()->addDays(10),
+            Peminjaman::STATUS_DITOLAK, ['Hot Plate Stirrer' => 2], [
+                'alasan_penolakan' => 'Lama pinjam melebihi batas maksimal 7 hari dan alat tidak boleh dibawa ke luar laboratorium.',
                 'diverifikasi_oleh' => $admin->id,
                 'diverifikasi_pada' => now()->subDay(),
             ]);
 
         // 4. Sedang dipinjam, belum jatuh tempo
-        $p = $this->buat($dewi, 'Seminar nasional fakultas', $hariIni->copy()->subDay(), $hariIni->copy()->addDays(2),
-            Peminjaman::STATUS_DIPINJAM, ['Mikrofon Wireless' => 2], [
+        $p = $this->buat($dewi, 'Sterilisasi alat untuk praktikum subkultur pisang', $hariIni->copy()->subDay(), $hariIni->copy()->addDays(2),
+            Peminjaman::STATUS_DIPINJAM, ['Set Cawan Petri' => 2], [
                 'diverifikasi_oleh' => $admin->id,
                 'diverifikasi_pada' => $hariIni->copy()->subDays(2)->setTime(10, 0),
                 'diserahkan_pada' => $hariIni->copy()->subDay()->setTime(8, 30),
             ]);
-        $this->serahkan($p, ['MIC-001', 'MIC-002']);
+        $this->serahkan($p, ['CTP-001', 'CTP-002']);
 
         // 5. Sedang dipinjam dan TERLAMBAT (rencana kembali sudah lewat)
-        $p = $this->buat($eko, 'Praktikum jaringan komputer', $hariIni->copy()->subDays(6), $hariIni->copy()->subDays(2),
-            Peminjaman::STATUS_DIPINJAM, ['Laptop' => 1], [
+        $p = $this->buat($eko, 'Pengukuran pH media penelitian kentang', $hariIni->copy()->subDays(6), $hariIni->copy()->subDays(2),
+            Peminjaman::STATUS_DIPINJAM, ['pH Meter Digital' => 1], [
                 'diverifikasi_oleh' => $admin->id,
                 'diverifikasi_pada' => $hariIni->copy()->subDays(7)->setTime(9, 0),
                 'diserahkan_pada' => $hariIni->copy()->subDays(6)->setTime(9, 15),
             ]);
-        $this->serahkan($p, ['LPT-001']);
+        $this->serahkan($p, ['PHM-001']);
 
         // 6. Selesai: satu unit kembali terlambat 1 hari (denda), satu unit kembali rusak
         $mulai = $hariIni->copy()->subDays(14);
         $rencana = $hariIni->copy()->subDays(11);
-        $p = $this->buat($andi, 'Kuliah umum dosen tamu', $mulai, $rencana,
-            Peminjaman::STATUS_SELESAI, ['Proyektor' => 1, 'Kabel Roll' => 1], [
+        $p = $this->buat($andi, 'Inisiasi eksplan krisan untuk penelitian dosen', $mulai, $rencana,
+            Peminjaman::STATUS_SELESAI, ['Mikroskop Stereo' => 1, 'Bead Sterilizer' => 1], [
                 'diverifikasi_oleh' => $admin->id,
                 'diverifikasi_pada' => $mulai->copy()->subDay()->setTime(13, 0),
                 'diserahkan_pada' => $mulai->copy()->setTime(8, 0),
             ]);
-        $this->serahkan($p, ['PRJ-004', 'KBL-003']);
-        $this->kembalikan($p, 'PRJ-004', $rencana->copy()->addDay()->setTime(10, 0), UnitBarang::KONDISI_BAIK, 1, 1000);
-        $this->kembalikan($p, 'KBL-003', $rencana->copy()->setTime(15, 0), UnitBarang::KONDISI_RUSAK, 0, 0, 'Kabel terkelupas di ujung colokan.');
+        $this->serahkan($p, ['MKR-004', 'STR-003']);
+        $this->kembalikan($p, 'MKR-004', $rencana->copy()->addDay()->setTime(10, 0), UnitBarang::KONDISI_BAIK, 1, 1000);
+        $this->kembalikan($p, 'STR-003', $rencana->copy()->setTime(15, 0), UnitBarang::KONDISI_RUSAK, 0, 0, 'Elemen pemanas tidak panas saat dicoba.');
 
         // 7. Dibatalkan peminjam sebelum diambil
-        $this->buat($budi, 'Rapat koordinasi panitia', $hariIni->copy()->addDays(3), $hariIni->copy()->addDays(3),
-            Peminjaman::STATUS_DIBATALKAN, ['Speaker Portable' => 1]);
+        $this->buat($budi, 'Persiapan praktikum aklimatisasi', $hariIni->copy()->addDays(3), $hariIni->copy()->addDays(3),
+            Peminjaman::STATUS_DIBATALKAN, ['Hot Plate Stirrer' => 1]);
 
         // 8. Kedaluwarsa: disetujui tetapi tidak diambil
-        $this->buat($citra, 'Lomba fotografi', $hariIni->copy()->subDays(5), $hariIni->copy()->subDays(3),
-            Peminjaman::STATUS_KEDALUWARSA, ['Kamera DSLR' => 1], [
+        $this->buat($citra, 'Penimbangan zat pengatur tumbuh', $hariIni->copy()->subDays(5), $hariIni->copy()->subDays(3),
+            Peminjaman::STATUS_KEDALUWARSA, ['Timbangan Analitik' => 1], [
                 'diverifikasi_oleh' => $admin->id,
                 'diverifikasi_pada' => $hariIni->copy()->subDays(6)->setTime(11, 0),
             ]);

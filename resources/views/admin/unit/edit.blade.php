@@ -1,20 +1,20 @@
 @php $dipinjam = $unit->status === 'dipinjam'; @endphp
 
 <x-app-layout>
-    <x-slot name="header"><span class="text-sm text-gray-500">Data Barang</span></x-slot>
+    <x-slot name="header"><span class="text-sm text-marian-500">Data Barang</span></x-slot>
 
     <x-admin.judul :judul="'Ubah Unit '.$unit->kode_unit" :kembali="route('admin.barang.show', $unit->barang_id)" />
 
-    <div class="max-w-2xl rounded-lg bg-white p-6 shadow">
+    <div class="max-w-2xl rounded-3xl bg-white p-6 shadow-lembut ring-1 ring-marian-100">
         @if ($dipinjam)
-            <div class="mb-4 rounded-md border border-blue-200 bg-blue-50 p-3 text-sm text-blue-800">
+            <div class="mb-4 rounded-2xl border border-marian-200 bg-marian-50 p-3 text-sm text-marian-800">
                 Unit ini sedang dipinjam. Kondisi dan status akan diperbarui saat proses pengembalian.
             </div>
         @endif
 
         <dl class="mb-4 grid gap-3 text-sm sm:grid-cols-2">
-            <div><dt class="text-gray-500">Kode Unit</dt><dd class="font-mono font-medium">{{ $unit->kode_unit }}</dd></div>
-            <div><dt class="text-gray-500">Jenis Barang</dt><dd class="font-medium">{{ $unit->barang->nama }}</dd></div>
+            <div><dt class="text-marian-500">Kode Unit</dt><dd class="font-mono font-medium">{{ $unit->kode_unit }}</dd></div>
+            <div><dt class="text-marian-500">Jenis Barang</dt><dd class="font-medium">{{ $unit->barang->nama }}</dd></div>
         </dl>
 
         <form method="POST" action="{{ route('admin.unit.update', $unit) }}" class="space-y-4">
@@ -51,7 +51,7 @@
                             <option value="{{ $s }}" @selected(old('status', $unit->status) === $s)>{{ ucfirst($s) }}</option>
                         @endforeach
                     </x-select>
-                    <p class="mt-1 text-xs text-gray-500">Rusak → perbaikan, hilang → hilang. Hanya kondisi baik yang boleh tersedia.</p>
+                    <p class="mt-1 text-xs text-marian-500">Rusak → perbaikan, hilang → hilang. Hanya kondisi baik yang boleh tersedia.</p>
                     <x-input-error :messages="$errors->get('status')" class="mt-2" />
                 </div>
             </div>
@@ -65,7 +65,7 @@
 
             <div class="flex items-center gap-3">
                 <x-primary-button :disabled="$dipinjam" class="disabled:opacity-50">Simpan</x-primary-button>
-                <a href="{{ route('admin.barang.show', $unit->barang_id) }}" class="text-sm text-gray-600 hover:text-gray-800">Batal</a>
+                <a href="{{ route('admin.barang.show', $unit->barang_id) }}" class="text-sm text-marian-600 hover:text-marian-900">Batal</a>
             </div>
         </form>
     </div>

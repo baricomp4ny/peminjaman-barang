@@ -11,6 +11,6 @@ class ExampleTest extends TestCase
 
     public function test_halaman_awal_adalah_katalog_publik(): void
     {
-        $this->get('/')->assertOk()->assertSee('Katalog Barang')->assertSee('Login Admin');
+        $this->get('/')->assertOk()->assertSee('Katalog Alat')->assertSee(config('peminjaman.mitra_singkat'))->assertSee('Login Admin');
     }
 }
