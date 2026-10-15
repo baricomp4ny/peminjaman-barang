@@ -123,8 +123,8 @@ class KetersediaanTest extends TestCase
         $b = $this->buatBarang('PRJ', 3);
         $this->buatPeminjaman($this->user, Peminjaman::STATUS_DISETUJUI, '2026-10-11', '2026-10-12', [$b->id => 1]);
 
-        $this->actingAs($this->user)
-            ->getJson('/peminjam/ketersediaan?mulai=2026-10-11&selesai=2026-10-11&barang[]='.$b->id)
+        // Endpoint publik (form ajuan tanpa login)
+        $this->getJson('/ketersediaan?mulai=2026-10-11&selesai=2026-10-11&barang[]='.$b->id)
             ->assertOk()
             ->assertExactJson([(string) $b->id => 2]);
     }

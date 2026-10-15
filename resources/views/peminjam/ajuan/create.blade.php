@@ -8,19 +8,50 @@
         <h1 class="text-xl font-semibold leading-tight text-gray-800">Ajukan Peminjaman</h1>
     </x-slot>
 
-    @if ($terlambat)
-        <div class="mb-4 rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-800">
-            Anda masih memiliki pinjaman yang <strong>terlambat</strong>. Kembalikan barang tersebut terlebih dahulu sebelum mengajukan peminjaman baru.
-            <a href="{{ route('peminjam.pinjaman.index', ['status' => 'dipinjam']) }}" class="underline">Lihat pinjaman</a>
-        </div>
-    @endif
-
     <div class="max-w-3xl rounded-lg bg-white p-6 shadow"
          x-data="formAjuan(@js($barisAwal), @js(old('tanggal_pinjam', now()->toDateString())), @js(old('tanggal_rencana_kembali', now()->addDay()->toDateString())), {{ $maksUnit }})"
          x-init="cekStok()">
         <form method="POST" action="{{ route('peminjam.ajuan.store') }}" class="space-y-5">
             @csrf
 
+            {{-- Identitas peminjam (tanpa login). NIM dipakai untuk mencocokkan riwayat peminjaman. --}}
+            <fieldset class="rounded-md border border-gray-200 p-4">
+                <legend class="px-1 text-sm font-semibold text-gray-800">Identitas Peminjam</legend>
+                <div class="grid gap-4 sm:grid-cols-2">
+                    <div>
+                        <x-input-label for="name" value="Nama Lengkap *" />
+                        <x-text-input id="name" name="name" class="mt-1 block w-full" :value="old('name')" required maxlength="255" autocomplete="name" />
+                        <x-input-error :messages="$errors->get('name')" class="mt-2" />
+                    </div>
+                    <div>
+                        <x-input-label for="nomor_identitas" value="Nomor Identitas (NIM/NIP) *" />
+                        <x-text-input id="nomor_identitas" name="nomor_identitas" class="mt-1 block w-full" :value="old('nomor_identitas')" required maxlength="50" />
+                        <x-input-error :messages="$errors->get('nomor_identitas')" class="mt-2" />
+                    </div>
+                    <div>
+                        <x-input-label for="email" value="Email *" />
+                        <x-text-input id="email" type="email" name="email" class="mt-1 block w-full" :value="old('email')" required maxlength="255" autocomplete="email" />
+                        <p class="mt-1 text-xs text-gray-500">Kode peminjaman dan kabar persetujuan dikirim ke email ini.</p>
+                        <x-input-error :messages="$errors->get('email')" class="mt-2" />
+                    </div>
+                    <div>
+                        <x-input-label for="no_hp" value="No. HP / WhatsApp *" />
+                        <x-text-input id="no_hp" name="no_hp" class="mt-1 block w-full" :value="old('no_hp')" required maxlength="20" placeholder="08xxxxxxxxxx" autocomplete="tel" />
+                        <x-input-error :messages="$errors->get('no_hp')" class="mt-2" />
+                    </div>
+                    <div class="sm:col-span-2">
+                        <x-input-label for="unit" value="Unit / Prodi" />
+                        <x-text-input id="unit" name="unit" class="mt-1 block w-full" :value="old('unit')" maxlength="100" />
+                        <x-input-error :messages="$errors->get('unit')" class="mt-2" />
+                    </div>
+                </div>
+                <p class="mt-3 text-xs text-gray-500">Bawa kartu identitas asli (KTM/KTP) saat mengambil barang untuk dicocokkan petugas.</p>
+                {{-- Jebakan bot: tidak terlihat oleh manusia, harus dibiarkan kosong --}}
+                <div class="hidden" aria-hidden="true">
+                    <label for="website">Website</label>
+                    <input id="website" type="text" name="website" tabindex="-1" autocomplete="off">
+                </div>
+            </fieldset>
             <div class="grid gap-4 sm:grid-cols-2">
                 <div>
                     <x-input-label for="tanggal_pinjam" value="Tanggal Pinjam *" />
@@ -82,7 +113,7 @@
             </div>
 
             <div class="flex items-center gap-3">
-                <x-primary-button :disabled="$terlambat" class="disabled:opacity-50">Kirim Ajuan</x-primary-button>
+                <x-primary-button>Kirim Ajuan</x-primary-button>
                 <a href="{{ route('peminjam.katalog.index') }}" class="text-sm text-gray-600 hover:text-gray-800">Batal</a>
             </div>
         </form>

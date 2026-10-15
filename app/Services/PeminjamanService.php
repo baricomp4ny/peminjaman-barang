@@ -13,6 +13,7 @@ use App\Notifications\AjuanBaru;
 use App\Notifications\AjuanDisetujui;
 use App\Notifications\AjuanDitolak;
 use App\Notifications\AjuanKedaluwarsa;
+use App\Notifications\AjuanTerkirim;
 use App\Notifications\PengembalianDicatat;
 use App\Notifications\PengingatPengembalian;
 use Carbon\CarbonInterface;
@@ -72,6 +73,8 @@ class PeminjamanService
             User::where('role', User::ROLE_ADMIN)->where('status', User::STATUS_AKTIF)->get(),
             new AjuanBaru($peminjaman)
         );
+        // Peminjam tidak login → bukti ajuan & kode dikirim ke email
+        $peminjam->notify(new AjuanTerkirim($peminjaman));
 
         return $peminjaman;
     }

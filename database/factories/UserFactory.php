@@ -25,21 +25,25 @@ class UserFactory extends Factory
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
-            // Hash dibuat sekali sesuai konfigurasi aktif (cast 'hashed' menolak cost yang berbeda)
-            'password' => static::$password ??= Hash::make('password'),
+            // Peminjam tidak punya akun login → tanpa password
+            'password' => null,
             'role' => User::ROLE_PEMINJAM,
             'nomor_identitas' => fake()->unique()->numerify('##########'),
             'unit' => fake()->randomElement(['Teknik Informatika', 'Sistem Informasi', 'Manajemen', 'Akuntansi']),
             'no_hp' => fake()->numerify('08##########'),
             'status' => User::STATUS_AKTIF,
-            'remember_token' => Str::random(10),
+            'remember_token' => null,
         ];
     }
 
+    /** Admin: satu-satunya peran yang login. Password: "password". */
     public function admin(): static
     {
         return $this->state(fn () => [
             'role' => User::ROLE_ADMIN,
+            // Hash dibuat sekali sesuai konfigurasi aktif (cast 'hashed' menolak cost yang berbeda)
+            'password' => static::$password ??= Hash::make('password'),
+            'remember_token' => Str::random(10),
             'nomor_identitas' => null,
             'unit' => 'Pengelola',
         ]);

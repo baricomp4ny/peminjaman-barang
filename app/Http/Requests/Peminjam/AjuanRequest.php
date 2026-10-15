@@ -4,17 +4,19 @@ namespace App\Http\Requests\Peminjam;
 
 use App\Models\Barang;
 use App\Models\Pengaturan;
+use App\Services\IdentitasPeminjamService;
 use App\Services\KetersediaanService;
 use App\Services\PeminjamanService;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Validator;
 
+/** Form ajuan publik: peminjam tidak login, identitas diisi di form. */
 class AjuanRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->isPeminjam() ?? false;
+        return true;
     }
 
     protected function prepareForValidation(): void
@@ -31,6 +33,16 @@ class AjuanRequest extends FormRequest
     public function rules(): array
     {
         return [
+            // Identitas peminjam
+            'name' => ['required', 'string', 'max:255'],
+            'nomor_identitas' => ['required', 'string', 'max:50', 'regex:/^[A-Za-z0-9.\-]+$/'],
+            'email' => ['required', 'string', 'email', 'max:255'],
+            'unit' => ['nullable', 'string', 'max:100'],
+            'no_hp' => ['required', 'regex:/^[0-9+\-\s]{8,20}$/'],
+            // Jebakan bot: kolom tersembunyi ini harus kosong
+            'website' => ['prohibited'],
+
+            // Ajuan
             'tujuan' => ['required', 'string', 'min:5', 'max:500'],
             'tanggal_pinjam' => ['required', 'date', 'after_or_equal:today'],
             'tanggal_rencana_kembali' => ['required', 'date', 'after_or_equal:tanggal_pinjam'],
@@ -49,8 +61,18 @@ class AjuanRequest extends FormRequest
                     return;
                 }
 
-                if (app(PeminjamanService::class)->punyaPinjamanTerlambat($this->user())) {
-                    $validator->errors()->add('items', 'Anda masih memiliki pinjaman yang terlambat. Kembalikan dulu sebelum mengajukan lagi.');
+                $identitas = app(IdentitasPeminjamService::class);
+                foreach ($identitas->periksa($this->only(['name', 'nomor_identitas', 'email', 'unit', 'no_hp'])) as $field => $pesan) {
+                    $validator->errors()->add($field, $pesan);
+                }
+                if ($validator->errors()->isNotEmpty()) {
+                    return;
+                }
+
+                // Peminjam (berdasarkan NIM) yang masih punya pinjaman terlambat tidak boleh mengajukan
+                $peminjam = $identitas->cari($this->input('nomor_identitas'));
+                if ($peminjam && app(PeminjamanService::class)->punyaPinjamanTerlambat($peminjam)) {
+                    $validator->errors()->add('nomor_identitas', 'Anda masih memiliki pinjaman yang terlambat. Kembalikan dulu sebelum mengajukan lagi.');
 
                     return;
                 }
@@ -86,9 +108,25 @@ class AjuanRequest extends FormRequest
         ];
     }
 
+    /** Data identitas peminjam. */
+    public function identitas(): array
+    {
+        return $this->safe()->only(['name', 'nomor_identitas', 'email', 'unit', 'no_hp']);
+    }
+
+    /** Data ajuan (tanpa identitas). */
+    public function ajuan(): array
+    {
+        return $this->safe()->only(['tujuan', 'tanggal_pinjam', 'tanggal_rencana_kembali', 'items']);
+    }
+
     public function attributes(): array
     {
         return [
+            'name' => 'nama lengkap',
+            'nomor_identitas' => 'nomor identitas (NIM/NIP)',
+            'no_hp' => 'no. HP',
+            'unit' => 'unit/prodi',
             'tujuan' => 'tujuan peminjaman',
             'tanggal_pinjam' => 'tanggal pinjam',
             'tanggal_rencana_kembali' => 'tanggal rencana kembali',
@@ -101,6 +139,9 @@ class AjuanRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'nomor_identitas.regex' => 'Nomor identitas hanya boleh berisi huruf, angka, titik, atau tanda hubung.',
+            'no_hp.regex' => 'No. HP hanya boleh berisi angka, spasi, + atau - (8–20 karakter).',
+            'website.prohibited' => 'Ajuan tidak dapat diproses.',
             'tanggal_pinjam.after_or_equal' => 'Tanggal pinjam tidak boleh sebelum hari ini.',
             'tanggal_rencana_kembali.after_or_equal' => 'Tanggal rencana kembali tidak boleh sebelum tanggal pinjam.',
             'items.required' => 'Pilih minimal satu barang.',

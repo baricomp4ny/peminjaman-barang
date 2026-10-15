@@ -7,33 +7,38 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Peminjam\AjuanRequest;
 use App\Models\Barang;
 use App\Models\Pengaturan;
+use App\Services\IdentitasPeminjamService;
 use App\Services\PeminjamanService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
+/** Form ajuan publik: peminjam tidak perlu login. */
 class AjuanController extends Controller
 {
-    public function create(Request $request, PeminjamanService $service): View
+    public function create(Request $request): View
     {
         return view('peminjam.ajuan.create', [
             'barang' => Barang::orderBy('nama')->get(['id', 'nama', 'kode']),
             'barangDipilih' => $request->integer('barang_id') ?: null,
-            'terlambat' => $service->punyaPinjamanTerlambat($request->user()),
             'maksHari' => (int) Pengaturan::nilai(Pengaturan::LAMA_PINJAM_MAKS),
             'maksUnit' => (int) Pengaturan::nilai(Pengaturan::UNIT_MAKS_PER_AJUAN),
         ]);
     }
 
-    public function store(AjuanRequest $request, PeminjamanService $service): RedirectResponse
+    public function store(AjuanRequest $request, IdentitasPeminjamService $identitas, PeminjamanService $service): RedirectResponse
     {
         try {
-            $peminjaman = $service->ajukan($request->user(), $request->validated());
+            $peminjam = $identitas->cariAtauBuat($request->identitas());
+            $peminjaman = $service->ajukan($peminjam, $request->ajuan());
         } catch (PeminjamanException $e) {
             return back()->withInput()->with('error', $e->getMessage());
         }
 
-        return redirect()->route('peminjam.pinjaman.show', $peminjaman)
-            ->with('success', "Ajuan {$peminjaman->kode_peminjaman} berhasil dikirim. Tunggu verifikasi admin.");
+        // Pengaju langsung boleh melihat halaman status ajuannya di sesi ini
+        StatusController::beriAkses($request, $peminjaman);
+
+        return redirect()->route('peminjam.status.show', $peminjaman->kode_peminjaman)
+            ->with('success', "Ajuan {$peminjaman->kode_peminjaman} berhasil dikirim. Simpan kode ini; rincian juga dikirim ke {$peminjam->email}.");
     }
 }

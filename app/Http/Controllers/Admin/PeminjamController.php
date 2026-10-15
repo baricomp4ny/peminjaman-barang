@@ -7,7 +7,6 @@ use App\Http\Requests\Admin\PeminjamRequest;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\View\View;
 
 /** Data peminjam. Parameter {peminjam} hanya cocok dengan user ber-role peminjam (lihat RouteServiceProvider). */
@@ -39,10 +38,10 @@ class PeminjamController extends Controller
     {
         $data = $request->validated();
 
-        $peminjam = new User(collect($data)->except(['status', 'password'])->all());
-        // role & status tidak ada di $fillable, jadi diisi eksplisit
+        $peminjam = new User(collect($data)->except('status')->all());
+        // role & status tidak ada di $fillable; peminjam tanpa password (tidak login)
         $peminjam->forceFill([
-            'password' => Hash::make($data['password']),
+            'password' => null,
             'role' => User::ROLE_PEMINJAM,
             'status' => $data['status'],
         ])->save();
@@ -71,15 +70,8 @@ class PeminjamController extends Controller
     {
         $data = $request->validated();
 
-        $peminjam->fill(collect($data)->except(['status', 'password'])->all());
-        $peminjam->forceFill(['status' => $data['status']]);
-
-        // Password hanya diganti bila admin mengisinya (reset password)
-        if (! empty($data['password'])) {
-            $peminjam->forceFill(['password' => Hash::make($data['password'])]);
-        }
-
-        $peminjam->save();
+        $peminjam->fill(collect($data)->except('status')->all());
+        $peminjam->forceFill(['status' => $data['status']])->save();
 
         return redirect()->route('admin.peminjam.index')
             ->with('success', "Data peminjam \"{$peminjam->name}\" berhasil diperbarui.");

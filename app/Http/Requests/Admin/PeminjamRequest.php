@@ -5,7 +5,6 @@ namespace App\Http\Requests\Admin;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules\Password;
 
 /** Dipakai untuk tambah (POST) dan ubah (PUT) data peminjam. */
 class PeminjamRequest extends FormRequest
@@ -18,7 +17,6 @@ class PeminjamRequest extends FormRequest
     public function rules(): array
     {
         $peminjam = $this->route('peminjam');
-        $sedangEdit = $peminjam !== null;
 
         return [
             'name' => ['required', 'string', 'max:255'],
@@ -26,9 +24,8 @@ class PeminjamRequest extends FormRequest
             'nomor_identitas' => ['required', 'string', 'max:50', Rule::unique('users', 'nomor_identitas')->ignore($peminjam)],
             'unit' => ['nullable', 'string', 'max:100'],
             'no_hp' => ['nullable', 'regex:/^[0-9+\-\s]{8,20}$/'],
+            // Nonaktif = tidak bisa mengajukan peminjaman lewat halaman publik
             'status' => ['required', Rule::in([User::STATUS_AKTIF, User::STATUS_NONAKTIF])],
-            // Saat tambah wajib; saat edit hanya diisi bila ingin reset password
-            'password' => [$sedangEdit ? 'nullable' : 'required', 'confirmed', Password::defaults()],
         ];
     }
 

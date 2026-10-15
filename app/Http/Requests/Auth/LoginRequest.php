@@ -41,7 +41,10 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
+        // Login hanya untuk admin; peminjam mengajukan lewat halaman publik tanpa akun
+        $kredensial = $this->only('email', 'password') + ['role' => \App\Models\User::ROLE_ADMIN];
+
+        if (! Auth::attempt($kredensial, $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([

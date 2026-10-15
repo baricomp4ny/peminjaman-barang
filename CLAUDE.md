@@ -27,14 +27,14 @@ Metode: Agile Scrum, 5 sprint. Tim 3 orang.
 
 ## Peran
 - admin: verifikasi ajuan, scan serah-terima & pengembalian, kelola data, laporan, pengaturan
-- peminjam (punya akun): ajukan peminjaman, lihat status & riwayat, kartu QR milik sendiri
-Semua route dilindungi middleware role. Menyembunyikan menu saja tidak cukup.
+- peminjam (TANPA login, diubah setelah Sprint 5): lihat katalog, ajukan peminjaman dengan mengisi identitas (nama, NIM/NIP, email, no. HP, unit), cek status & batalkan dengan kode peminjaman + NIM atau tautan email bertanda tangan
+Login hanya untuk admin. Semua route /admin dilindungi middleware role:admin. Menyembunyikan menu saja tidak cukup.
 
 ## Alur sistem
-1. Peminjam mengajukan: pilih jenis barang + jumlah, tujuan, tanggal pinjam, tanggal rencana kembali.
+1. Peminjam mengajukan (halaman publik, tanpa login): isi identitas, pilih jenis barang + jumlah, tujuan, tanggal pinjam, tanggal rencana kembali. Peminjam menerima kode PJM-… + QR-nya (layar & email).
 2. Admin memverifikasi: identitas, ketersediaan pada rentang tanggal, aturan peminjaman.
-3. Disetujui, atau ditolak dengan alasan wajib. Peminjam mendapat notifikasi.
-4. Serah-terima: admin scan QR setiap unit. Sistem cek jenis unit sesuai ajuan, status unit tersedia, jumlah tidak melebihi yang disetujui. Setelah lengkap → status Dipinjam, unit → dipinjam.
+3. Disetujui, atau ditolak dengan alasan wajib. Peminjam mendapat notifikasi lewat email.
+4. Serah-terima: admin scan QR kode peminjaman (dari layar/email peminjam), cocokkan kartu identitas asli, lalu scan QR setiap unit. Sistem cek jenis unit sesuai ajuan, status unit tersedia, jumlah tidak melebihi yang disetujui. Setelah lengkap → status Dipinjam, unit → dipinjam.
 5. Pengembalian: admin scan QR unit, pilih kondisi (baik/rusak/hilang), catat tanggal kembali. Boleh sebagian.
 6. Sistem memperbarui status unit, riwayat, keterlambatan, denda, dan laporan.
 Cabang: ajuan disetujui tapi tidak diambil dalam [1] hari → kedaluwarsa (scheduler); peminjam boleh membatalkan sebelum diambil; unit rusak/hilang tidak bisa dipinjam.
@@ -46,7 +46,7 @@ Cabang: ajuan disetujui tapi tidak diambil dalam [1] hari → kedaluwarsa (sched
 - Cek ketersediaan WAJIB menghitung ajuan berstatus disetujui/dipinjam yang rentang tanggalnya bertabrakan (mulai_A <= selesai_B dan selesai_A >= mulai_B), bukan hanya stok hari ini. Cek ulang di dalam DB::transaction saat admin menyetujui.
 
 ## Database
-- users: name, email, password, role (admin, peminjam), nomor_identitas, unit, no_hp, status (aktif, nonaktif)
+- users: name, email, password (nullable — peminjam tanpa password), role (admin, peminjam), nomor_identitas, unit, no_hp, status (aktif, nonaktif). Peminjam dicocokkan berdasarkan nomor_identitas.
 - kategori: nama
 - lokasi: nama, keterangan
 - barang: kategori_id, kode (prefix kode unit, unik, misal PRJ — ditambahkan Sprint 2), nama, deskripsi, foto
@@ -56,11 +56,20 @@ Cabang: ajuan disetujui tapi tidak diambil dalam [1] hari → kedaluwarsa (sched
 - peminjaman_unit: peminjaman_id, unit_barang_id, diserahkan_pada, dikembalikan_pada, kondisi_kembali, hari_terlambat, denda, catatan
 - pengaturan: key, value
 "Terlambat" dihitung otomatis, bukan kolom.
-Seeder: 1 admin, 5 peminjam, 4 kategori, 3 lokasi, 10 jenis barang, 30 unit, contoh transaksi di semua status.
+Seeder: 2 admin (admin@, petugas@), 5 peminjam (tanpa akun login), 4 kategori, 3 lokasi, 10 jenis barang, 30 unit, contoh transaksi di semua status.
 
 ## Menu
-Admin (sidebar): Dashboard; Scan QR Code; Transaksi (Ajuan Peminjaman + badge, Peminjaman, Pengembalian, Riwayat); Data Barang (jenis, unit, kategori, lokasi, cetak label QR); Data Peminjam; Laporan (peminjaman, pengembalian, inventaris, keterlambatan, denda — PDF/Excel, filter tanggal); Pengaturan; avatar (profil, ganti password, logout).
-Peminjam (navbar): Beranda, Katalog Barang, Ajukan Peminjaman, Pinjaman Saya, Notifikasi, Profil (kartu QR, logout).
+Admin (sidebar, urutan & deskripsi sebagai subjudul halaman):
+- Dashboard — Ringkasan inventaris dan transaksi aktif
+- Data Barang (Jenis Barang, Unit & Kondisi, Kategori, Lokasi, Cetak Label Barcode) — Pengelolaan data barang, jenis, kategori, unit, kondisi, lokasi, serta barcode
+- Data Peminjam — Pengelolaan identitas dan riwayat peminjaman setiap peminjam
+- Transaksi (Ajuan Peminjaman + badge, Peminjaman Aktif, Pengembalian, Riwayat Transaksi) — Pengelolaan pengajuan, peminjaman aktif, pengembalian, dan riwayat transaksi
+- Scan Barcode — Pemindaian barcode untuk mencatat penyerahan dan pengembalian barang
+- Laporan (Transaksi, Pengembalian, Inventaris, Keterlambatan, Denda — PDF/Excel, filter tanggal) — Rekapitulasi transaksi, pengembalian, inventaris, keterlambatan, dan denda
+- Pengaturan (Data Admin, Aturan & Denda) — Pengelolaan data admin, aturan peminjaman, dan ketentuan denda
+- avatar: profil, ganti password, logout
+Peminjam (navbar publik): Katalog Barang, Ajukan Peminjaman, Cek Status; tautan Login Admin.
+Teknologi label tetap QR Code (dibaca scanner 2D & kamera); di menu disebut "barcode".
 Responsif, menu aktif ditandai, pesan sukses/gagal jelas.
 
 ## Arsitektur
@@ -101,3 +110,11 @@ Responsif, menu aktif ditandai, pesan sukses/gagal jelas.
 - Scanner USB: penangkap keydown global (ketikan < 50 ms/karakter + Enter/Tab = scan) walau fokus di luar input; antrean berurutan; debounce 2,5 detik untuk kamera & scanner (ketik manual tidak); indikator "Scanner siap".
 - Normalisasi kode (browser & ScanService::normalisasi): buang karakter kontrol, prefix AIM "]Xn", spasi; huruf besar; maks 100 karakter.
 - Dokumen pengujian: docs/STLC.md.
+
+## Catatan desain (perubahan setelah Sprint 5, disetujui)
+- Peminjam tanpa login: route publik /, /katalog/{barang}, /ajuan, /status, /status/{kode} (nama route peminjam.*). Registrasi dihapus; login & reset password hanya role admin.
+- IdentitasPeminjamService: NIM terdaftar → email harus sama (dicegah pengalihan email); NIM baru → email belum dipakai; peminjam nonaktif ditolak; nama/email tidak ditimpa dari form, unit & no. HP diperbarui.
+- Akses halaman status: kode + NIM (StatusController, disimpan di session), tautan URL::signedRoute di email, atau langsung setelah mengirim ajuan. POST /ajuan & /status dibatasi throttle 10/menit + honeypot "website".
+- Notifikasi peminjam hanya email (+ AjuanTerkirim berisi kode); tetap dicatat di tabel notifications.
+- Pengaturan > Data Admin (AkunAdminController, {akunAdmin} hanya role admin): tidak bisa menonaktifkan/menghapus diri sendiri, minimal satu admin aktif, admin yang pernah memverifikasi tidak bisa dihapus.
+- Kartu QR peminjam diganti QR kode peminjaman; scan kartu PMJ lama masih dikenali.

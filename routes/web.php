@@ -9,29 +9,39 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
+| Peminjam TIDAK login: katalog, form ajuan, dan cek status bersifat publik.
+| Login hanya untuk admin (semua route /admin dilindungi middleware role:admin).
 */
 
-// Halaman awal: tamu ke login, yang sudah login ke halaman sesuai peran
-Route::get('/', function () {
-    return auth()->check() ? redirect(auth()->user()->homeRoute()) : redirect()->route('login');
+// ---------- Publik (peminjam) ----------
+Route::name('peminjam.')->group(function () {
+    Route::get('/', [Peminjam\KatalogController::class, 'index'])->name('katalog.index');
+    Route::get('/katalog/{barang}', [Peminjam\KatalogController::class, 'show'])->name('katalog.show');
+    Route::get('/ketersediaan', Peminjam\KetersediaanController::class)->middleware('throttle:60,1')->name('ketersediaan');
+
+    Route::get('/ajuan', [Peminjam\AjuanController::class, 'create'])->name('ajuan.create');
+    // Dibatasi supaya form publik tidak dibanjiri kiriman
+    Route::post('/ajuan', [Peminjam\AjuanController::class, 'store'])->middleware('throttle:10,1')->name('ajuan.store');
+
+    Route::get('/status', [Peminjam\StatusController::class, 'form'])->name('status.form');
+    Route::post('/status', [Peminjam\StatusController::class, 'cek'])->middleware('throttle:10,1')->name('status.cek');
+    Route::get('/status/{kode}', [Peminjam\StatusController::class, 'show'])->name('status.show');
+    Route::post('/status/{kode}/batal', [Peminjam\StatusController::class, 'batal'])->middleware('throttle:10,1')->name('status.batal');
 });
 
-// Tujuan bawaan setelah login/registrasi (RouteServiceProvider::HOME)
-Route::get('/dashboard', function () {
-    return redirect(auth()->user()->homeRoute());
-})->middleware('auth')->name('dashboard');
+// Tujuan bawaan setelah login (RouteServiceProvider::HOME)
+Route::get('/dashboard', fn () => redirect()->route('admin.dashboard'))->middleware('auth')->name('dashboard');
 
-// Profil & ganti password untuk kedua peran
-Route::middleware(['auth', 'role:admin,peminjam'])->group(function () {
+// ---------- Admin ----------
+Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
 });
 
-// ---------- Admin ----------
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [Admin\DashboardController::class, 'index'])->name('dashboard');
 
-    // Scan QR
+    // Scan Barcode
     Route::get('/scan', [Admin\ScanController::class, 'index'])->name('scan.index');
     Route::post('/scan/cari', [Admin\ScanController::class, 'cari'])->name('scan.cari');
     Route::post('/scan/cek-unit', [Admin\ScanController::class, 'cekUnit'])->name('scan.cek-unit');
@@ -40,7 +50,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/unit/label', [Admin\QrController::class, 'label'])->name('unit.label');
     Route::get('/unit/{unit}/qr', [Admin\QrController::class, 'unit'])->name('unit.qr');
 
-    // Data master
+    // Data Barang & Data Peminjam
     Route::resource('kategori', Admin\KategoriController::class)->except('show');
     Route::resource('lokasi', Admin\LokasiController::class)->except('show');
     Route::resource('barang', Admin\BarangController::class);
@@ -69,31 +79,14 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         ->whereIn('jenis', ['peminjaman', 'pengembalian', 'inventaris', 'keterlambatan', 'denda'])
         ->name('laporan.show');
 
-    // Pengaturan aturan bisnis
-    Route::get('/pengaturan', [Admin\PengaturanController::class, 'edit'])->name('pengaturan.edit');
-    Route::put('/pengaturan', [Admin\PengaturanController::class, 'update'])->name('pengaturan.update');
-});
-
-// ---------- Peminjam ----------
-Route::middleware(['auth', 'role:peminjam'])->prefix('peminjam')->name('peminjam.')->group(function () {
-    Route::get('/beranda', [Peminjam\BerandaController::class, 'index'])->name('beranda');
-
-    Route::get('/katalog', [Peminjam\KatalogController::class, 'index'])->name('katalog.index');
-    Route::get('/katalog/{barang}', [Peminjam\KatalogController::class, 'show'])->name('katalog.show');
-    Route::get('/ketersediaan', Peminjam\KetersediaanController::class)->name('ketersediaan');
-
-    Route::get('/ajuan/create', [Peminjam\AjuanController::class, 'create'])->name('ajuan.create');
-    Route::post('/ajuan', [Peminjam\AjuanController::class, 'store'])->name('ajuan.store');
-
-    Route::get('/pinjaman', [Peminjam\PinjamanController::class, 'index'])->name('pinjaman.index');
-    Route::get('/pinjaman/{peminjaman}', [Peminjam\PinjamanController::class, 'show'])->name('pinjaman.show');
-    Route::post('/pinjaman/{peminjaman}/batal', [Peminjam\PinjamanController::class, 'batal'])->name('pinjaman.batal');
-
-    Route::get('/kartu-qr', Peminjam\KartuQrController::class)->name('kartu-qr');
-
-    Route::get('/notifikasi', [Peminjam\NotifikasiController::class, 'index'])->name('notifikasi.index');
-    Route::post('/notifikasi/baca-semua', [Peminjam\NotifikasiController::class, 'bacaSemua'])->name('notifikasi.baca-semua');
-    Route::get('/notifikasi/{id}', [Peminjam\NotifikasiController::class, 'buka'])->name('notifikasi.buka');
+    // Pengaturan: data admin + aturan peminjaman & denda
+    Route::redirect('/pengaturan', '/admin/pengaturan/aturan');
+    Route::get('/pengaturan/aturan', [Admin\PengaturanController::class, 'edit'])->name('pengaturan.edit');
+    Route::put('/pengaturan/aturan', [Admin\PengaturanController::class, 'update'])->name('pengaturan.update');
+    Route::resource('pengaturan/admin', Admin\AkunAdminController::class)
+        ->except('show')
+        ->parameters(['admin' => 'akunAdmin'])
+        ->names('akun-admin');
 });
 
 require __DIR__.'/auth.php';

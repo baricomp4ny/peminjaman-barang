@@ -65,7 +65,6 @@ class QrLabelTest extends TestCase
         $this->assertNull($qr->bacaKartu('PMJ.'.$user->id.'.zzzzzzzzzz'));
         $this->assertNull($qr->bacaKartu('PRJ-001'));
 
-        $this->actingAs($user)->get('/peminjam/kartu-qr')->assertOk()->assertSee('Rina Kartika')->assertSee('<svg', false);
     }
 
     public function test_hak_akses_qr(): void
@@ -76,6 +75,5 @@ class QrLabelTest extends TestCase
         $this->actingAs($peminjam)->get('/admin/unit/label')->assertForbidden();
         $this->get('/admin/unit/'.UnitBarang::value('id').'/qr')->assertForbidden();
         $this->get('/admin/scan')->assertForbidden();
-        $this->actingAs($this->admin)->get('/peminjam/kartu-qr')->assertForbidden();
     }
 }

@@ -9,12 +9,19 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        // Semua akun hasil seeder memakai password: password
+        // Akun admin (login) memakai password: password
         User::factory()->admin()->create([
             'name' => 'Administrator',
             'email' => 'admin@peminjaman.test',
             'no_hp' => '081200000000',
         ]);
+        User::factory()->admin()->create([
+            'name' => 'Petugas Lab',
+            'email' => 'petugas@peminjaman.test',
+            'no_hp' => '081200000001',
+        ]);
+
+        // Peminjam tidak punya akun login; data identitasnya tersimpan dari form ajuan publik
 
         $peminjam = [
             ['Andi Pratama', 'andi@peminjaman.test', '2201001', 'Teknik Informatika'],

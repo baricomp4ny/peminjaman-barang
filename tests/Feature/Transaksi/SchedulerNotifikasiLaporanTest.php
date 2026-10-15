@@ -98,35 +98,31 @@ class SchedulerNotifikasiLaporanTest extends TestCase
         $this->assertStringContainsString('0 7 * * *', $jadwal);
     }
 
-    // ---------- Notifikasi di aplikasi ----------
+    // ---------- Notifikasi email (peminjam tidak login) ----------
 
-    public function test_peminjam_membuka_notifikasi_dan_tandai_dibaca(): void
+    public function test_email_peminjam_berisi_tautan_status_yang_bisa_dibuka_tanpa_login(): void
     {
         $b = $this->buatBarang('PRJ', 1);
-        $p = $this->buatPeminjaman($this->peminjam, 'disetujui', '2026-10-01', '2026-10-02', [$b->id => 1]);
-        $this->peminjam->notify(new AjuanKedaluwarsa($p));
-        $this->peminjam->notify(new AjuanKedaluwarsa($p));
-        $notif = $this->peminjam->notifications()->first();
+        $p = $this->buatPeminjaman($this->peminjam, 'kedaluwarsa', '2026-10-01', '2026-10-02', [$b->id => 1]);
 
-        $this->actingAs($this->peminjam)->get('/peminjam/notifikasi')->assertOk()->assertSee('Ajuan kedaluwarsa');
-        $this->get("/peminjam/notifikasi/{$notif->id}")->assertRedirect("/peminjam/pinjaman/{$p->id}");
-        $this->assertNotNull($notif->fresh()->read_at);
+        $mail = (new AjuanKedaluwarsa($p))->toMail($this->peminjam);
+        $this->assertStringContainsString($p->kode_peminjaman, $mail->subject);
+        $this->assertStringContainsString('signature=', $mail->actionUrl);
 
-        $this->post('/peminjam/notifikasi/baca-semua')->assertSessionHas('success');
-        $this->assertSame(0, $this->peminjam->unreadNotifications()->count());
+        $this->get($mail->actionUrl)->assertOk()->assertSee($p->kode_peminjaman)->assertSee('kedaluwarsa');
+        $this->assertGuest();
     }
 
-    public function test_tidak_bisa_membuka_notifikasi_milik_orang_lain(): void
+    public function test_email_admin_menuju_halaman_detail_admin(): void
     {
+        $admin = User::factory()->admin()->create();
         $b = $this->buatBarang('PRJ', 1);
-        $p = $this->buatPeminjaman($this->peminjam, 'disetujui', '2026-10-01', '2026-10-02', [$b->id => 1]);
-        $this->peminjam->notify(new AjuanKedaluwarsa($p));
-        $notif = $this->peminjam->notifications()->first();
+        $p = $this->buatPeminjaman($this->peminjam, 'menunggu', '2026-10-11', '2026-10-12', [$b->id => 1]);
 
-        $this->actingAs(User::factory()->create())->get("/peminjam/notifikasi/{$notif->id}")->assertNotFound();
-        $this->assertNull($notif->fresh()->read_at);
+        $mail = (new \App\Notifications\AjuanBaru($p))->toMail($admin);
+
+        $this->assertSame(route('admin.peminjaman.show', $p), $mail->actionUrl);
     }
-
     // ---------- Laporan & dashboard ----------
 
     public function test_semua_laporan_tampil_dan_bisa_diunduh(): void
@@ -178,12 +174,14 @@ class SchedulerNotifikasiLaporanTest extends TestCase
             $this->get("/admin/peminjaman/{$p->id}")->assertOk();
         }
 
-        $this->actingAs($andi)->get('/peminjam/beranda')->assertOk();
-        $this->get('/peminjam/katalog')->assertOk()->assertSee('Proyektor');
-        $this->get('/peminjam/ajuan/create')->assertOk();
-        $this->get('/peminjam/pinjaman')->assertOk();
+        // Halaman publik peminjam (tanpa login)
+        auth()->logout();
+        $this->get('/')->assertOk()->assertSee('Proyektor');
+        $this->get('/katalog/'.\App\Models\Barang::value('id'))->assertOk();
+        $this->get('/ajuan')->assertOk();
         foreach ($andi->peminjaman as $p) {
-            $this->get("/peminjam/pinjaman/{$p->id}")->assertOk();
+            $this->post('/status', ['kode' => $p->kode_peminjaman, 'nomor_identitas' => $andi->nomor_identitas]);
+            $this->get("/status/{$p->kode_peminjaman}")->assertOk();
         }
     }
 }

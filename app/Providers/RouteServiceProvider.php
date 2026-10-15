@@ -29,6 +29,8 @@ class RouteServiceProvider extends ServiceProvider
 
         // {peminjam} hanya cocok dengan user ber-role peminjam; ID admin → 404
         Route::bind('peminjam', fn ($id) => User::peminjam()->findOrFail($id));
+        // {akunAdmin} hanya cocok dengan user ber-role admin; ID peminjam → 404
+        Route::bind('akunAdmin', fn ($id) => User::where('role', User::ROLE_ADMIN)->findOrFail($id));
 
         $this->routes(function () {
             Route::middleware('api')

@@ -90,7 +90,8 @@ class User extends Authenticatable
     /** Halaman awal sesuai peran. */
     public function homeRoute(): string
     {
-        return $this->isAdmin() ? route('admin.dashboard') : route('peminjam.beranda');
+        // Hanya admin yang login; peminjam memakai halaman publik
+        return $this->isAdmin() ? route('admin.dashboard') : route('peminjam.katalog.index');
     }
 
     public function scopePeminjam(Builder $query): Builder

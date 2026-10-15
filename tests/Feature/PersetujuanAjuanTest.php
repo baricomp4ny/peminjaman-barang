@@ -112,7 +112,9 @@ class PersetujuanAjuanTest extends TestCase
         $this->setujui($a)->assertSessionHas('success');
         $this->setujui($b)->assertSessionHas('error');
 
-        $this->actingAs($this->peminjam)->post("/peminjam/pinjaman/{$a->id}/batal")->assertSessionHas('success');
+        // Peminjam (tanpa login) membuka status dengan kode + NIM, lalu membatalkan
+        $this->post('/status', ['kode' => $a->kode_peminjaman, 'nomor_identitas' => $this->peminjam->nomor_identitas]);
+        $this->post("/status/{$a->kode_peminjaman}/batal")->assertSessionHas('success');
         $this->setujui($b)->assertSessionHas('success');
     }
 

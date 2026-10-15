@@ -1,35 +1,55 @@
 @php
     /*
-     * Menu sidebar admin. 'route' = null artinya fitur belum dibuat (ditandai "segera").
-     * 'aktif' = pola nama route untuk menandai menu yang sedang dibuka.
+     * Menu sidebar admin (urutan sesuai alur kerja).
+     * 'aktif'     = pola nama route (string/array) atau boolean untuk menandai menu yang dibuka.
+     * 'pola'      = pola route milik satu grup/menu utama (untuk judul & subjudul halaman).
+     * 'deskripsi' = tampil sebagai subjudul di bagian atas halaman.
      */
+    $laporan = ['peminjaman' => 'Transaksi', 'pengembalian' => 'Pengembalian', 'inventaris' => 'Inventaris', 'keterlambatan' => 'Keterlambatan', 'denda' => 'Denda'];
+
     $menu = [
-        ['label' => 'Dashboard', 'route' => 'admin.dashboard', 'aktif' => 'admin.dashboard'],
-        ['label' => 'Scan QR Code', 'route' => 'admin.scan.index', 'aktif' => 'admin.scan.*'],
-        ['grup' => 'Transaksi', 'items' => [
-            ['label' => 'Ajuan Peminjaman', 'route' => 'admin.ajuan.index', 'aktif' => 'admin.ajuan.*', 'badge' => true],
-            ['label' => 'Peminjaman', 'route' => 'admin.peminjaman.index', 'aktif' => 'admin.peminjaman.*'],
-            ['label' => 'Pengembalian', 'route' => 'admin.pengembalian.index', 'aktif' => 'admin.pengembalian.*'],
-            ['label' => 'Riwayat', 'route' => 'admin.riwayat.index', 'aktif' => 'admin.riwayat.*'],
-        ]],
-        ['grup' => 'Data Barang', 'items' => [
-            ['label' => 'Jenis Barang', 'route' => 'admin.barang.index', 'aktif' => 'admin.barang.*'],
-            ['label' => 'Unit Barang', 'route' => 'admin.unit.index', 'aktif' => ['admin.unit.index', 'admin.unit.create', 'admin.unit.edit']],
-            ['label' => 'Kategori', 'route' => 'admin.kategori.index', 'aktif' => 'admin.kategori.*'],
-            ['label' => 'Lokasi', 'route' => 'admin.lokasi.index', 'aktif' => 'admin.lokasi.*'],
-            ['label' => 'Cetak Label QR', 'route' => 'admin.unit.label', 'aktif' => 'admin.unit.label'],
-        ]],
-        ['label' => 'Data Peminjam', 'route' => 'admin.peminjam.index', 'aktif' => 'admin.peminjam.*'],
-        ['grup' => 'Laporan', 'items' => collect(['peminjaman' => 'Peminjaman', 'pengembalian' => 'Pengembalian', 'inventaris' => 'Inventaris', 'keterlambatan' => 'Keterlambatan', 'denda' => 'Denda'])
-            ->map(fn ($label, $jenis) => [
+        ['label' => 'Dashboard', 'route' => 'admin.dashboard', 'aktif' => 'admin.dashboard', 'pola' => ['admin.dashboard'],
+            'deskripsi' => 'Ringkasan inventaris dan transaksi aktif'],
+        ['grup' => 'Data Barang', 'pola' => ['admin.barang.*', 'admin.unit.*', 'admin.kategori.*', 'admin.lokasi.*'],
+            'deskripsi' => 'Pengelolaan data barang, jenis, kategori, unit, kondisi, lokasi, serta barcode',
+            'items' => [
+                ['label' => 'Jenis Barang', 'route' => 'admin.barang.index', 'aktif' => 'admin.barang.*'],
+                ['label' => 'Unit & Kondisi', 'route' => 'admin.unit.index', 'aktif' => ['admin.unit.index', 'admin.unit.create', 'admin.unit.edit']],
+                ['label' => 'Kategori', 'route' => 'admin.kategori.index', 'aktif' => 'admin.kategori.*'],
+                ['label' => 'Lokasi', 'route' => 'admin.lokasi.index', 'aktif' => 'admin.lokasi.*'],
+                ['label' => 'Cetak Label Barcode', 'route' => 'admin.unit.label', 'aktif' => 'admin.unit.label'],
+            ]],
+        ['label' => 'Data Peminjam', 'route' => 'admin.peminjam.index', 'aktif' => 'admin.peminjam.*', 'pola' => ['admin.peminjam.*'],
+            'deskripsi' => 'Pengelolaan identitas dan riwayat peminjaman setiap peminjam'],
+        ['grup' => 'Transaksi', 'pola' => ['admin.ajuan.*', 'admin.peminjaman.*', 'admin.pengembalian.*', 'admin.riwayat.*'],
+            'deskripsi' => 'Pengelolaan pengajuan, peminjaman aktif, pengembalian, dan riwayat transaksi',
+            'items' => [
+                ['label' => 'Ajuan Peminjaman', 'route' => 'admin.ajuan.index', 'aktif' => 'admin.ajuan.*', 'badge' => true],
+                ['label' => 'Peminjaman Aktif', 'route' => 'admin.peminjaman.index', 'aktif' => 'admin.peminjaman.*'],
+                ['label' => 'Pengembalian', 'route' => 'admin.pengembalian.index', 'aktif' => 'admin.pengembalian.*'],
+                ['label' => 'Riwayat Transaksi', 'route' => 'admin.riwayat.index', 'aktif' => 'admin.riwayat.*'],
+            ]],
+        ['label' => 'Scan Barcode', 'route' => 'admin.scan.index', 'aktif' => 'admin.scan.*', 'pola' => ['admin.scan.*'],
+            'deskripsi' => 'Pemindaian barcode untuk mencatat penyerahan dan pengembalian barang'],
+        ['grup' => 'Laporan', 'pola' => ['admin.laporan.*'],
+            'deskripsi' => 'Rekapitulasi transaksi, pengembalian, inventaris, keterlambatan, dan denda',
+            'items' => collect($laporan)->map(fn ($label, $jenis) => [
                 'label' => $label,
                 'route' => 'admin.laporan.show',
                 'params' => ['jenis' => $jenis],
                 // aktif bila sedang membuka laporan jenis ini
                 'aktif' => request()->routeIs('admin.laporan.show') && request()->route('jenis') === $jenis,
             ])->values()->all()],
-        ['label' => 'Pengaturan', 'route' => 'admin.pengaturan.edit', 'aktif' => 'admin.pengaturan.*'],
+        ['grup' => 'Pengaturan', 'pola' => ['admin.pengaturan.*', 'admin.akun-admin.*'],
+            'deskripsi' => 'Pengelolaan data admin, aturan peminjaman, dan ketentuan denda',
+            'items' => [
+                ['label' => 'Data Admin', 'route' => 'admin.akun-admin.index', 'aktif' => 'admin.akun-admin.*'],
+                ['label' => 'Aturan & Denda', 'route' => 'admin.pengaturan.edit', 'aktif' => 'admin.pengaturan.*'],
+            ]],
     ];
+
+    // Menu utama yang sedang dibuka → judul & subjudul di header halaman
+    $menuAktif = collect($menu)->first(fn ($m) => request()->routeIs($m['pola']));
 
     // Jumlah ajuan menunggu untuk badge menu
     $jumlahAjuan = \App\Models\Peminjaman::where('status', \App\Models\Peminjaman::STATUS_MENUNGGU)->count();
@@ -52,7 +72,7 @@
                     <x-application-logo class="h-8 w-8 fill-current text-indigo-400" />
                     <div class="leading-tight">
                         <div class="text-sm font-semibold text-white">Peminjaman Barang</div>
-                        <div class="text-xs text-slate-400">Panel Admin</div>
+                        <div class="text-xs text-slate-400">Panel Admin · <a href="{{ route('peminjam.katalog.index') }}" class="hover:text-white">Lihat situs</a></div>
                     </div>
                 </div>
 
@@ -91,9 +111,15 @@
                         <button type="button" @click="sidebar = true" class="rounded-md p-2 text-gray-500 hover:bg-gray-100 lg:hidden" aria-label="Buka menu">
                             <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
                         </button>
-                        @isset($header)
+                        @if ($menuAktif)
+                            {{-- Judul menu + deskripsi sebagai subjudul halaman --}}
+                            <div class="min-w-0 leading-tight">
+                                <div class="font-semibold text-gray-800">{{ $menuAktif['label'] ?? $menuAktif['grup'] }}</div>
+                                <div class="hidden truncate text-xs text-gray-500 sm:block">{{ $menuAktif['deskripsi'] }}</div>
+                            </div>
+                        @elseif (isset($header))
                             <div>{{ $header }}</div>
-                        @endisset
+                        @endif
                     </div>
 
                     {{-- Avatar: profil, ganti password, logout --}}

@@ -8,8 +8,9 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 /**
- * Dasar semua notifikasi peminjaman: disimpan di database (menu Notifikasi)
- * dan dikirim lewat email (lokal: MAIL_MAILER=log → storage/logs/laravel.log).
+ * Dasar semua notifikasi peminjaman: dikirim lewat email (lokal: MAIL_MAILER=log →
+ * storage/logs/laravel.log) dan dicatat di tabel notifications (log + cegah pengingat dobel).
+ * Peminjam tidak login, jadi tautan di email menuju halaman status bertanda tangan.
  */
 abstract class NotifikasiPeminjaman extends Notification
 {
@@ -23,12 +24,12 @@ abstract class NotifikasiPeminjaman extends Notification
 
     abstract public function pesan(): string;
 
-    /** URL tujuan saat notifikasi diklik, sesuai peran penerima. */
+    /** URL tujuan di email: admin → halaman detail admin; peminjam → halaman status bertanda tangan. */
     public function url(object $notifiable): string
     {
         return $notifiable->isAdmin()
             ? route('admin.peminjaman.show', $this->peminjaman)
-            : route('peminjam.pinjaman.show', $this->peminjaman);
+            : \App\Http\Controllers\Peminjam\StatusController::tautan($this->peminjaman);
     }
 
     /** Baris tambahan di email (opsional). */

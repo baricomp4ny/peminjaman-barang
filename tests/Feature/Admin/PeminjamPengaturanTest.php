@@ -6,7 +6,6 @@ use App\Models\Peminjaman;
 use App\Models\Pengaturan;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class PeminjamPengaturanTest extends TestCase
@@ -30,8 +29,6 @@ class PeminjamPengaturanTest extends TestCase
             'unit' => 'Teknik Informatika',
             'no_hp' => '081234567890',
             'status' => 'aktif',
-            'password' => 'rahasia123',
-            'password_confirmation' => 'rahasia123',
         ], $ubah);
     }
 
@@ -42,7 +39,8 @@ class PeminjamPengaturanTest extends TestCase
 
         $user = User::where('email', 'fajar@example.com')->firstOrFail();
         $this->assertSame(User::ROLE_PEMINJAM, $user->role);
-        $this->assertTrue(Hash::check('rahasia123', $user->password));
+        // Peminjam tidak punya akun login
+        $this->assertNull($user->password);
     }
 
     public function test_validasi_peminjam_input_salah(): void
@@ -55,46 +53,38 @@ class PeminjamPengaturanTest extends TestCase
             'nomor_identitas' => '111',
             'no_hp' => 'abc',
             'status' => 'diblokir',
-            'password' => '123',
-            'password_confirmation' => '456',
-        ]))->assertSessionHasErrors(['name', 'email', 'nomor_identitas', 'no_hp', 'status', 'password']);
+        ]))->assertSessionHasErrors(['name', 'email', 'nomor_identitas', 'no_hp', 'status']);
 
         $this->post('/admin/peminjam', $this->dataPeminjam(['email' => 'bukan-email']))->assertSessionHasErrors('email');
-        $this->post('/admin/peminjam', $this->dataPeminjam(['password' => '', 'password_confirmation' => '']))->assertSessionHasErrors('password');
+        $this->post('/admin/peminjam', $this->dataPeminjam(['nomor_identitas' => '']))->assertSessionHasErrors('nomor_identitas');
     }
 
-    public function test_edit_peminjam_tanpa_password_tidak_mengubah_password(): void
+    public function test_admin_bisa_mengubah_dan_menonaktifkan_peminjam(): void
     {
         $peminjam = User::factory()->create();
-        $hashLama = $peminjam->password;
 
         $this->actingAs($this->admin)->put("/admin/peminjam/{$peminjam->id}", $this->dataPeminjam([
             'email' => $peminjam->email,
             'nomor_identitas' => $peminjam->nomor_identitas,
+            'no_hp' => '089999999999',
             'status' => 'nonaktif',
-            'password' => '',
-            'password_confirmation' => '',
         ]))->assertSessionHasNoErrors();
 
         $peminjam->refresh();
-        $this->assertSame($hashLama, $peminjam->password);
+        $this->assertSame('089999999999', $peminjam->no_hp);
         $this->assertSame('nonaktif', $peminjam->status);
+        $this->assertNull($peminjam->password);
     }
 
-    public function test_admin_bisa_reset_password_peminjam(): void
+    public function test_peminjam_tidak_bisa_login_walau_data_ada(): void
     {
-        $peminjam = User::factory()->create();
+        $peminjam = User::factory()->create(['email' => 'fajar@example.com']);
 
-        $this->actingAs($this->admin)->put("/admin/peminjam/{$peminjam->id}", $this->dataPeminjam([
-            'email' => $peminjam->email,
-            'nomor_identitas' => $peminjam->nomor_identitas,
-            'password' => 'passwordbaru',
-            'password_confirmation' => 'passwordbaru',
-        ]))->assertSessionHasNoErrors();
-
-        $this->assertTrue(Hash::check('passwordbaru', $peminjam->fresh()->password));
+        $this->post('/login', ['email' => 'fajar@example.com', 'password' => ''])->assertSessionHasErrors();
+        $this->post('/login', ['email' => 'fajar@example.com', 'password' => 'password'])->assertSessionHasErrors('email');
+        $this->assertGuest();
+        $this->assertNotNull($peminjam->fresh());
     }
-
     public function test_peminjam_dengan_riwayat_tidak_bisa_dihapus(): void
     {
         $denganRiwayat = User::factory()->create();
@@ -132,9 +122,9 @@ class PeminjamPengaturanTest extends TestCase
 
     public function test_admin_bisa_ubah_pengaturan(): void
     {
-        $this->actingAs($this->admin)->get('/admin/pengaturan')->assertOk();
+        $this->actingAs($this->admin)->get('/admin/pengaturan/aturan')->assertOk();
 
-        $this->put('/admin/pengaturan', [
+        $this->put('/admin/pengaturan/aturan', [
             'lama_pinjam_maks' => 14,
             'unit_maks_per_ajuan' => 5,
             'denda_per_hari' => 0,
@@ -147,7 +137,7 @@ class PeminjamPengaturanTest extends TestCase
 
     public function test_validasi_pengaturan_input_salah(): void
     {
-        $this->actingAs($this->admin)->put('/admin/pengaturan', [
+        $this->actingAs($this->admin)->put('/admin/pengaturan/aturan', [
             'lama_pinjam_maks' => 0,
             'unit_maks_per_ajuan' => 'tiga',
             'denda_per_hari' => -500,
@@ -163,6 +153,6 @@ class PeminjamPengaturanTest extends TestCase
         $peminjam = User::factory()->create();
 
         $this->actingAs($peminjam)->get('/admin/peminjam')->assertForbidden();
-        $this->put('/admin/pengaturan', ['lama_pinjam_maks' => 90])->assertForbidden();
+        $this->put('/admin/pengaturan/aturan', ['lama_pinjam_maks' => 90])->assertForbidden();
     }
 }

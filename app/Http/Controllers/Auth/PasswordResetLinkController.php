@@ -32,8 +32,9 @@ class PasswordResetLinkController extends Controller
         // We will send the password reset link to this user. Once we have attempted
         // to send the link, we will examine the response then see the message we
         // need to show to the user. Finally, we'll send out a proper response.
+        // Reset password hanya untuk admin; peminjam tidak punya akun login
         $status = Password::sendResetLink(
-            $request->only('email')
+            ['email' => $request->input('email'), 'role' => \App\Models\User::ROLE_ADMIN]
         );
 
         return $status == Password::RESET_LINK_SENT

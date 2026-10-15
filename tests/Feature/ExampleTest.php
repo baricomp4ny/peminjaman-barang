@@ -2,12 +2,15 @@
 
 namespace Tests\Feature;
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class ExampleTest extends TestCase
 {
-    public function test_guest_is_redirected_from_home_to_login(): void
+    use RefreshDatabase;
+
+    public function test_halaman_awal_adalah_katalog_publik(): void
     {
-        $this->get('/')->assertRedirect('/login');
+        $this->get('/')->assertOk()->assertSee('Katalog Barang')->assertSee('Login Admin');
     }
 }

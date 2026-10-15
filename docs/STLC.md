@@ -4,7 +4,7 @@
 |---|---|
 | Aplikasi | Sistem Informasi Peminjaman Barang Berbasis Web dengan QR Code |
 | Mitra | (isi sesuai `MITRA_NAMA` di `.env`) |
-| Versi yang diuji | Commit Sprint 5 (`git log --oneline -1`) |
+| Versi yang diuji | Commit setelah Sprint 5 — peminjam tanpa login & navigasi baru (`git log --oneline -1`) |
 | Metode pengembangan | Agile Scrum, 5 sprint |
 | Teknologi | Laravel 10, PHP 8.1, MySQL 8, Blade + Tailwind + Alpine.js, html5-qrcode, simple-qrcode, dompdf, Laravel Excel |
 | Jenis pengujian | Black box (manual) + Feature Test otomatis (PHPUnit) |
@@ -23,18 +23,26 @@
 | 3 — Transaksi & laporan | Ajuan peminjaman (multi-barang, cek sisa unit langsung), verifikasi admin (setujui/tolak dengan alasan wajib), pembatalan, serah-terima, pengembalian (boleh sebagian, kondisi baik/rusak/hilang), keterlambatan & denda, riwayat, dashboard admin & beranda peminjam, laporan peminjaman/pengembalian/inventaris/keterlambatan/denda (web, PDF, Excel), notifikasi aplikasi + email, scheduler kedaluwarsa & pengingat H-1 |
 | 4 — QR Code & scan | QR SVG per unit, cetak label massal A4, kartu QR peminjam bertanda tangan (HMAC), halaman Scan QR (kamera html5-qrcode lokal + input manual) untuk serah-terima & pengembalian, pencocokan hasil scan dengan ajuan |
 | 5 — Hardware & pengujian | Dukungan scanner USB 2D (penangkap ketikan cepat global, auto-focus + indikator "Scanner siap", proses saat Enter/Tab, antrean, cegah scan ganda, pembersihan kode, pesan error jaringan/sesi), aturan pinjaman terlambat memblokir stok sampai unit kembali, Feature Test terfokus, dokumen STLC |
+| Pasca Sprint 5 — perubahan konsep | **Peminjam tidak perlu login**: katalog, form ajuan (isi identitas), dan Cek Status (kode + NIM / tautan email) bersifat publik; QR kode peminjaman menggantikan kartu QR; notifikasi peminjam lewat email. Login hanya untuk admin (registrasi dihapus). **Navigasi admin** disusun ulang dengan subjudul deskripsi; **Pengaturan > Data Admin** untuk mengelola akun admin |
 
 ### 1.2 Per peran
 
-**Admin** (sidebar)
-- Dashboard: ajuan menunggu, siap diambil, sedang dipinjam, terlambat, denda bulan ini, status unit, daftar jatuh tempo.
-- Scan QR Code: mode serah-terima & pengembalian (kamera, scanner USB, input manual).
-- Transaksi: Ajuan Peminjaman (badge jumlah menunggu), Peminjaman (tab siap diambil/dipinjam/terlambat), Pengembalian, Riwayat.
-- Data Barang: Jenis Barang, Unit Barang, Kategori, Lokasi, Cetak Label QR.
-- Data Peminjam, Laporan (5 jenis, PDF/Excel, filter tanggal), Pengaturan, menu avatar (profil, ganti password, keluar).
+**Admin** (login; sidebar — deskripsi tampil sebagai subjudul halaman)
+| Menu | Isi | Subjudul |
+|---|---|---|
+| Dashboard | Ajuan menunggu, siap diambil, dipinjam, terlambat, denda bulan ini, status unit, jatuh tempo | Ringkasan inventaris dan transaksi aktif |
+| Data Barang | Jenis Barang, Unit & Kondisi, Kategori, Lokasi, Cetak Label Barcode | Pengelolaan data barang, jenis, kategori, unit, kondisi, lokasi, serta barcode |
+| Data Peminjam | Identitas, status aktif/nonaktif, riwayat | Pengelolaan identitas dan riwayat peminjaman setiap peminjam |
+| Transaksi | Ajuan Peminjaman (badge), Peminjaman Aktif, Pengembalian, Riwayat Transaksi | Pengelolaan pengajuan, peminjaman aktif, pengembalian, dan riwayat transaksi |
+| Scan Barcode | Mode serah-terima & pengembalian (kamera, scanner USB, input manual) | Pemindaian barcode untuk mencatat penyerahan dan pengembalian barang |
+| Laporan | Transaksi, Pengembalian, Inventaris, Keterlambatan, Denda (PDF/Excel) | Rekapitulasi transaksi, pengembalian, inventaris, keterlambatan, dan denda |
+| Pengaturan | Data Admin, Aturan & Denda | Pengelolaan data admin, aturan peminjaman, dan ketentuan denda |
 
-**Peminjam** (navbar)
-- Beranda (pinjaman berjalan, peringatan terlambat, notifikasi terbaru), Katalog Barang (sisa unit hari ini), Ajukan Peminjaman, Pinjaman Saya (detail, batalkan), Notifikasi (badge belum dibaca), Profil, Kartu QR.
+**Peminjam** (TANPA login; navbar publik)
+- Katalog Barang (sisa unit hari ini), Ajukan Peminjaman (isi identitas + barang), Cek Status (kode peminjaman + NIM: status, alasan penolakan, batas ambil, perkiraan denda, QR pengambilan, batalkan).
+- Email: bukti ajuan terkirim (kode + tautan status), disetujui, ditolak, kedaluwarsa, pengingat H-1, pengembalian dicatat.
+
+Label barang tetap memakai **QR Code** (dibaca scanner 2D & kamera); di menu disebut "barcode".
 
 ### 1.3 Aturan bisnis (dapat diubah di Pengaturan)
 
@@ -102,11 +110,12 @@ Isi **Laporan Penutupan (bagian 9)**: jumlah kasus, persentase lulus, cacat per 
 
 ## 3. Data Uji (hasil `php artisan migrate:fresh --seed`)
 
-Semua akun memakai password **`password`**. Tanggal relatif terhadap hari seeder dijalankan (H = hari ini).
+Akun **admin** memakai password **`password`**. Peminjam **tidak punya akun login** — data di bawah dipakai sebagai identitas (NIM + email) di form ajuan dan Cek Status. Tanggal relatif terhadap hari seeder dijalankan (H = hari ini).
 
-| Akun | Peran | Data penting |
+| Email / NIM | Peran | Data penting |
 |---|---|---|
-| admin@peminjaman.test | Admin | — |
+| admin@peminjaman.test | Admin (login) | — |
+| petugas@peminjaman.test | Admin (login) | — |
 | andi@peminjaman.test | Peminjam (2201001) | Ajuan **menunggu** Proyektor×1 + Layar×1 (H+2 s/d H+4); riwayat **selesai** (PRJ-004 terlambat 1 hari Rp1.000, KBL-003 kembali rusak) |
 | budi@peminjaman.test | Peminjam (2201002) | Ajuan **disetujui** Kamera×1 + Tripod×1 (H s/d H+2); ajuan **dibatalkan** |
 | citra@peminjaman.test | Peminjam (2201003) | Ajuan **ditolak** (dengan alasan); ajuan **kedaluwarsa** |
@@ -121,31 +130,28 @@ Unit khusus: `SPK-003` rusak/perbaikan, `SLD-002` hilang, `KBL-003` rusak/perbai
 
 Kolom: **J** = jenis (P positif, N negatif/input salah, B nilai batas); **Tes otomatis** = kelas Feature Test yang mencakup logika yang sama (`—` = hanya manual). Prioritas: kasus bertanda ★ adalah prioritas Tinggi.
 
-### 4.1 Autentikasi & Hak Akses (AU)
+### 4.1 Autentikasi, Hak Akses & Navigasi (AU)
 Prasyarat: seed baru. Penguji: ________ Tanggal: ________
 
 | ID | Skenario | Langkah / Data uji | Hasil yang diharapkan | J | Tes otomatis | Hasil aktual | Status |
 |---|---|---|---|---|---|---|---|
 | AU-01 ★ | Login admin | admin@peminjaman.test / password | Masuk ke /admin/dashboard dengan sidebar | P | AuthenticationTest, RoleAccessTest | | |
-| AU-02 ★ | Login peminjam | andi@peminjaman.test / password | Masuk ke /peminjam/beranda dengan navbar | P | RoleAccessTest | | |
-| AU-03 | Password salah | andi@… / salah123 | "Email atau password salah.", tetap di login | N | AuthenticationTest | | |
-| AU-04 | Login berulang gagal | 6× password salah | Pesan dibatasi "Terlalu banyak percobaan…" | N | — | | |
-| AU-05 ★ | Akun nonaktif login | Nonaktifkan Budi, login Budi | "Akun Anda dinonaktifkan. Hubungi admin." | N | RoleAccessTest | | |
-| AU-06 ★ | Akun dinonaktifkan saat sedang login | Budi login; admin menonaktifkan; Budi klik menu | Budi dikeluarkan ke halaman login | N | RoleAccessTest | | |
-| AU-07 | Registrasi peminjam | Isi nama, NIM baru, email baru, password 8+ | Akun dibuat sebagai peminjam aktif, masuk beranda | P | RegistrationTest | | |
-| AU-08 | Registrasi tanpa NIM / NIM dipakai | NIM kosong / 2201001 | Ditolak dengan pesan | N | RegistrationTest | | |
-| AU-09 ★ | Sisipkan role admin saat registrasi | Tambah field `role=admin` via inspect element | Akun tetap peminjam | N | RegistrationTest | | |
-| AU-10 ★ | Peminjam buka halaman admin | Login Andi → /admin/dashboard, /admin/kategori, /admin/laporan/denda | 403 | N | RoleAccessTest, KategoriLokasiTest | | |
-| AU-11 ★ | Admin buka halaman peminjam | Login admin → /peminjam/beranda | 403 | N | RoleAccessTest | | |
-| AU-12 | Tamu buka halaman terlindungi | Logout → /admin/barang | Diarahkan ke login | N | RoleAccessTest | | |
-| AU-13 | Ubah profil | Profil → ubah nama | Tersimpan | P | ProfileTest | | |
-| AU-14 | Ganti password | Avatar → Ganti Password; password lama benar, baru 8+ | Tersimpan; login dengan password baru berhasil | P | PasswordUpdateTest | | |
-| AU-15 | Ganti password, password lama salah | Password lama salah | Ditolak | N | PasswordUpdateTest | | |
-| AU-16 | Hapus akun sendiri | DELETE /profile | Tidak tersedia (405) | N | ProfileTest | | |
-| AU-17 | Lupa password | Forgot password → email terdaftar | Tautan reset tercatat di log email | P | PasswordResetTest | | |
-| AU-18 | Logout | Avatar → Keluar | Kembali ke login | P | AuthenticationTest | | |
-| AU-19 | Menu aktif & responsif | Buka beberapa menu; perkecil jendela < 640 px | Menu aktif ditandai; sidebar jadi tombol ☰, navbar jadi menu mobile | P | — | | |
-
+| AU-02 ★ | Halaman peminjam tanpa login | Buka /, /ajuan, /status sebagai tamu | Semua terbuka tanpa diminta login | P | RoleAccessTest | | |
+| AU-03 ★ | Peminjam mencoba login | andi@peminjaman.test / password | Ditolak "Email atau password salah." | N | RoleAccessTest, PeminjamPengaturanTest | | |
+| AU-04 | Password admin salah | admin@… / salah123 | Ditolak, tetap di login | N | AuthenticationTest | | |
+| AU-05 | Login berulang gagal | 6× password salah | "Terlalu banyak percobaan…" | N | — | | |
+| AU-06 ★ | Admin nonaktif login | Nonaktifkan petugas@ (Data Admin), login petugas@ | "Akun Anda dinonaktifkan. Hubungi admin." | N | RoleAccessTest | | |
+| AU-07 | Admin dinonaktifkan saat sedang login | Petugas login; admin menonaktifkan; petugas klik menu | Dikeluarkan ke halaman login | N | RoleAccessTest | | |
+| AU-08 | Registrasi dihapus | Buka /register | 404 | N | RoleAccessTest | | |
+| AU-09 ★ | Tamu buka panel admin | /admin/dashboard, /admin/barang, /profile | Diarahkan ke login | N | RoleAccessTest | | |
+| AU-10 | Lupa password admin | Forgot password → admin@… | Tautan reset tercatat di log email | P | PasswordResetTest, RoleAccessTest | | |
+| AU-11 | Lupa password dengan email peminjam | Forgot password → andi@… | Ditolak; tidak ada email reset | N | RoleAccessTest | | |
+| AU-12 | Ubah profil & ganti password admin | Avatar → Profil / Ganti Password | Tersimpan | P | ProfileTest, PasswordUpdateTest | | |
+| AU-13 | Logout | Avatar → Keluar | Kembali ke login | P | AuthenticationTest | | |
+| AU-14 ★ | Urutan sidebar | Login admin | Dashboard, Data Barang, Data Peminjam, Transaksi, Scan Barcode, Laporan, Pengaturan | P | — | | |
+| AU-15 ★ | Subjudul halaman | Buka tiap menu | Header menampilkan nama menu + deskripsi (mis. Dashboard: "Ringkasan inventaris dan transaksi aktif") | P | RoleAccessTest, AkunAdminTest | | |
+| AU-16 | Menu aktif & responsif | Buka submenu; perkecil < 640 px | Menu aktif ditandai, grup terbuka; sidebar jadi ☰; navbar publik jadi menu mobile | P | — | | |
+| AU-17 | Tautan antar-area | Navbar publik "Login Admin"; sidebar "Lihat situs"; navbar publik saat admin login | Login / katalog / "Dashboard Admin" | P | — | | |
 ### 4.2 Kategori (KT)
 Prasyarat: login admin. Penguji: ________ Tanggal: ________
 
@@ -205,20 +211,20 @@ Prasyarat: login admin. Penguji: ________ Tanggal: ________
 | UN-13 | Filter status | Status perbaikan | SPK-003, KBL-003 | P | — | | |
 
 ### 4.6 Data Peminjam (PJ)
+Peminjam tidak punya akun login; datanya terbentuk dari form ajuan publik atau ditambah admin.
 
 | ID | Skenario | Langkah / Data uji | Hasil yang diharapkan | J | Tes otomatis | Hasil aktual | Status |
 |---|---|---|---|---|---|---|---|
-| PJ-01 | Tambah peminjam | Data lengkap, password 8+ | Tersimpan sebagai peminjam | P | PeminjamPengaturanTest | | |
+| PJ-01 | Tambah peminjam oleh admin | Nama, NIM, email, no. HP | Tersimpan sebagai peminjam tanpa password | P | PeminjamPengaturanTest | | |
 | PJ-02 | Email / NIM duplikat | andi@… / 2201001 | Ditolak | N | PeminjamPengaturanTest | | |
 | PJ-03 | Email format salah | "andi@" | Ditolak | N | PeminjamPengaturanTest | | |
-| PJ-04 | No. HP berisi huruf | "08abc" | Ditolak | N | PeminjamPengaturanTest | | |
-| PJ-05 | Password pendek / konfirmasi beda | "123" / beda | Ditolak | N | PeminjamPengaturanTest | | |
-| PJ-06 | Edit tanpa password | Ubah No. HP | Password lama tetap berlaku | P | PeminjamPengaturanTest | | |
-| PJ-07 | Reset password | Isi password baru | Login dengan password baru | P | PeminjamPengaturanTest | | |
+| PJ-04 | No. HP berisi huruf / NIM kosong | "08abc" / "" | Ditolak | N | PeminjamPengaturanTest | | |
+| PJ-05 | Ubah kontak peminjam | Ubah No. HP Andi | Tersimpan; dipakai di ajuan berikutnya | P | PeminjamPengaturanTest | | |
+| PJ-06 ★ | Nonaktifkan peminjam | Status nonaktif, lalu ajukan dengan NIM itu | Ajuan ditolak "dinonaktifkan" | N | PeminjamPengaturanTest, AjuanVerifikasiTest | | |
+| PJ-07 | Peminjam dari form publik | Ajukan dengan NIM baru | Muncul di Data Peminjam beserta riwayatnya | P | AjuanVerifikasiTest | | |
 | PJ-08 ★ | Hapus peminjam dengan riwayat | Hapus Andi | Ditolak, saran nonaktifkan | N | PeminjamPengaturanTest | | |
-| PJ-09 ★ | Ubah akun admin lewat URL peminjam | /admin/peminjam/1/edit | 404 | N | PeminjamPengaturanTest | | |
-| PJ-10 | Detail peminjam | Klik Andi | Profil + 10 transaksi terakhir | P | PeminjamPengaturanTest | | |
-
+| PJ-09 ★ | Ubah akun admin lewat URL peminjam | /admin/peminjam/{id admin}/edit | 404 | N | PeminjamPengaturanTest | | |
+| PJ-10 | Detail peminjam | Klik Andi | Identitas + 10 transaksi terakhir | P | PeminjamPengaturanTest | | |
 ### 4.7 Pengaturan (PG)
 
 | ID | Skenario | Langkah / Data uji | Hasil yang diharapkan | J | Tes otomatis | Hasil aktual | Status |
@@ -229,12 +235,11 @@ Prasyarat: login admin. Penguji: ________ Tanggal: ________
 | PG-04 | Bukan angka / kosong | "tiga", "" | Ditolak, nilai lama tetap | N | PeminjamPengaturanTest | | |
 | PG-05 ★ | Pengaturan berlaku di ajuan | Lama maks 2 → ajukan 3 hari | Ditolak "maksimal 2 hari" | P | AjuanVerifikasiTest | | |
 
-### 4.8 Ajuan Peminjaman (AJ)
-Prasyarat: login peminjam. Penguji: ________ Tanggal: ________
+### 4.8 Ajuan Peminjaman (AJ) — halaman publik
+Prasyarat: **tanpa login** (tamu), buka menu Ajukan Peminjaman. Identitas uji: data peminjam seeder atau NIM baru. Penguji: ________ Tanggal: ________
 
 | ID | Skenario | Langkah / Data uji | Hasil yang diharapkan | J | Tes otomatis | Hasil aktual | Status |
-|---|---|---|---|---|---|---|---|
-| AJ-01 ★ | Ajuan valid | Laptop×1, besok s/d lusa, tujuan diisi | Status menunggu, kode PJM-YYYYMMDD-NNNN, admin dapat email | P | AjuanVerifikasiTest | | |
+|---|---|---|---|---|---|---|---|| AJ-01 ★ | Ajuan valid tanpa login | Identitas Andi, Laptop×1, besok s/d lusa | Diarahkan ke halaman status: kode PJM-YYYYMMDD-NNNN + QR; email bukti ke peminjam & email ke admin | P | AjuanVerifikasiTest | | |
 | AJ-02 | Kode berurutan per hari | Dua ajuan hari ini | Nomor urut naik | P | AjuanVerifikasiTest | | |
 | AJ-03 | Tanggal pinjam kemarin | (inspect element) | Ditolak | N | AjuanVerifikasiTest | | |
 | AJ-04 | Kembali < pinjam | tgl 20 → tgl 19 | Ditolak | N | AjuanVerifikasiTest | | |
@@ -247,8 +252,15 @@ Prasyarat: login peminjam. Penguji: ________ Tanggal: ________
 | AJ-11 ★ | Stok kurang pada rentang | Kamera×3, H s/d H+1 | Peringatan merah "Sisa 2"; server menolak | N | AjuanVerifikasiTest | | |
 | AJ-12 | Rentang tidak bertabrakan | Kamera×3 setelah H+2 | Diterima | P | AjuanVerifikasiTest | | |
 | AJ-13 | Ajuan menunggu tidak mengikat stok | Dua akun ajukan Kamera×3 tanggal sama | Keduanya diterima sebagai menunggu | P | KetersediaanTest | | |
-| AJ-14 ★ | Peminjam terlambat mengajukan | Login Eko | Peringatan, tombol nonaktif, server menolak | N | AjuanVerifikasiTest | | |
+| AJ-14 ★ | Peminjam terlambat mengajukan | NIM Eko (2201005) + eko@… | Ditolak di kolom NIM: masih punya pinjaman terlambat | N | AjuanVerifikasiTest | | |
 | AJ-15 | Katalog | Katalog → cari, filter kategori | Sisa unit hari ini tampil; tombol Pinjam mengisi barang | P | SchedulerNotifikasiLaporanTest | | |
+| AJ-16 ★ | NIM baru | NIM 2301777, email baru | Data peminjam baru dibuat (tanpa password) | P | AjuanVerifikasiTest | | |
+| AJ-17 ★ | NIM terdaftar, email berbeda | NIM 2201001 + email lain | Ditolak; email tersimpan disamarkan (a***i@…) | N | AjuanVerifikasiTest | | |
+| AJ-18 | Email dipakai NIM lain | NIM baru + andi@peminjaman.test | Ditolak | N | AjuanVerifikasiTest | | |
+| AJ-19 | Nama berbeda untuk NIM terdaftar | NIM Andi, nama lain, no. HP baru | Diterima; nama tersimpan tetap, no. HP diperbarui | P | AjuanVerifikasiTest | | |
+| AJ-20 | Validasi identitas | Nama/NIM kosong, email salah, HP "abc", NIM berisi `<script>` | Ditolak per kolom | N | AjuanVerifikasiTest | | |
+| AJ-21 | Jebakan bot | Isi kolom tersembunyi "website" (inspect element) | Ditolak | N | AjuanVerifikasiTest | | |
+| AJ-22 | Pembatasan kiriman | Kirim > 10 kali dalam 1 menit | "Too Many Requests" (429) | N | — | | |
 
 ### 4.9 Ketersediaan (KS) — logika inti
 Diuji lewat form ajuan (sisa unit) dan panel verifikasi admin.
@@ -280,16 +292,21 @@ Prasyarat: login admin.
 | VR-09 | Badge ajuan | Setelah VR-02 | Badge berkurang 1 | P | — | | |
 | VR-10 | Pembatalan mengembalikan stok | Setujui A (habiskan stok), A dibatalkan, setujui B | B berhasil | P | PersetujuanAjuanTest | | |
 
-### 4.11 Pembatalan (BT)
-Prasyarat: login peminjam.
+### 4.11 Cek Status & Pembatalan (BT) — tanpa login
 
 | ID | Skenario | Langkah / Data uji | Hasil yang diharapkan | J | Tes otomatis | Hasil aktual | Status |
 |---|---|---|---|---|---|---|---|
-| BT-01 | Batalkan ajuan menunggu | Andi → Batalkan | Status dibatalkan | P | AjuanVerifikasiTest | | |
-| BT-02 | Batalkan ajuan disetujui | Budi → Batalkan | Status dibatalkan | P | AjuanVerifikasiTest | | |
-| BT-03 ★ | Batalkan yang sudah dipinjam | Dewi → POST batal | Ditolak | N | AjuanVerifikasiTest | | |
-| BT-04 ★ | Buka/batalkan milik orang lain | Ganti ID di URL | 403 | N | AjuanVerifikasiTest | | |
-
+| BT-01 ★ | Cek status kode + NIM | Cek Status → kode ajuan Citra (ditolak) + 2201003 | Status ditolak + alasan penolakan | P | AjuanVerifikasiTest | | |
+| BT-02 ★ | NIM / kode salah | Kode benar + NIM lain; kode tidak ada | "Kode peminjaman atau nomor identitas tidak cocok." (pesan sama) | N | AjuanVerifikasiTest | | |
+| BT-03 | Buka /status/{kode} langsung tanpa akses | Ketik URL status orang lain | Diarahkan ke form Cek Status | N | AjuanVerifikasiTest | | |
+| BT-04 ★ | Tautan dari email | Klik "Lihat Detail" di email (log) | Halaman status terbuka tanpa login | P | AjuanVerifikasiTest, SchedulerNotifikasiLaporanTest | | |
+| BT-05 | Tautan email diubah | Ubah nilai `signature` | Diarahkan ke form Cek Status | N | AjuanVerifikasiTest | | |
+| BT-06 ★ | Batalkan ajuan menunggu | Status Andi → Batalkan | Status dibatalkan | P | AjuanVerifikasiTest | | |
+| BT-07 | Batalkan ajuan disetujui | Status Budi → Batalkan | Status dibatalkan, stok kembali | P | AjuanVerifikasiTest, PersetujuanAjuanTest | | |
+| BT-08 ★ | Batalkan yang sudah dipinjam | Status Dewi | Tombol tidak ada; paksa POST → ditolak | N | AjuanVerifikasiTest | | |
+| BT-09 ★ | Batalkan tanpa akses | POST /status/{kode orang lain}/batal | 403 | N | AjuanVerifikasiTest | | |
+| BT-10 | Cetak bukti | Halaman status → Cetak bukti | Hanya isi status & QR tercetak | P | — | | |
+| BT-11 | Pembatasan cek status | > 10 percobaan / menit | 429 | N | — | | |
 ### 4.12 Serah-terima lewat form (ST)
 Prasyarat: login admin; ajuan Budi disetujui.
 
@@ -326,21 +343,19 @@ Prasyarat: login admin.
 | PB-15 | Kembali di hari rencana pukul 23:50 | — | Tidak terlambat | B | PerhitunganDendaTest | | |
 | PB-16 | Perkiraan denda berjalan | Eko buka detail pinjaman | Kotak merah perkiraan denda | P | PerhitunganDendaTest | | |
 
-### 4.14 Riwayat, Notifikasi, Dashboard (RN)
+### 4.14 Riwayat, Notifikasi Email, Dashboard (RN)
 
 | ID | Skenario | Langkah / Data uji | Hasil yang diharapkan | J | Tes otomatis | Hasil aktual | Status |
 |---|---|---|---|---|---|---|---|
-| RN-01 | Tanda terlambat | Peminjaman → tab Terlambat | Eko dengan badge "+2 hari" | P | SchedulerNotifikasiLaporanTest | | |
+| RN-01 | Tanda terlambat | Peminjaman Aktif → tab Terlambat | Eko dengan badge "+2 hari" | P | SchedulerNotifikasiLaporanTest | | |
 | RN-02 | Filter riwayat | Status selesai; rentang tanggal; cari NIM | Hanya data cocok | P | SchedulerNotifikasiLaporanTest | | |
 | RN-03 | Rentang riwayat terbalik | Dari > sampai | Pesan validasi | N | — | | |
-| RN-04 ★ | Badge notifikasi | Admin setujui ajuan Andi | Badge merah di menu Notifikasi Andi | P | — | | |
-| RN-05 | Buka notifikasi | Klik notifikasi | Ke detail pinjaman, ditandai dibaca | P | SchedulerNotifikasiLaporanTest | | |
-| RN-06 | Tandai semua dibaca | Klik tombol | Badge hilang | P | SchedulerNotifikasiLaporanTest | | |
-| RN-07 ★ | Notifikasi milik orang lain | /peminjam/notifikasi/{id} user lain | 404 | N | SchedulerNotifikasiLaporanTest | | |
-| RN-08 | Email notifikasi | Ajukan, setujui, tolak, kembalikan | Subjek tercatat di storage/logs/laravel.log | P | AjuanVerifikasiTest | | |
-| RN-09 | Dashboard admin | Buka dashboard | Angka sesuai; kartu bisa diklik | P | SchedulerNotifikasiLaporanTest | | |
-| RN-10 | Beranda peminjam | Login Eko | Peringatan terlambat, pinjaman berjalan, notifikasi | P | SchedulerNotifikasiLaporanTest | | |
-
+| RN-04 ★ | Email bukti ajuan | Kirim ajuan (AJ-01) | Log: "Ajuan peminjaman terkirim — PJM-…" ke email peminjam | P | AjuanVerifikasiTest | | |
+| RN-05 ★ | Email disetujui / ditolak | Admin verifikasi | Email ke peminjam berisi batas ambil / alasan + tautan status | P | AjuanVerifikasiTest | | |
+| RN-06 | Email ke admin | Ajuan baru | Semua admin aktif menerima email "Ajuan peminjaman baru" berisi tautan ke panel admin | P | SchedulerNotifikasiLaporanTest | | |
+| RN-07 | Email kedaluwarsa, pengingat H-1, pengembalian | Jalankan scheduler / catat pengembalian | Email terkirim dengan tautan status | P | SchedulerNotifikasiLaporanTest | | |
+| RN-08 | Dashboard admin | Buka dashboard | Angka sesuai; kartu bisa diklik | P | SchedulerNotifikasiLaporanTest | | |
+| RN-09 | Halaman status peminjam terlambat | Cek status pinjaman Eko | Kotak merah perkiraan denda | P | PerhitunganDendaTest | | |
 ### 4.15 Laporan (LP)
 
 | ID | Skenario | Langkah / Data uji | Hasil yang diharapkan | J | Tes otomatis | Hasil aktual | Status |
@@ -371,30 +386,27 @@ Prasyarat: login admin.
 | ID | Skenario | Langkah / Data uji | Hasil yang diharapkan | J | Tes otomatis | Hasil aktual | Status |
 |---|---|---|---|---|---|---|---|
 | QR-01 | Unduh QR unit | Unit Barang → "QR" PRJ-001 | qr-PRJ-001.svg; di-scan HP berisi "PRJ-001" | P | QrLabelTest | | |
-| QR-02 | Label per jenis | Detail Proyektor → Cetak Label QR | Label PRJ-001…004 (QR, kode, nama, mitra) | P | QrLabelTest | | |
+| QR-02 | Label per jenis | Detail Proyektor → Cetak Label Barcode | Label PRJ-001…004 (QR, kode, nama, mitra) | P | QrLabelTest | | |
 | QR-03 | Label sesuai filter | Filter lokasi → Cetak Label (sesuai filter) | Hanya unit lokasi itu | P | QrLabelTest | | |
 | QR-04 | Label terpilih | Centang 3 unit → Cetak label terpilih | Tepat 3 label; tombol nonaktif bila 0 | P | QrLabelTest | | |
 | QR-05 | Ukuran label | 3 / 4 / 5 per baris | Grid berubah; `?kolom=9` ditolak | B | QrLabelTest | | |
 | QR-06 ★ | Hasil cetak | Ctrl+P | Hanya label, tidak terpotong; QR cetakan terbaca scanner | P | — | | |
 
-### 4.18 Kartu QR Peminjam (KQ)
+### 4.18 QR Kode Peminjaman (KQ) — pengganti kartu QR peminjam
 
 | ID | Skenario | Langkah / Data uji | Hasil yang diharapkan | J | Tes otomatis | Hasil aktual | Status |
 |---|---|---|---|---|---|---|---|
-| KQ-01 | Tampilan kartu | Budi → avatar → Kartu QR | Kartu ukuran KTP: nama, NIM, prodi, QR | P | QrLabelTest | | |
-| KQ-02 ★ | Kartu membuka ajuan | Admin scan kartu Budi (mode serah) | Ajuan Budi terbuka | P | ScanTest | | |
-| KQ-03 ★ | Kartu palsu | `PMJ.3.0000000000` | "Kartu QR tidak valid atau sudah tidak berlaku." | N | ScanTest, QrLabelTest | | |
-| KQ-04 | Kartu milik admin | (data uji) isi kartu admin | Tidak berlaku | N | PencocokanScanTest | | |
-| KQ-05 | Peminjam tanpa ajuan disetujui | Kartu Citra | "…tidak memiliki ajuan disetujui…" | N | ScanTest | | |
-| KQ-06 | Peminjam nonaktif | Nonaktifkan Budi, scan kartunya | "Akun … dinonaktifkan." | N | — | | |
-| KQ-07 | Dua ajuan disetujui | Kartu peminjam dengan 2 ajuan | Muncul daftar pilihan | P | ScanTest | | |
-
+| KQ-01 | QR di halaman status | Setelah AJ-01 / Cek Status | QR + kode PJM + nama peminjam tampil | P | AjuanVerifikasiTest | | |
+| KQ-02 ★ | QR membuka transaksi | Admin Scan Barcode (mode serah) → scan QR di layar HP peminjam | Ajuan terbuka | P | ScanTest | | |
+| KQ-03 | QR ajuan yang belum disetujui | Scan QR ajuan menunggu | "…berstatus "menunggu", bukan "disetujui"." | N | ScanTest | | |
+| KQ-04 | Kartu QR lama (PMJ.…) palsu | `PMJ.3.0000000000` | "Kartu QR tidak valid atau sudah tidak berlaku." | N | ScanTest, QrLabelTest | | |
+| KQ-05 | Kartu milik admin | (data uji) isi kartu admin | Tidak berlaku | N | PencocokanScanTest | | |
 ### 4.19 Scan — Serah-terima (SS)
-Prasyarat: admin → Scan QR → mode Serah-terima; ajuan Budi (Kamera×1, Tripod×1). Input lewat kamera, scanner USB, atau ketik + Enter.
+Prasyarat: admin → Scan Barcode → mode Serah-terima; ajuan Budi (Kamera×1, Tripod×1). Input lewat kamera, scanner USB, atau ketik + Enter.
 
 | ID | Skenario | Input | Hasil yang diharapkan | J | Tes otomatis | Hasil aktual | Status |
 |---|---|---|---|---|---|---|---|
-| SS-01 ★ | Buka dengan kode peminjaman | PJM-… Budi | Transaksi terbuka, Kamera 0/1, Tripod 0/1 | P | ScanTest | | |
+| SS-01 ★ | Buka dengan QR/kode peminjaman | QR di halaman status Budi atau ketik PJM-… | Transaksi terbuka, Kamera 0/1, Tripod 0/1 | P | ScanTest | | |
 | SS-02 | Kode unit sebelum transaksi | KMR-001 | "…Scan kartu peminjam atau kode peminjaman terlebih dahulu." | N | ScanTest | | |
 | SS-03 ★ | **QR tidak dikenal** (buka transaksi) | ABC-123 | "QR tidak dikenal: ABC-123." + bunyi gagal + kotak merah berkedip | N | ScanTest | | |
 | SS-04 | Kode peminjaman beda status | PJM-… Dewi | "…berstatus "dipinjam", bukan "disetujui"." | N | ScanTest | | |
@@ -425,15 +437,15 @@ Prasyarat: admin → Scan QR → mode Serah-terima; ajuan Budi (Kamera×1, Tripo
 | SK-07 ★ | Sebagian | Simpan MIC-001 saja | Tetap dipinjam; "Belum kembali" MIC-002 | P | ScanTest | | |
 | SK-08 | Unit sudah kembali | MIC-001 lagi pada transaksi sama | "…sudah dikembalikan pada …" | N | ScanTest | | |
 | SK-09 | Terlambat via scan | LPT-001 → Simpan | Peringatan terlambat; denda Rp2.000, selesai | P | — | | |
-| SK-10 | Buka dengan kartu | Kartu Dewi | Pinjaman Dewi terbuka | P | PencocokanScanTest | | |
+| SK-10 | Buka dengan QR kode peminjaman | QR status pinjaman Dewi | Pinjaman Dewi terbuka | P | ScanTest | | |
 | SK-11 | Kartu/kode peminjaman sebagai unit | Kartu / PJM saat transaksi terbuka | "bukan QR unit" | N | PencocokanScanTest | | |
 
 ### 4.21 Scanner USB 2D & Penanganan Error Scan (SU)
-Prasyarat: scanner USB mode keyboard (akhiran Enter, sebagian tes juga dengan akhiran Tab); halaman Scan QR.
+Prasyarat: scanner USB mode keyboard (akhiran Enter, sebagian tes juga dengan akhiran Tab); halaman Scan Barcode.
 
 | ID | Skenario | Langkah / Data uji | Hasil yang diharapkan | J | Tes otomatis | Hasil aktual | Status |
 |---|---|---|---|---|---|---|---|
-| SU-01 ★ | Auto-focus saat halaman dibuka | Buka Scan QR | Kursor di kolom scanner; indikator hijau "Scanner siap" | P | — | | |
+| SU-01 ★ | Auto-focus saat halaman dibuka | Buka Scan Barcode | Kursor di kolom scanner; indikator hijau "Scanner siap" | P | — | | |
 | SU-02 ★ | Proses otomatis saat Enter | Scan label PRJ-… | Diproses tanpa klik apa pun | P | — | | |
 | SU-03 | Scanner berakhiran Tab | Ubah setelan scanner ke suffix Tab | Tetap diproses, fokus tidak pindah | P | — | | |
 | SU-04 ★ | Fokus hilang (klik area kosong / tab lain) | Klik area abu-abu, lalu scan | Indikator kuning lalu kembali hijau; hasil scan tetap diproses | P | — | | |
@@ -451,30 +463,46 @@ Prasyarat: scanner USB mode keyboard (akhiran Enter, sebagian tes juga dengan ak
 | SU-16 | Kamera di HTTP non-localhost | http://peminjaman-barang.test → Nyalakan kamera | Pesan "Kamera tidak tersedia… HTTPS/localhost…"; scanner USB tetap jalan | N | — | | |
 | SU-17 | Izin kamera ditolak | Tolak izin | Pesan jelas; scanner/manual tetap jalan | N | — | | |
 | SU-18 | Kamera & scanner bersamaan | Kamera menyala, scan dengan scanner USB | Keduanya diproses lewat antrean yang sama | P | — | | |
-| SU-19 | Library lokal | Matikan internet → buka Scan QR → kamera | Kamera tetap bisa dinyalakan (tanpa CDN) | P | ScanTest | | |
+| SU-19 | Library lokal | Matikan internet → buka Scan Barcode → kamera | Kamera tetap bisa dinyalakan (tanpa CDN) | P | ScanTest | | |
+
+### 4.22 Pengaturan — Data Admin (DA)
+Prasyarat: login admin@peminjaman.test.
+
+| ID | Skenario | Langkah / Data uji | Hasil yang diharapkan | J | Tes otomatis | Hasil aktual | Status |
+|---|---|---|---|---|---|---|---|
+| DA-01 ★ | Tambah admin | Pengaturan → Data Admin → Tambah; password 8+ | Tersimpan; admin baru bisa login | P | AkunAdminTest | | |
+| DA-02 | Validasi | Nama kosong, email dipakai, HP "abc", password pendek/beda | Ditolak per kolom | N | AkunAdminTest | | |
+| DA-03 | Ubah tanpa password | Ubah No. HP | Password lama tetap berlaku | P | AkunAdminTest | | |
+| DA-04 | Reset password | Isi password baru | Login dengan password baru | P | AkunAdminTest | | |
+| DA-05 ★ | Nonaktifkan diri sendiri | Edit akun sendiri → nonaktif | Ditolak | N | AkunAdminTest | | |
+| DA-06 ★ | Hapus diri sendiri | (tombol tidak ada) / DELETE akun sendiri | Ditolak | N | AkunAdminTest | | |
+| DA-07 | Hapus admin yang pernah memverifikasi | Hapus admin dengan riwayat verifikasi | Ditolak, saran nonaktifkan | N | AkunAdminTest | | |
+| DA-08 | Hapus admin tanpa riwayat | Hapus petugas@ (seed baru) | Terhapus | P | AkunAdminTest | | |
+| DA-09 | Minimal satu admin aktif | Nonaktifkan admin aktif terakhir selain diri sendiri (bila hanya tersisa satu) | Ditolak | B | — | | |
+| DA-10 | URL Data Admin untuk peminjam | /admin/pengaturan/admin/{id peminjam}/edit | 404 | N | AkunAdminTest | | |
 
 ---
-
 ## 5. Matriks Ketertelusuran Kebutuhan
 
 | Kode | Kebutuhan (CLAUDE.md) | Kasus uji | Feature Test |
 |---|---|---|---|
-| R01 | Peran admin & peminjam; semua route dilindungi middleware role | AU-01–AU-12, PJ-09, LP-08, RN-07 | RoleAccessTest, RegistrationTest, *(semua tes hak akses)* |
+| R01 | Admin login (route /admin dilindungi role); peminjam tanpa login di halaman publik | AU-01–AU-13, PJ-09, LP-08, DA-10 | RoleAccessTest, *(semua tes hak akses)* |
 | R02 | CRUD kategori, lokasi, barang, unit (kode otomatis), peminjam, pengaturan | KT, LK, BR, UN, PJ, PG | KategoriLokasiTest, BarangUnitTest, PeminjamPengaturanTest |
-| R03 | Ajuan: barang + jumlah, tujuan, tanggal pinjam & rencana kembali; aturan lama/jumlah/terlambat | AJ-01–AJ-15, PG-05 | AjuanVerifikasiTest |
+| R03 | Ajuan publik: identitas + barang + jumlah, tujuan, tanggal; aturan lama/jumlah/terlambat; identitas dicocokkan via NIM | AJ-01–AJ-22, PG-05, PJ-07 | AjuanVerifikasiTest |
 | R04 | Cek ketersediaan memperhitungkan tabrakan rentang (disetujui/dipinjam), dicek ulang saat disetujui | KS-01–KS-08, AJ-11, VR-03, VR-04 | KetersediaanTest, KetersediaanServiceTest, PersetujuanAjuanTest |
-| R05 | Verifikasi: setujui / tolak dengan alasan wajib; notifikasi | VR-01–VR-10, RN-04, RN-08 | AjuanVerifikasiTest, PersetujuanAjuanTest |
-| R06 | Pembatalan sebelum diambil | BT-01–BT-04, VR-10 | AjuanVerifikasiTest, PersetujuanAjuanTest |
+| R05 | Verifikasi: setujui / tolak dengan alasan wajib; notifikasi email | VR-01–VR-10, RN-04–RN-07 | AjuanVerifikasiTest, PersetujuanAjuanTest |
+| R06 | Cek status (kode + NIM / tautan email) & pembatalan sebelum diambil | BT-01–BT-11, VR-10 | AjuanVerifikasiTest, PersetujuanAjuanTest |
 | R07 | Serah-terima: cek jenis, status tersedia, jumlah; lengkap → dipinjam | ST-01–ST-08, SS-01–SS-17 | SerahPengembalianTest, ScanTest, PencocokanScanTest |
 | R08 | Pengembalian: kondisi, tanggal kembali, boleh sebagian | PB-01–PB-10, SK-01–SK-11 | SerahPengembalianTest, ScanTest |
 | R09 | Keterlambatan otomatis & denda per unit per hari (0 = tanpa denda) | PB-02–PB-03, PB-06, PB-11–PB-16, RN-01 | SerahPengembalianTest, PerhitunganDendaTest |
 | R10 | Kedaluwarsa (scheduler) & pengingat | SC-01–SC-07 | SchedulerNotifikasiLaporanTest |
 | R11 | Riwayat, dashboard, laporan PDF/Excel + filter tanggal | RN-02, RN-09, LP-01–LP-08 | SchedulerNotifikasiLaporanTest, PerhitunganDendaTest |
-| R12 | QR per unit, cetak label massal, kartu QR peminjam | QR-01–QR-06, KQ-01–KQ-07 | QrLabelTest, ScanTest |
+| R12 | QR per unit, cetak label massal, QR kode peminjaman untuk pengambilan | QR-01–QR-06, KQ-01–KQ-05 | QrLabelTest, ScanTest |
 | R13 | Scan kamera (html5-qrcode lokal) & input manual | SS, SK, SU-16–SU-19 | ScanTest |
 | R14 | Scanner USB: auto-focus, Enter, cegah scan ganda, pesan kode tidak dikenal | SU-01–SU-15 | PencocokanScanTest (sisi server) |
 | R15 | Unit rusak/hilang tidak bisa dipinjam | UN-08–UN-09, KS-05, ST-05, SS-10, PB-05 | BarangUnitTest, KetersediaanServiceTest, ScanTest |
-| R16 | Responsif, menu aktif, pesan sukses/gagal jelas | AU-19, KT-06, SS-03 | — (manual) |
+| R16 | Navigasi admin (urutan, subjudul deskripsi), responsif, menu aktif, pesan jelas | AU-14–AU-17, KT-06, SS-03 | RoleAccessTest, AkunAdminTest |
+| R17 | Pengaturan: data admin, aturan peminjaman & ketentuan denda | DA-01–DA-10, PG-01–PG-05 | AkunAdminTest, PeminjamPengaturanTest |
 
 ---
 
@@ -496,7 +524,7 @@ php artisan schedule:work                                 # menjalankan jadwal s
 ### 6.2 Scanner USB 2D
 1. Pastikan scanner dalam mode **USB HID keyboard**, akhiran **Enter** (CR). Uji di Notepad: scan label → teks `PRJ-001` muncul lalu pindah baris.
 2. Keyboard layout Windows dan scanner sama-sama **US** (bila tidak, tanda "-" bisa berubah).
-3. Buka Scan QR; indikator harus hijau. Jalankan SU-01 s/d SU-15.
+3. Buka Scan Barcode; indikator harus hijau. Jalankan SU-01 s/d SU-15.
 4. Bila scanner mengirim prefix simbologi (mis. `]Q1`), aplikasi otomatis membuangnya (SU-10).
 
 ### 6.3 Kamera dari HP
@@ -508,26 +536,27 @@ php artisan schedule:work                                 # menjalankan jadwal s
 
 ## 7. Tes Otomatis (Feature Test)
 
-Jalankan: `php artisan test` (database terpisah `peminjaman_barang_test`). Hasil Sprint 5: **182 tes lulus (924 assertion)**.
+Jalankan: `php artisan test` (database terpisah `peminjaman_barang_test`). Hasil terakhir (peminjam tanpa login): **194 tes lulus (1014 assertion)**.
 
 | Kelas tes | Jumlah | Cakupan |
 |---|---|---|
-| Auth\* (Breeze) + ProfileTest | 25 | Login, registrasi, reset/ubah password, profil |
-| RoleAccessTest | 8 | Middleware role, akun nonaktif, redirect sesuai peran |
+| Auth\* (Breeze) + ProfileTest | 21 | Login admin, reset/ubah password, profil |
+| RoleAccessTest | 10 | Halaman publik tanpa login, panel admin terlindungi, peminjam tidak bisa login, registrasi dihapus, reset password khusus admin |
 | Admin\KategoriLokasiTest | 6 | CRUD + larangan hapus + validasi |
 | Admin\BarangUnitTest | 13 | Barang, foto, kode unit otomatis, kondisi/status unit |
-| Admin\PeminjamPengaturanTest | 10 | Data peminjam, reset password, pengaturan |
+| Admin\PeminjamPengaturanTest | 10 | Data peminjam (tanpa password), nonaktifkan, pengaturan |
+| **Admin\AkunAdminTest** (baru) | 7 | Data Admin: tambah, validasi, reset password, larangan nonaktif/hapus diri sendiri, subjudul menu |
 | Transaksi\KetersediaanTest | 9 | Rumus tabrakan rentang & status |
-| Transaksi\AjuanVerifikasiTest | 15 | Validasi ajuan, setujui/tolak, pembatalan |
+| Transaksi\AjuanVerifikasiTest | 22 | Ajuan publik + identitas (NIM/email), jebakan bot, setujui/tolak, cek status kode+NIM, tautan email, pembatalan |
 | Transaksi\SerahPengembalianTest | 19 | Serah-terima, pengembalian, denda |
-| Transaksi\SchedulerNotifikasiLaporanTest | 10 | Kedaluwarsa, pengingat, notifikasi, laporan, dashboard |
+| Transaksi\SchedulerNotifikasiLaporanTest | 10 | Kedaluwarsa, pengingat, email (tautan status & admin), laporan, dashboard, halaman publik |
 | Scan\QrLabelTest | 4 | QR SVG, label massal, kartu bertanda tangan |
 | Scan\ScanTest | 18 | Buka transaksi & pencocokan scan |
 | **KetersediaanServiceTest** (Sprint 5) | 6 | Penjumlahan tabrakan, multi-barang, unit rusak, terlambat memblokir, uji acak 200 skenario |
 | **PersetujuanAjuanTest** (Sprint 5) | 9 | Atomik, overbooking, terlambat, persetujuan ganda, admin nonaktif, alasan spasi |
 | **PencocokanScanTest** (Sprint 5) | 15 | Normalisasi kode scanner, panjang, alur multi-barang, race condition, kartu admin |
 | **PerhitunganDendaTest** (Sprint 5) | 13 | Kalender (lintas bulan/tahun/kabisat), unit hilang, perkiraan, tarif berubah, laporan |
-| ExampleTest (Feature + Unit) | 2 | Redirect beranda |
+| ExampleTest (Feature + Unit) | 2 | Halaman awal = katalog publik |
 
 ---
 
@@ -537,6 +566,7 @@ Jalankan: `php artisan test` (database terpisah `peminjaman_barang_test`). Hasil
 |---|---|---|---|---|---|---|
 | D-01 | Sprint 5 | KS-06 | Pinjaman terlambat hanya memblokir stok s/d hari ini, sehingga ajuan untuk hari-hari berikutnya bisa disetujui walau unit belum kembali | Tinggi | Selesai | Aturan diubah: terlambat memblokir semua tanggal ke depan (KetersediaanService) |
 | D-02 | Sprint 5 | SU-08 | Label "memproses…" di indikator scanner kadang tetap tampil setelah proses selesai | Rendah | Selesai | Ganti `x-show` dengan `x-text` |
+| D-03 | Pasca Sprint 5 | AU-11 | (Dicegah sejak desain) reset password terbuka untuk email peminjam sehingga peminjam bisa memperoleh akun login | Tinggi | Selesai | Reset password dibatasi role admin |
 | | | | | | | |
 
 ---
@@ -545,12 +575,12 @@ Jalankan: `php artisan test` (database terpisah `peminjaman_barang_test`). Hasil
 
 | Metrik | Nilai |
 |---|---|
-| Jumlah kasus uji manual | 217 (72 prioritas Tinggi ★) |
+| Jumlah kasus uji manual | 235 (80 prioritas Tinggi ★) |
 | Dieksekusi | ____ |
 | Lulus / Gagal / Tertunda | ____ / ____ / ____ |
 | Persentase lulus | ____ % |
-| Kasus prioritas Tinggi (★) lulus | ____ / 72 |
-| Feature Test otomatis | 182 lulus / 0 gagal |
+| Kasus prioritas Tinggi (★) lulus | ____ / 80 |
+| Feature Test otomatis | 194 lulus / 0 gagal |
 | Cacat ditemukan (Kritis/Tinggi/Sedang/Rendah) | ____ |
 | Cacat masih terbuka | ____ |
 

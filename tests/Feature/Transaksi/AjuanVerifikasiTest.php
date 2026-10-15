@@ -31,7 +31,13 @@ class AjuanVerifikasiTest extends TestCase
 
     private function ajukan(array $ubah = [])
     {
-        return $this->actingAs($this->peminjam)->post('/peminjam/ajuan', array_merge([
+        // Peminjam TIDAK login: identitas diisi di form publik
+        return $this->post('/ajuan', array_merge([
+            'name' => $this->peminjam->name,
+            'nomor_identitas' => $this->peminjam->nomor_identitas,
+            'email' => $this->peminjam->email,
+            'no_hp' => '081234567890',
+            'unit' => 'Teknik Informatika',
             'tujuan' => 'Presentasi seminar',
             'tanggal_pinjam' => '2026-10-11',
             'tanggal_rencana_kembali' => '2026-10-13',
@@ -52,9 +58,15 @@ class AjuanVerifikasiTest extends TestCase
     {
         $this->siapkanBarang();
 
-        $this->ajukan()->assertSessionHasNoErrors()->assertSessionHas('success');
+        $p = null;
+        $res = $this->ajukan()->assertSessionHasNoErrors()->assertSessionHas('success');
 
         $p = Peminjaman::firstOrFail();
+        // Langsung diarahkan ke halaman status ajuannya (tanpa login)
+        $res->assertRedirect("/status/{$p->kode_peminjaman}");
+        $this->get("/status/{$p->kode_peminjaman}")->assertOk()->assertSee($p->kode_peminjaman)->assertSee('<svg', false);
+        $this->assertSame($this->peminjam->id, $p->user_id);
+        Notification::assertSentTo($this->peminjam, \App\Notifications\AjuanTerkirim::class);
         $this->assertSame('menunggu', $p->status);
         $this->assertMatchesRegularExpression('/^PJM-20261010-\d{4}$/', $p->kode_peminjaman);
         $this->assertSame(1, $p->detail()->first()->jumlah);
@@ -132,15 +144,76 @@ class AjuanVerifikasiTest extends TestCase
         $p = $this->buatPeminjaman($this->peminjam, 'disetujui', '2026-10-01', '2026-10-05', [$this->barang->id => 1]);
         $this->serahkanUnit($p, ['PRJ-001']);
 
-        $this->ajukan()->assertSessionHasErrors('items');
+        $this->ajukan()->assertSessionHasErrors('nomor_identitas');
         $this->assertSame(1, Peminjaman::count());
     }
 
-    public function test_admin_tidak_bisa_mengajukan_lewat_halaman_peminjam(): void
+    // ---------- Identitas peminjam (tanpa login) ----------
+
+    public function test_nim_baru_membuat_data_peminjam_tanpa_akun_login(): void
     {
-        $this->actingAs($this->admin)->get('/peminjam/ajuan/create')->assertForbidden();
+        $this->siapkanBarang();
+
+        $this->ajukan(['name' => 'Rina Baru', 'nomor_identitas' => '2299001', 'email' => 'Rina@Example.com'])->assertSessionHasNoErrors();
+
+        $rina = User::where('nomor_identitas', '2299001')->firstOrFail();
+        $this->assertSame('peminjam', $rina->role);
+        $this->assertSame('rina@example.com', $rina->email);
+        $this->assertNull($rina->password);
+        $this->assertSame(1, $rina->peminjaman()->count());
     }
 
+    public function test_nim_terdaftar_dengan_email_lain_ditolak(): void
+    {
+        $this->siapkanBarang();
+
+        $this->ajukan(['email' => 'penyusup@example.com'])->assertSessionHasErrors('email');
+        $this->assertSame(0, Peminjaman::count());
+        $this->assertNotSame('penyusup@example.com', $this->peminjam->fresh()->email);
+    }
+
+    public function test_email_yang_dipakai_nim_lain_ditolak(): void
+    {
+        $this->siapkanBarang();
+
+        $this->ajukan(['nomor_identitas' => '2299002', 'email' => $this->peminjam->email])->assertSessionHasErrors('email');
+        $this->assertSame(0, Peminjaman::count());
+    }
+
+    public function test_peminjam_nonaktif_dan_nomor_milik_admin_ditolak(): void
+    {
+        $this->siapkanBarang();
+        $this->peminjam->forceFill(['status' => 'nonaktif'])->save();
+        $this->ajukan()->assertSessionHasErrors('nomor_identitas');
+
+        $this->admin->forceFill(['nomor_identitas' => 'ADM-01'])->save();
+        $this->ajukan(['nomor_identitas' => 'ADM-01', 'email' => $this->admin->email])->assertSessionHasErrors('nomor_identitas');
+        $this->assertSame(0, Peminjaman::count());
+    }
+
+    public function test_kontak_diperbarui_tapi_nama_tidak_ditimpa_dari_form(): void
+    {
+        $this->siapkanBarang();
+        $namaAsli = $this->peminjam->name;
+
+        $this->ajukan(['name' => 'Nama Lain', 'no_hp' => '089911112222', 'unit' => 'Manajemen'])->assertSessionHasNoErrors();
+
+        $this->peminjam->refresh();
+        $this->assertSame($namaAsli, $this->peminjam->name);
+        $this->assertSame('089911112222', $this->peminjam->no_hp);
+        $this->assertSame('Manajemen', $this->peminjam->unit);
+    }
+
+    public function test_validasi_identitas_dan_jebakan_bot(): void
+    {
+        $this->siapkanBarang();
+
+        $this->ajukan(['name' => '', 'nomor_identitas' => '', 'email' => 'bukan-email', 'no_hp' => 'abc'])
+            ->assertSessionHasErrors(['name', 'nomor_identitas', 'email', 'no_hp']);
+        $this->ajukan(['nomor_identitas' => '22<script>'])->assertSessionHasErrors('nomor_identitas');
+        $this->ajukan(['website' => 'http://spam.example'])->assertSessionHasErrors('website');
+        $this->assertSame(0, Peminjaman::count());
+    }
     // ---------- Verifikasi ----------
 
     public function test_admin_menyetujui_ajuan_dan_peminjam_mendapat_notifikasi(): void
@@ -207,7 +280,41 @@ class AjuanVerifikasiTest extends TestCase
         $this->assertSame('menunggu', $p->fresh()->status);
     }
 
-    // ---------- Pembatalan ----------
+    // ---------- Cek status & pembatalan (tanpa login) ----------
+
+    private function bukaStatus(Peminjaman $p, ?string $nim = null)
+    {
+        return $this->post('/status', ['kode' => strtolower($p->kode_peminjaman), 'nomor_identitas' => $nim ?? $this->peminjam->nomor_identitas]);
+    }
+
+    public function test_cek_status_dengan_kode_dan_nim(): void
+    {
+        $this->siapkanBarang();
+        $p = $this->buatPeminjaman($this->peminjam, 'ditolak', '2026-10-11', '2026-10-12', [$this->barang->id => 1],
+            ['alasan_penolakan' => 'Barang dipakai ujian praktik.']);
+
+        // Tanpa akses → diarahkan ke form cek status
+        $this->get("/status/{$p->kode_peminjaman}")->assertRedirect('/status');
+
+        // NIM salah → pesan umum (tidak membocorkan kode mana yang benar)
+        $this->bukaStatus($p, '0000000')->assertSessionHasErrors('kode');
+        $this->post('/status', ['kode' => 'PJM-19990101-0001', 'nomor_identitas' => $this->peminjam->nomor_identitas])->assertSessionHasErrors('kode');
+
+        $this->bukaStatus($p)->assertRedirect("/status/{$p->kode_peminjaman}");
+        $this->get("/status/{$p->kode_peminjaman}")->assertOk()->assertSee('Barang dipakai ujian praktik.');
+    }
+
+    public function test_tautan_bertanda_tangan_dari_email_membuka_status(): void
+    {
+        $this->siapkanBarang();
+        $p = $this->buatPeminjaman($this->peminjam, 'menunggu', '2026-10-11', '2026-10-12', [$this->barang->id => 1]);
+
+        $this->get(\App\Http\Controllers\Peminjam\StatusController::tautan($p))->assertOk()->assertSee($p->kode_peminjaman);
+
+        // Tanda tangan diubah → tidak berlaku
+        $this->flushSession();
+        $this->get("/status/{$p->kode_peminjaman}?signature=palsu")->assertRedirect('/status');
+    }
 
     public function test_peminjam_bisa_membatalkan_sebelum_barang_diambil(): void
     {
@@ -215,23 +322,28 @@ class AjuanVerifikasiTest extends TestCase
         $menunggu = $this->buatPeminjaman($this->peminjam, 'menunggu', '2026-10-11', '2026-10-12', [$this->barang->id => 1]);
         $disetujui = $this->buatPeminjaman($this->peminjam, 'disetujui', '2026-10-11', '2026-10-12', [$this->barang->id => 1]);
 
-        $this->actingAs($this->peminjam)->post("/peminjam/pinjaman/{$menunggu->id}/batal")->assertSessionHas('success');
-        $this->post("/peminjam/pinjaman/{$disetujui->id}/batal")->assertSessionHas('success');
+        $this->bukaStatus($menunggu);
+        $this->post("/status/{$menunggu->kode_peminjaman}/batal")->assertSessionHas('success');
+        $this->bukaStatus($disetujui);
+        $this->post("/status/{$disetujui->kode_peminjaman}/batal")->assertSessionHas('success');
 
         $this->assertSame('dibatalkan', $menunggu->fresh()->status);
         $this->assertSame('dibatalkan', $disetujui->fresh()->status);
     }
 
-    public function test_tidak_bisa_membatalkan_yang_sudah_dipinjam_atau_milik_orang_lain(): void
+    public function test_tidak_bisa_membatalkan_yang_sudah_dipinjam_atau_tanpa_akses(): void
     {
         $this->siapkanBarang();
         $dipinjam = $this->buatPeminjaman($this->peminjam, 'disetujui', '2026-10-10', '2026-10-12', [$this->barang->id => 1]);
         $this->serahkanUnit($dipinjam, ['PRJ-001']);
         $milikLain = $this->buatPeminjaman(User::factory()->create(), 'menunggu', '2026-10-11', '2026-10-12', [$this->barang->id => 1]);
 
-        $this->actingAs($this->peminjam)->post("/peminjam/pinjaman/{$dipinjam->id}/batal")->assertSessionHas('error');
-        $this->post("/peminjam/pinjaman/{$milikLain->id}/batal")->assertForbidden();
-        $this->get("/peminjam/pinjaman/{$milikLain->id}")->assertForbidden();
+        $this->bukaStatus($dipinjam);
+        $this->post("/status/{$dipinjam->kode_peminjaman}/batal")->assertSessionHas('error');
+
+        // Belum membuka status ajuan orang lain (tidak tahu NIM-nya) → ditolak
+        $this->post("/status/{$milikLain->kode_peminjaman}/batal")->assertForbidden();
+        $this->get("/status/{$milikLain->kode_peminjaman}")->assertRedirect('/status');
 
         $this->assertSame('dipinjam', $dipinjam->fresh()->status);
         $this->assertSame('menunggu', $milikLain->fresh()->status);

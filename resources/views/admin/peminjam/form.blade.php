@@ -40,27 +40,12 @@
                     <x-input-label for="status" value="Status Akun *" />
                     <x-select id="status" name="status" class="mt-1 block w-full" required>
                         <option value="aktif" @selected(old('status', $peminjam->status) === 'aktif')>Aktif</option>
-                        <option value="nonaktif" @selected(old('status', $peminjam->status) === 'nonaktif')>Nonaktif (tidak bisa login)</option>
+                        <option value="nonaktif" @selected(old('status', $peminjam->status) === 'nonaktif')>Nonaktif (tidak bisa mengajukan)</option>
                     </x-select>
                     <x-input-error :messages="$errors->get('status')" class="mt-2" />
                 </div>
             </div>
 
-            <fieldset class="rounded-md border border-gray-200 p-4">
-                <legend class="px-1 text-sm font-medium text-gray-700">{{ $edit ? 'Reset Password (kosongkan jika tidak diganti)' : 'Password *' }}</legend>
-                <div class="grid gap-4 sm:grid-cols-2">
-                    <div>
-                        <x-input-label for="password" value="Password" />
-                        <x-text-input id="password" type="password" name="password" class="mt-1 block w-full" autocomplete="new-password" :required="! $edit" />
-                        <x-input-error :messages="$errors->get('password')" class="mt-2" />
-                    </div>
-                    <div>
-                        <x-input-label for="password_confirmation" value="Konfirmasi Password" />
-                        <x-text-input id="password_confirmation" type="password" name="password_confirmation" class="mt-1 block w-full" autocomplete="new-password" :required="! $edit" />
-                    </div>
-                </div>
-                <p class="mt-2 text-xs text-gray-500">Minimal 8 karakter.</p>
-            </fieldset>
 
             <div class="flex items-center gap-3">
                 <x-primary-button>Simpan</x-primary-button>
