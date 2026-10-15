@@ -84,7 +84,7 @@ Responsif, menu aktif ditandai, pesan sukses/gagal jelas.
 
 ## Catatan desain (disetujui di Sprint 3)
 - Lama pinjam = tanggal rencana kembali − tanggal pinjam (tgl 1 → tgl 8 = 7 hari).
-- Ketersediaan (KetersediaanService): kapasitas = unit kondisi baik berstatus tersedia/dipinjam; terpakai = jumlah ajuan "disetujui" yang bertabrakan + unit BELUM kembali dari pinjaman "dipinjam" yang bertabrakan (batas akhir pinjaman terlambat = max(rencana, hari ini)).
+- Ketersediaan (KetersediaanService): kapasitas = unit kondisi baik berstatus tersedia/dipinjam; terpakai = jumlah ajuan "disetujui" yang bertabrakan + unit BELUM kembali dari pinjaman "dipinjam" yang bertabrakan. Diubah di Sprint 5 (disetujui): pinjaman yang sudah terlambat memblokir SEMUA tanggal ke depan sampai unitnya kembali.
 - Batas ambil = min(tanggal pinjam + batas_ambil_hari, rencana kembali); lewat itu → kedaluwarsa (peminjaman:kedaluwarsa 00:05). Pengingat H-1: peminjaman:pengingat 07:00, tidak dobel. Keduanya punya opsi --tanggal untuk uji manual.
 - Serah-terima Sprint 3 lewat form pilih/ketik kode unit; Sprint 4 (scan QR) memanggil PeminjamanService::cekUnitUntukSerah() dan serahkan() yang sama.
 - Denda disimpan per unit saat pengembalian dicatat (tarif saat itu); perubahan tarif tidak mengubah denda lama.
@@ -95,3 +95,9 @@ Responsif, menu aktif ditandai, pesan sukses/gagal jelas.
 - Halaman /admin/scan: mode serah|kembali. Langkah 1 ScanService::cari() (PJM-…, kartu, atau kode unit untuk pengembalian); langkah 2 ScanService::cekUnit() per scan (JSON, daftar unit disimpan di browser); langkah 3 form ke endpoint serahkan/pengembalian.store yang sama dengan form (dari_scan=1 → kembali ke halaman scan).
 - html5-qrcode 2.3.8 disimpan di public/vendor/html5-qrcode (bukan CDN). Kamera butuh HTTPS atau localhost.
 - Debounce kamera: kode sama diabaikan 2,5 detik.
+
+## Catatan desain (Sprint 5)
+- Logika halaman scan ada di resources/js/scan-qr.js, didaftarkan via Alpine.data('halamanScan') di app.js (harus sebelum Alpine.start()).
+- Scanner USB: penangkap keydown global (ketikan < 50 ms/karakter + Enter/Tab = scan) walau fokus di luar input; antrean berurutan; debounce 2,5 detik untuk kamera & scanner (ketik manual tidak); indikator "Scanner siap".
+- Normalisasi kode (browser & ScanService::normalisasi): buang karakter kontrol, prefix AIM "]Xn", spasi; huruf besar; maks 100 karakter.
+- Dokumen pengujian: docs/STLC.md.

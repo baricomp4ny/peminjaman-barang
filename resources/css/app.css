@@ -1,3 +1,13 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Kotak pesan scan gagal berkedip merah sebentar supaya terlihat petugas */
+@keyframes kedip-gagal {
+    0%, 100% { background-color: rgb(254 242 242); }
+    25%, 75% { background-color: rgb(254 202 202); }
+}
+
+.kedip-gagal {
+    animation: kedip-gagal 0.6s ease-in-out 2;
+}

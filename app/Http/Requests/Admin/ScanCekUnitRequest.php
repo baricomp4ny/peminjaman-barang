@@ -17,7 +17,8 @@ class ScanCekUnitRequest extends FormRequest
     {
         return [
             'peminjaman_id' => ['required', 'integer', 'exists:peminjaman,id'],
-            'kode' => ['required', 'string', 'max:100'],
+            // Batas longgar: karakter sisa scanner dibuang dulu, panjang akhir dicek di ScanService
+            'kode' => ['required', 'string', 'max:500'],
             'mode' => ['required', Rule::in([ScanService::MODE_SERAH, ScanService::MODE_KEMBALI])],
             'sudah' => ['nullable', 'array', 'max:100'],
             'sudah.*' => ['integer'],

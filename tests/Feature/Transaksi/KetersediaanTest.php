@@ -82,8 +82,8 @@ class KetersediaanTest extends TestCase
         $this->assertSame(1, $this->svc->sisa($b->id, '2026-10-10', '2026-10-10'));
         $this->assertSame(1, $this->svc->sisa($b->id, '2026-10-09', '2026-10-09'), 'Hari ini sudah lewat rencana, unit tetap belum ada');
 
-        // Rentang di masa depan (setelah hari ini) tidak terhalang oleh pinjaman yang rencananya sudah lewat
-        $this->assertSame(2, $this->svc->sisa($b->id, '2026-10-20', '2026-10-21'));
+        // Sprint 5: pinjaman terlambat memblokir SEMUA tanggal ke depan sampai unitnya kembali
+        $this->assertSame(1, $this->svc->sisa($b->id, '2026-10-20', '2026-10-21'));
     }
 
     public function test_pengembalian_sebagian_langsung_membebaskan_unit(): void

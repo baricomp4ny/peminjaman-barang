@@ -20,6 +20,8 @@ class ScanService
     public const MODE_SERAH = 'serah';
     public const MODE_KEMBALI = 'kembali';
 
+    public const MAKS_PANJANG_KODE = 100;
+
     public function __construct(
         private QrService $qr,
         private PeminjamanService $peminjaman,
@@ -34,7 +36,26 @@ class ScanService
 
     public function normalisasi(string $kode): string
     {
+        // Scanner USB kadang ikut mengirim CR/LF/Tab, karakter kontrol, atau prefix simbologi AIM (mis. "]Q1")
+        $kode = preg_replace('/[\x00-\x1F\x7F]/u', '', $kode) ?? '';
+        $kode = preg_replace('/^\][A-Za-z]\d/', '', trim($kode)) ?? '';
+
         return strtoupper(trim($kode));
+    }
+
+    /** Normalisasi + tolak kode kosong / terlalu panjang dengan pesan yang jelas. */
+    private function kodeBersih(string $kode): string
+    {
+        $kode = $this->normalisasi($kode);
+
+        if ($kode === '') {
+            throw new PeminjamanException('Kode kosong. Scan QR atau ketik kodenya.');
+        }
+        if (mb_strlen($kode) > self::MAKS_PANJANG_KODE) {
+            throw new PeminjamanException('Kode terlalu panjang ('.mb_strlen($kode).' karakter). Pastikan yang di-scan adalah QR dari aplikasi ini.');
+        }
+
+        return $kode;
     }
 
     /**
@@ -44,7 +65,7 @@ class ScanService
      */
     public function cari(string $kode, string $mode): Collection
     {
-        $kode = $this->normalisasi($kode);
+        $kode = $this->kodeBersih($kode);
         $status = $this->statusUntuk($mode);
 
         // 1) Kode peminjaman
@@ -112,7 +133,7 @@ class ScanService
      */
     public function cekUnit(Peminjaman $p, string $kode, string $mode, array $sudah = []): UnitBarang
     {
-        $kode = $this->normalisasi($kode);
+        $kode = $this->kodeBersih($kode);
         $p->loadMissing('detail.barang');
 
         if ($p->status !== $this->statusUntuk($mode)) {

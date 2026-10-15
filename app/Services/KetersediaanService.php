@@ -16,7 +16,8 @@ use Illuminate\Support\Carbon;
  *  - kapasitas: unit kondisi baik yang statusnya tersedia/dipinjam
  *    (unit perbaikan/hilang tidak bisa dipinjam)
  *  - terpakai : ajuan "disetujui" yang rentangnya bertabrakan (pakai jumlah ajuan)
- *             + pinjaman "dipinjam" yang bertabrakan (pakai unit yang BELUM kembali)
+ *             + pinjaman "dipinjam" yang bertabrakan (pakai unit yang BELUM kembali);
+ *               pinjaman yang sudah terlambat dianggap bertabrakan dengan semua tanggal ke depan
  *
  * Tabrakan rentang: mulai_A <= selesai_B DAN selesai_A >= mulai_B.
  * Ajuan "menunggu" sengaja tidak dihitung (belum mengikat stok).
@@ -58,8 +59,8 @@ class KetersediaanService
             ->pluck('total', 'barang_id');
 
         // Pinjaman berjalan: hitung unit fisik yang belum kembali.
-        // Pinjaman terlambat tetap memblokir sampai unitnya kembali,
-        // jadi batas akhirnya = max(rencana kembali, hari ini).
+        // Pinjaman TERLAMBAT (rencana kembali < hari ini) memblokir semua tanggal ke depan
+        // sampai unitnya benar-benar kembali, karena kapan kembalinya tidak bisa dipastikan.
         $hariIni = today()->toDateString();
         $dipinjam = PeminjamanUnit::query()
             ->join('peminjaman', 'peminjaman.id', '=', 'peminjaman_unit.peminjaman_id')
@@ -69,7 +70,8 @@ class KetersediaanService
             ->whereNull('peminjaman_unit.dikembalikan_pada')
             ->when($kecualiPeminjamanId, fn ($q) => $q->where('peminjaman.id', '!=', $kecualiPeminjamanId))
             ->whereDate('peminjaman.tanggal_pinjam', '<=', $selesai)
-            ->when($hariIni < $mulai, fn ($q) => $q->whereDate('peminjaman.tanggal_rencana_kembali', '>=', $mulai))
+            ->where(fn ($q) => $q->whereDate('peminjaman.tanggal_rencana_kembali', '>=', $mulai)
+                ->orWhereDate('peminjaman.tanggal_rencana_kembali', '<', $hariIni))
             ->selectRaw('unit_barang.barang_id, COUNT(*) as total')
             ->groupBy('unit_barang.barang_id')
             ->pluck('total', 'barang_id');

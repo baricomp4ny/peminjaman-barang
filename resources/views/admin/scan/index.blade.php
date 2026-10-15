@@ -9,7 +9,7 @@
             'urlSerah' => route('admin.peminjaman.serahkan', '__ID__'),
             'urlKembali' => route('admin.pengembalian.store', '__ID__'),
             'hariIni' => now()->toDateString(),
-        ]))" x-init="mulai()" @beforeunload.window="matikanKamera()">
+        ]))" @beforeunload.window="matikanKamera()">
 
         {{-- Pilihan mode --}}
         <div class="mb-4 flex flex-wrap items-center gap-2">
@@ -30,28 +30,47 @@
                                 x-text="kameraAktif ? 'Matikan kamera' : 'Nyalakan kamera'" @click="kameraAktif ? matikanKamera() : nyalakanKamera()"></button>
                     </div>
                     <div id="pembaca-qr" class="overflow-hidden rounded-md bg-gray-900" x-show="kameraAktif"></div>
-                    <p class="text-sm text-gray-500" x-show="!kameraAktif && !pesanKamera">Kamera mati. Nyalakan untuk scan dengan kamera, atau pakai input manual di bawah.</p>
+                    <p class="text-sm text-gray-500" x-show="!kameraAktif && !pesanKamera">Kamera mati. Nyalakan untuk scan dengan kamera, atau pakai scanner USB / input manual di bawah.</p>
                     <p class="rounded-md bg-amber-50 p-3 text-sm text-amber-800" x-show="pesanKamera" x-text="pesanKamera"></p>
                 </div>
 
                 <div class="rounded-lg bg-white p-4 shadow">
+                    {{-- Indikator: hijau bila hasil scanner USB akan langsung terbaca --}}
+                    <button type="button" @click="paksaFokus()"
+                            :class="scannerSiap ? 'bg-green-50 text-green-800 ring-green-300' : 'bg-amber-50 text-amber-800 ring-amber-300 animate-pulse'"
+                            class="mb-3 flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm font-medium ring-1">
+                        <span class="h-2.5 w-2.5 rounded-full" :class="scannerSiap ? 'bg-green-500' : 'bg-amber-500'"></span>
+                        <span x-text="scannerSiap ? 'Scanner siap — arahkan scanner USB ke QR' : 'Klik di sini untuk mengaktifkan scanner'"></span>
+                        {{-- x-text (bukan x-show): status sibuk bisa berganti sangat cepat --}}
+                        <span class="ms-auto text-xs" x-text="sibuk ? 'memproses' + (antrean.length ? ' (+' + antrean.length + ' antre)' : '') + '…' : ''"></span>
+                    </button>
+
                     <form @submit.prevent="kirimManual()">
-                        <x-input-label for="kode_manual" value="Input kode manual" />
+                        <x-input-label for="kode_manual" value="Scanner USB / input kode manual" />
                         <div class="mt-1 flex gap-2">
                             <x-text-input id="kode_manual" x-ref="manual" x-model="manual" class="block w-full font-mono uppercase"
-                                          autocomplete="off" placeholder="PJM-… / PRJ-001" />
-                            <x-primary-button x-bind:disabled="sibuk">Proses</x-primary-button>
+                                          autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"
+                                          maxlength="150" placeholder="PJM-… / PRJ-001" />
+                            <x-primary-button>Proses</x-primary-button>
                         </div>
-                        <p class="mt-1 text-xs text-gray-500">Ketik kode lalu tekan Enter. Bisa kode peminjaman, kartu peminjam, atau kode unit.</p>
+                        <p class="mt-1 text-xs text-gray-500">
+                            Scanner USB mengetik kode lalu menekan Enter/Tab secara otomatis. Bisa juga diketik manual lalu Enter.
+                            Kode yang sama dalam 2,5 detik dianggap scan ganda dan diabaikan.
+                        </p>
                     </form>
                 </div>
 
-                {{-- Umpan balik scan terakhir --}}
-                <div x-show="pesan.teks" x-transition
-                     :class="{ 'border-green-300 bg-green-50 text-green-800': pesan.jenis === 'ok', 'border-red-300 bg-red-50 text-red-800': pesan.jenis === 'gagal', 'border-blue-200 bg-blue-50 text-blue-800': pesan.jenis === 'info' }"
-                     class="rounded-lg border p-4 text-sm font-medium" role="status" aria-live="polite">
-                    <span x-text="pesan.teks"></span>
-                </div>
+                {{-- Umpan balik scan terakhir; :key berganti tiap pesan supaya animasi kedip diputar ulang --}}
+                <template x-for="p in [pesan]" :key="pesan.n">
+                    <div x-show="p.teks"
+                         :class="{ 'border-green-300 bg-green-50 text-green-800': p.jenis === 'ok', 'border-red-400 bg-red-50 text-red-800 kedip-gagal': p.jenis === 'gagal', 'border-blue-200 bg-blue-50 text-blue-800': p.jenis === 'info' }"
+                         class="rounded-lg border-2 p-4 text-sm font-medium" role="status" aria-live="assertive">
+                        <span x-text="p.teks"></span>
+                        <span x-show="p.jenis === 'gagal' && p.teks.includes('tidak dikenal')" class="mt-1 block text-xs font-normal">
+                            Pastikan label QR tidak rusak/kotor dan unit sudah terdaftar di Data Barang.
+                        </span>
+                    </div>
+                </template>
             </div>
 
             {{-- Kanan: transaksi --}}
@@ -181,154 +200,4 @@
 
     {{-- Library scan kamera disimpan lokal (bukan CDN) --}}
     <script src="{{ asset('vendor/html5-qrcode/html5-qrcode.min.js') }}"></script>
-    <script>
-        function halamanScan(cfg) {
-            return {
-                cfg,
-                mode: cfg.mode,
-                transaksi: null,
-                pilihan: [],
-                dipindai: [],
-                manual: '',
-                pesan: { jenis: '', teks: '' },
-                sibuk: false,
-                terakhir: { kode: '', waktu: 0 },
-                kamera: null,
-                kameraAktif: false,
-                pesanKamera: '',
-
-                mulai() {
-                    if (cfg.awal) this.proses(cfg.awal);
-                    this.$nextTick(() => this.$refs.manual?.focus());
-                },
-
-                // ---------- Masukan kode (kamera & manual memakai fungsi yang sama) ----------
-                kirimManual() {
-                    const kode = this.manual.trim();
-                    this.manual = '';
-                    if (!kode) { this.tampil('gagal', 'Kode kosong. Scan QR atau ketik kodenya.'); return; }
-                    this.proses(kode, true);
-                },
-
-                async proses(kode, dariManual = false) {
-                    kode = kode.trim();
-                    const now = Date.now();
-                    // Cegah scan ganda: kamera bisa membaca QR yang sama berkali-kali per detik
-                    if (!dariManual && kode === this.terakhir.kode && now - this.terakhir.waktu < 2500) return;
-                    if (this.sibuk) return;
-                    this.terakhir = { kode, waktu: now };
-                    this.sibuk = true;
-                    try {
-                        if (!this.transaksi) await this.cari(kode);
-                        else await this.cekUnit(kode);
-                    } finally {
-                        this.sibuk = false;
-                        this.$refs.manual?.focus();
-                    }
-                },
-
-                async kirim(url, data) {
-                    const res = await fetch(url, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content },
-                        body: JSON.stringify(data),
-                    });
-                    let json = {};
-                    try { json = await res.json(); } catch (e) { /* respons bukan JSON */ }
-                    if (!res.ok) {
-                        const pesan = json.pesan || (json.errors ? Object.values(json.errors)[0][0] : null) || 'Terjadi kesalahan (' + res.status + ').';
-                        throw new Error(pesan);
-                    }
-                    return json;
-                },
-
-                async cari(kode) {
-                    try {
-                        const json = await this.kirim(cfg.urlCari, { kode, mode: this.mode });
-                        if (json.transaksi.length === 1) this.buka(json.transaksi[0], kode);
-                        else { this.pilihan = json.transaksi; this.tampil('info', 'Peminjam memiliki ' + json.transaksi.length + ' transaksi. Pilih salah satu.'); this.bunyi(true); }
-                    } catch (e) { this.tampil('gagal', e.message); this.bunyi(false); }
-                },
-
-                buka(t, kodeAwal = null) {
-                    this.transaksi = t;
-                    this.pilihan = [];
-                    this.dipindai = [];
-                    this.tampil('ok', 'Transaksi ' + t.kode + ' (' + t.peminjam + ') dibuka. Scan unitnya.');
-                    this.bunyi(true);
-                    // Mode pengembalian dibuka dari scan unit: unit itu langsung dimasukkan
-                    if (this.mode === 'kembali' && kodeAwal && t.belum_kembali.some(u => u.kode_unit === kodeAwal.toUpperCase())) {
-                        this.cekUnit(kodeAwal);
-                    }
-                },
-
-                async cekUnit(kode) {
-                    try {
-                        const json = await this.kirim(cfg.urlCek, {
-                            peminjaman_id: this.transaksi.id, kode, mode: this.mode, sudah: this.dipindai.map(u => u.unit_id),
-                        });
-                        this.dipindai.push({ ...json.unit, kondisi: 'baik', catatan: '' });
-                        let teks = '✔ ' + json.unit.kode_unit + ' (' + json.unit.nama + ') diterima.';
-                        if (this.mode === 'serah' && this.lengkap()) teks += ' Semua lengkap — klik "Selesaikan serah-terima".';
-                        this.tampil('ok', teks);
-                        this.bunyi(true);
-                    } catch (e) { this.tampil('gagal', '✖ ' + e.message); this.bunyi(false); }
-                },
-
-                // ---------- Status daftar ----------
-                jumlahTerscan(barangId) { return this.dipindai.filter(u => u.barang_id === barangId).length; },
-                sudahDipindai(unitId) { return this.dipindai.some(u => u.unit_id === unitId); },
-                lengkap() { return !!this.transaksi && this.transaksi.detail.every(d => this.jumlahTerscan(d.barang_id) === d.jumlah); },
-                bisaSimpan() {
-                    if (!this.transaksi || this.sibuk) return false;
-                    return this.mode === 'serah' ? this.lengkap() && !this.transaksi.peringatan : this.dipindai.length > 0;
-                },
-                urlSimpan() {
-                    if (!this.transaksi) return '#';
-                    return (this.mode === 'serah' ? cfg.urlSerah : cfg.urlKembali).replace('__ID__', this.transaksi.id);
-                },
-                hapus(i) { const u = this.dipindai.splice(i, 1)[0]; this.tampil('info', u.kode_unit + ' dihapus dari daftar.'); },
-                reset() { this.transaksi = null; this.pilihan = []; this.dipindai = []; this.tampil('', ''); this.$refs.manual?.focus(); },
-                tampil(jenis, teks) { this.pesan = { jenis, teks }; },
-
-                // ---------- Kamera ----------
-                async nyalakanKamera() {
-                    this.pesanKamera = '';
-                    // Browser hanya mengizinkan kamera di HTTPS atau localhost
-                    if (!window.isSecureContext || !navigator.mediaDevices) {
-                        this.pesanKamera = 'Kamera tidak tersedia karena halaman tidak dibuka lewat HTTPS/localhost. Aktifkan SSL di Laragon lalu buka https://…, atau gunakan input manual.';
-                        return;
-                    }
-                    if (typeof Html5Qrcode === 'undefined') { this.pesanKamera = 'Library scan QR gagal dimuat.'; return; }
-                    this.kameraAktif = true;
-                    await this.$nextTick();
-                    try {
-                        this.kamera = this.kamera || new Html5Qrcode('pembaca-qr');
-                        await this.kamera.start({ facingMode: 'environment' }, { fps: 10, qrbox: { width: 240, height: 240 } },
-                            (teks) => this.proses(teks), () => {});
-                    } catch (e) {
-                        this.kameraAktif = false;
-                        this.pesanKamera = 'Kamera tidak bisa dibuka: ' + (e?.message || e) + '. Pastikan izin kamera diberikan, atau gunakan input manual.';
-                    }
-                },
-                async matikanKamera() {
-                    if (this.kamera && this.kameraAktif) { try { await this.kamera.stop(); } catch (e) {} }
-                    this.kameraAktif = false;
-                },
-
-                // Bunyi singkat: nada tinggi = berhasil, nada rendah = gagal
-                bunyi(berhasil) {
-                    try {
-                        const ctx = this._audio || (this._audio = new (window.AudioContext || window.webkitAudioContext)());
-                        const osc = ctx.createOscillator(); const gain = ctx.createGain();
-                        osc.frequency.value = berhasil ? 880 : 220; gain.gain.value = 0.1;
-                        osc.connect(gain); gain.connect(ctx.destination);
-                        osc.start(); osc.stop(ctx.currentTime + (berhasil ? 0.12 : 0.35));
-                    } catch (e) { /* audio tidak didukung */ }
-                    // Getar hanya diizinkan browser setelah pengguna pernah menyentuh/klik halaman
-                    if (navigator.vibrate && navigator.userActivation?.hasBeenActive) navigator.vibrate(berhasil ? 60 : [80, 60, 80]);
-                },
-            };
-        }
-    </script>
 </x-app-layout>
