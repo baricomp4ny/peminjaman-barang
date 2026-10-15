@@ -2,6 +2,11 @@
 
 namespace App\Services;
 
+use App\Enums\KondisiUnit;
+use App\Enums\Peran;
+use App\Enums\StatusAkun;
+use App\Enums\StatusPeminjaman;
+use App\Enums\StatusUnit;
 use App\Exceptions\PeminjamanException;
 use App\Models\Barang;
 use App\Models\Peminjaman;
@@ -32,8 +37,7 @@ class PeminjamanService
         private KetersediaanService $ketersediaan,
         private DendaService $denda,
         private KodePeminjamanService $kode,
-    ) {
-    }
+    ) {}
 
     // ------------------------------------------------------------------
     // 1. Ajuan oleh peminjam
@@ -56,7 +60,7 @@ class PeminjamanService
                 'tujuan' => $data['tujuan'],
                 'tanggal_pinjam' => $data['tanggal_pinjam'],
                 'tanggal_rencana_kembali' => $data['tanggal_rencana_kembali'],
-                'status' => Peminjaman::STATUS_MENUNGGU,
+                'status' => StatusPeminjaman::Menunggu,
             ]);
 
             foreach ($data['items'] as $item) {
@@ -70,7 +74,7 @@ class PeminjamanService
         });
 
         Notification::send(
-            User::where('role', User::ROLE_ADMIN)->where('status', User::STATUS_AKTIF)->get(),
+            User::where('role', Peran::Admin)->where('status', StatusAkun::Aktif)->get(),
             new AjuanBaru($peminjaman)
         );
         // Peminjam tidak login → bukti ajuan & kode dikirim ke email
@@ -91,7 +95,7 @@ class PeminjamanService
     public function setujui(Peminjaman $peminjaman, User $admin): Peminjaman
     {
         DB::transaction(function () use ($peminjaman, $admin) {
-            $p = $this->kunci($peminjaman, [Peminjaman::STATUS_MENUNGGU]);
+            $p = $this->kunci($peminjaman, [StatusPeminjaman::Menunggu]);
             $permintaan = $p->detail->pluck('jumlah', 'barang_id')->all();
 
             // Kunci baris barang: dua admin yang menyetujui barang sama harus antre
@@ -106,7 +110,7 @@ class PeminjamanService
             }
 
             $p->update([
-                'status' => Peminjaman::STATUS_DISETUJUI,
+                'status' => StatusPeminjaman::Disetujui,
                 'diverifikasi_oleh' => $admin->id,
                 'diverifikasi_pada' => now(),
                 'alasan_penolakan' => null,
@@ -126,8 +130,8 @@ class PeminjamanService
         }
 
         DB::transaction(function () use ($peminjaman, $admin, $alasan) {
-            $this->kunci($peminjaman, [Peminjaman::STATUS_MENUNGGU])->update([
-                'status' => Peminjaman::STATUS_DITOLAK,
+            $this->kunci($peminjaman, [StatusPeminjaman::Menunggu])->update([
+                'status' => StatusPeminjaman::Ditolak,
                 'alasan_penolakan' => trim($alasan),
                 'diverifikasi_oleh' => $admin->id,
                 'diverifikasi_pada' => now(),
@@ -151,8 +155,8 @@ class PeminjamanService
         }
 
         DB::transaction(function () use ($peminjaman) {
-            $this->kunci($peminjaman, [Peminjaman::STATUS_MENUNGGU, Peminjaman::STATUS_DISETUJUI])
-                ->update(['status' => Peminjaman::STATUS_DIBATALKAN]);
+            $this->kunci($peminjaman, [StatusPeminjaman::Menunggu, StatusPeminjaman::Disetujui])
+                ->update(['status' => StatusPeminjaman::Dibatalkan]);
         });
 
         return $peminjaman->refresh();
@@ -166,7 +170,7 @@ class PeminjamanService
      * Cek satu unit untuk diserahkan pada peminjaman ini.
      * Dipakai juga oleh scan QR (Sprint 4) untuk memvalidasi tiap scan.
      *
-     * @param  array<int>  $unitSudahDipilih  id unit yang sudah dipilih/discan sebelumnya
+     * @param  array<string>  $unitSudahDipilih  id unit yang sudah dipilih/discan sebelumnya
      */
     public function cekUnitUntukSerah(Peminjaman $peminjaman, UnitBarang $unit, array $unitSudahDipilih = []): void
     {
@@ -180,7 +184,7 @@ class PeminjamanService
         }
 
         if (! $unit->bisaDipinjam()) {
-            throw new PeminjamanException("Unit {$unit->kode_unit} tidak bisa dipinjam (kondisi {$unit->kondisi}, status {$unit->status}).");
+            throw new PeminjamanException("Unit {$unit->kode_unit} tidak bisa dipinjam (kondisi {$unit->kondisi->value}, status {$unit->status->value}).");
         }
 
         $sudahJenisIni = UnitBarang::whereIn('id', $unitSudahDipilih)->where('barang_id', $unit->barang_id)->count();
@@ -206,7 +210,7 @@ class PeminjamanService
     /** Tanggal terakhir barang boleh diambil: min(tanggal pinjam + batas ambil, rencana kembali). */
     public function batasAmbil(Peminjaman $peminjaman): Carbon
     {
-        $batas = Carbon::parse($peminjaman->tanggal_pinjam)->addDays((int) Pengaturan::nilai(Pengaturan::BATAS_AMBIL_HARI));
+        $batas = Carbon::parse($peminjaman->tanggal_pinjam)->addDays(Pengaturan::angka(Pengaturan::BATAS_AMBIL_HARI));
 
         return $batas->min(Carbon::parse($peminjaman->tanggal_rencana_kembali));
     }
@@ -219,7 +223,7 @@ class PeminjamanService
     public function serahkan(Peminjaman $peminjaman, User $admin, array $kodeUnit): Peminjaman
     {
         DB::transaction(function () use ($peminjaman, $kodeUnit) {
-            $p = $this->kunci($peminjaman, [Peminjaman::STATUS_DISETUJUI]);
+            $p = $this->kunci($peminjaman, [StatusPeminjaman::Disetujui]);
             $this->cekJendelaSerah($p);
 
             $kodeUnit = array_values(array_unique(array_map(fn ($k) => strtoupper(trim($k)), $kodeUnit)));
@@ -251,12 +255,11 @@ class PeminjamanService
                 PeminjamanUnit::create([
                     'peminjaman_id' => $p->id,
                     'unit_barang_id' => $u->id,
-                    'diserahkan_pada' => $waktu,
                 ]);
-                $u->update(['status' => UnitBarang::STATUS_DIPINJAM]);
+                $u->update(['status' => StatusUnit::Dipinjam]);
             }
 
-            $p->update(['status' => Peminjaman::STATUS_DIPINJAM, 'diserahkan_pada' => $waktu]);
+            $p->update(['status' => StatusPeminjaman::Dipinjam, 'diserahkan_pada' => $waktu]);
         });
 
         return $peminjaman->refresh();
@@ -268,7 +271,7 @@ class PeminjamanService
 
     /**
      * @param  array<int, array{kondisi:string, catatan?:?string}>  $unit  unit_barang_id => data
-     * @return Collection<int, PeminjamanUnit>  baris yang baru dikembalikan
+     * @return Collection<int, PeminjamanUnit> baris yang baru dikembalikan
      */
     public function kembalikan(Peminjaman $peminjaman, User $admin, array $unit, ?CarbonInterface $waktuKembali = null): Collection
     {
@@ -283,7 +286,7 @@ class PeminjamanService
         }
 
         $dikembalikan = DB::transaction(function () use ($peminjaman, $unit, $waktuKembali) {
-            $p = $this->kunci($peminjaman, [Peminjaman::STATUS_DIPINJAM]);
+            $p = $this->kunci($peminjaman, [StatusPeminjaman::Dipinjam]);
 
             if ($waktuKembali->copy()->startOfDay()->lt(Carbon::parse($p->diserahkan_pada)->startOfDay())) {
                 throw new PeminjamanException('Tanggal kembali tidak boleh sebelum tanggal serah-terima.');
@@ -321,7 +324,7 @@ class PeminjamanService
                 // Kondisi saat kembali menentukan status unit berikutnya
                 $row->unitBarang->update([
                     'kondisi' => $data['kondisi'],
-                    'status' => UnitBarang::statusDariKondisi($data['kondisi']),
+                    'status' => KondisiUnit::from($data['kondisi'])->statusUnit(),
                 ]);
 
                 $hasil->push($row);
@@ -329,7 +332,7 @@ class PeminjamanService
 
             // Semua unit sudah kembali → transaksi selesai
             if (! PeminjamanUnit::where('peminjaman_id', $p->id)->whereNull('dikembalikan_pada')->exists()) {
-                $p->update(['status' => Peminjaman::STATUS_SELESAI]);
+                $p->update(['status' => StatusPeminjaman::Selesai]);
             }
 
             return $hasil;
@@ -352,17 +355,17 @@ class PeminjamanService
         $jumlah = 0;
 
         Peminjaman::with(['peminjam', 'detail'])
-            ->where('status', Peminjaman::STATUS_DISETUJUI)
+            ->where('status', StatusPeminjaman::Disetujui)
             ->orderBy('id')
             ->get()
             ->filter(fn (Peminjaman $p) => $hariIni->gt($this->batasAmbil($p)))
             ->each(function (Peminjaman $p) use (&$jumlah) {
                 $berubah = DB::transaction(function () use ($p) {
                     $kunci = Peminjaman::whereKey($p->id)->lockForUpdate()->first();
-                    if ($kunci->status !== Peminjaman::STATUS_DISETUJUI) {
+                    if ($kunci->status !== StatusPeminjaman::Disetujui) {
                         return false; // sudah diambil/dibatalkan di sela proses
                     }
-                    $kunci->update(['status' => Peminjaman::STATUS_KEDALUWARSA]);
+                    $kunci->update(['status' => StatusPeminjaman::Kedaluwarsa]);
 
                     return true;
                 });
@@ -383,7 +386,7 @@ class PeminjamanService
         $jumlah = 0;
 
         Peminjaman::with('peminjam')
-            ->where('status', Peminjaman::STATUS_DIPINJAM)
+            ->where('status', StatusPeminjaman::Dipinjam)
             ->whereDate('tanggal_rencana_kembali', $besok)
             ->whereHas('peminjamanUnit', fn ($q) => $q->whereNull('dikembalikan_pada'))
             ->get()
@@ -411,7 +414,7 @@ class PeminjamanService
         $p = Peminjaman::with(['detail.barang'])->whereKey($peminjaman->id)->lockForUpdate()->firstOrFail();
 
         if (! in_array($p->status, $statusBoleh, true)) {
-            throw new PeminjamanException("Aksi tidak bisa dilakukan: status ajuan sekarang \"{$p->status}\".");
+            throw new PeminjamanException("Aksi tidak bisa dilakukan: status ajuan sekarang \"{$p->status->value}\".");
         }
 
         return $p;

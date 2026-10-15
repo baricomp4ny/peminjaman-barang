@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\KondisiUnit;
+use App\Enums\StatusPeminjaman;
+use App\Enums\StatusUnit;
 use App\Exceptions\PeminjamanException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\SerahTerimaRequest;
@@ -23,8 +26,8 @@ class PeminjamanController extends Controller
 
         $query = Peminjaman::with(['peminjam', 'detail.barang', 'peminjamanUnit']);
         match ($tab) {
-            'disetujui' => $query->where('status', Peminjaman::STATUS_DISETUJUI)->orderBy('tanggal_pinjam'),
-            'dipinjam' => $query->where('status', Peminjaman::STATUS_DIPINJAM)->orderBy('tanggal_rencana_kembali'),
+            'disetujui' => $query->where('status', StatusPeminjaman::Disetujui)->orderBy('tanggal_pinjam'),
+            'dipinjam' => $query->where('status', StatusPeminjaman::Dipinjam)->orderBy('tanggal_rencana_kembali'),
             'terlambat' => $query->terlambat()->orderBy('tanggal_rencana_kembali'),
         };
 
@@ -32,8 +35,8 @@ class PeminjamanController extends Controller
             'tab' => $tab,
             'peminjaman' => $query->paginate(15)->withQueryString(),
             'jumlah' => [
-                'disetujui' => Peminjaman::where('status', Peminjaman::STATUS_DISETUJUI)->count(),
-                'dipinjam' => Peminjaman::where('status', Peminjaman::STATUS_DIPINJAM)->count(),
+                'disetujui' => Peminjaman::where('status', StatusPeminjaman::Disetujui)->count(),
+                'dipinjam' => Peminjaman::where('status', StatusPeminjaman::Dipinjam)->count(),
                 'terlambat' => Peminjaman::terlambat()->count(),
             ],
             'service' => $service,
@@ -46,7 +49,7 @@ class PeminjamanController extends Controller
         $peminjaman->load(['peminjam', 'verifikator', 'detail.barang', 'peminjamanUnit.unitBarang.barang']);
 
         // Untuk ajuan menunggu: tampilkan sisa unit per barang pada rentang tanggalnya
-        $stok = $peminjaman->status === Peminjaman::STATUS_MENUNGGU
+        $stok = $peminjaman->status === StatusPeminjaman::Menunggu
             ? $ketersediaan->hitung($peminjaman->detail->pluck('barang_id')->all(), $peminjaman->tanggal_pinjam, $peminjaman->tanggal_rencana_kembali)
             : [];
 
@@ -61,7 +64,7 @@ class PeminjamanController extends Controller
 
     public function serahForm(Peminjaman $peminjaman, PeminjamanService $service): View|RedirectResponse
     {
-        if ($peminjaman->status !== Peminjaman::STATUS_DISETUJUI) {
+        if ($peminjaman->status !== StatusPeminjaman::Disetujui) {
             return redirect()->route('admin.peminjaman.show', $peminjaman)
                 ->with('error', 'Serah-terima hanya untuk ajuan berstatus disetujui.');
         }
@@ -71,8 +74,8 @@ class PeminjamanController extends Controller
         // Unit yang bisa dipilih: jenis sesuai ajuan, kondisi baik, status tersedia
         $unit = UnitBarang::with(['barang', 'lokasi'])
             ->whereIn('barang_id', $peminjaman->detail->pluck('barang_id'))
-            ->where('kondisi', UnitBarang::KONDISI_BAIK)
-            ->where('status', UnitBarang::STATUS_TERSEDIA)
+            ->where('kondisi', KondisiUnit::Baik)
+            ->where('status', StatusUnit::Tersedia)
             ->orderBy('kode_unit')
             ->get()
             ->groupBy('barang_id');

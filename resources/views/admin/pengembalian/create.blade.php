@@ -1,3 +1,4 @@
+@use('App\Enums\KondisiUnit')
 @php $p = $peminjaman; @endphp
 
 <x-app-layout>
@@ -14,7 +15,7 @@
             <div>
                 <dt class="text-marian-500">Jika kembali hari ini</dt>
                 <dd class="font-medium {{ $dendaHariIni['hari'] > 0 ? 'text-red-600' : 'text-marian-700' }}">
-                    {{ $dendaHariIni['hari'] > 0 ? "Terlambat {$dendaHariIni['hari']} hari · Rp".number_format($dendaHariIni['denda'], 0, ',', '.').'/unit' : 'Tepat waktu' }}
+                    {{ $dendaHariIni['hari'] > 0 ? "Terlambat {$dendaHariIni['hari']} hari · ".rupiah($dendaHariIni['denda']).'/unit' : 'Tepat waktu' }}
                 </dd>
             </div>
         </dl>
@@ -45,8 +46,8 @@
                             </label>
                             <div class="sm:col-span-3">
                                 <x-select name="unit[{{ $id }}][kondisi]" class="block w-full text-sm" x-bind:disabled="!pilih" aria-label="Kondisi {{ $u->unitBarang->kode_unit }}">
-                                    @foreach (['baik' => 'Baik', 'rusak' => 'Rusak', 'hilang' => 'Hilang'] as $nilai => $label)
-                                        <option value="{{ $nilai }}" @selected(old("unit.$id.kondisi", 'baik') === $nilai)>{{ $label }}</option>
+                                    @foreach (KondisiUnit::cases() as $k)
+                                        <option value="{{ $k->value }}" @selected(old("unit.$id.kondisi", KondisiUnit::Baik->value) === $k->value)>{{ $k->label() }}</option>
                                     @endforeach
                                 </x-select>
                             </div>

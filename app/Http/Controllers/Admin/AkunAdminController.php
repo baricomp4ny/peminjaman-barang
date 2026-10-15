@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\Peran;
+use App\Enums\StatusAkun;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\AkunAdminRequest;
 use App\Models\User;
@@ -15,7 +17,7 @@ class AkunAdminController extends Controller
 {
     public function index(): View
     {
-        $admin = User::where('role', User::ROLE_ADMIN)
+        $admin = User::where('role', Peran::Admin)
             ->withCount('verifikasi')
             ->orderBy('name')
             ->get();
@@ -25,7 +27,7 @@ class AkunAdminController extends Controller
 
     public function create(): View
     {
-        return view('admin.akun-admin.form', ['akun' => (new User())->forceFill(['status' => User::STATUS_AKTIF])]);
+        return view('admin.akun-admin.form', ['akun' => (new User)->forceFill(['status' => StatusAkun::Aktif])]);
     }
 
     public function store(AkunAdminRequest $request): RedirectResponse
@@ -35,7 +37,7 @@ class AkunAdminController extends Controller
         $akun = new User(['name' => $data['name'], 'email' => $data['email'], 'no_hp' => $data['no_hp'] ?? null]);
         // role, status, password diisi eksplisit (tidak ada di $fillable)
         $akun->forceFill([
-            'role' => User::ROLE_ADMIN,
+            'role' => Peran::Admin,
             'status' => $data['status'],
             'password' => Hash::make($data['password']),
             'email_verified_at' => now(),
@@ -74,7 +76,7 @@ class AkunAdminController extends Controller
             return back()->with('error', "Akun \"{$akunAdmin->name}\" pernah memverifikasi ajuan sehingga tidak bisa dihapus. Nonaktifkan saja.");
         }
 
-        if ($akunAdmin->isAktif() && User::where('role', User::ROLE_ADMIN)->where('status', User::STATUS_AKTIF)->count() <= 1) {
+        if ($akunAdmin->isAktif() && User::where('role', Peran::Admin)->where('status', StatusAkun::Aktif)->count() <= 1) {
             return back()->with('error', 'Minimal harus ada satu admin aktif.');
         }
 

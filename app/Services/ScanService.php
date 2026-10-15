@@ -2,36 +2,35 @@
 
 namespace App\Services;
 
+use App\Enums\StatusPeminjaman;
 use App\Exceptions\PeminjamanException;
 use App\Models\Peminjaman;
 use App\Models\PeminjamanUnit;
 use App\Models\UnitBarang;
-use App\Models\User;
 use Illuminate\Support\Collection;
 
 /**
  * Logika halaman Scan QR.
- *  - cari()   : mengenali kode pertama (PJM-…, kartu peminjam, atau kode unit) → transaksi
+ *  - cari()   : mengenali kode pertama (PJM-… atau kode unit) → transaksi
  *  - cekUnit(): memvalidasi setiap unit yang di-scan terhadap transaksi yang sedang dibuka
  * Penyimpanan akhir tetap lewat PeminjamanService::serahkan()/kembalikan().
  */
 class ScanService
 {
     public const MODE_SERAH = 'serah';
+
     public const MODE_KEMBALI = 'kembali';
 
     public const MAKS_PANJANG_KODE = 100;
 
     public function __construct(
-        private QrService $qr,
         private PeminjamanService $peminjaman,
-    ) {
-    }
+    ) {}
 
     /** Status transaksi yang bisa diproses pada tiap mode. */
-    private function statusUntuk(string $mode): string
+    private function statusUntuk(string $mode): StatusPeminjaman
     {
-        return $mode === self::MODE_SERAH ? Peminjaman::STATUS_DISETUJUI : Peminjaman::STATUS_DIPINJAM;
+        return $mode === self::MODE_SERAH ? StatusPeminjaman::Disetujui : StatusPeminjaman::Dipinjam;
     }
 
     public function normalisasi(string $kode): string
@@ -59,7 +58,7 @@ class ScanService
     }
 
     /**
-     * @return Collection<int, Peminjaman>  minimal satu transaksi
+     * @return Collection<int, Peminjaman> minimal satu transaksi
      *
      * @throws PeminjamanException
      */
@@ -75,47 +74,27 @@ class ScanService
                 throw new PeminjamanException("Kode peminjaman {$kode} tidak ditemukan.");
             }
             if ($p->status !== $status) {
-                throw new PeminjamanException("Peminjaman {$kode} berstatus \"{$p->status}\", bukan \"{$status}\".");
+                throw new PeminjamanException("Peminjaman {$kode} berstatus \"{$p->status->value}\", bukan \"{$status->value}\".");
             }
 
             return collect([$p]);
         }
 
-        // 2) Kartu QR peminjam (bertanda tangan)
-        if ($this->qr->pakaiFormatKartu($kode)) {
-            $userId = $this->qr->bacaKartu($kode);
-            $user = $userId ? User::find($userId) : null;
-            if (! $user || ! $user->isPeminjam()) {
-                throw new PeminjamanException('Kartu QR tidak valid atau sudah tidak berlaku.');
-            }
-            if (! $user->isAktif()) {
-                throw new PeminjamanException("Akun {$user->name} dinonaktifkan.");
-            }
-
-            $daftar = $user->peminjaman()->where('status', $status)->orderBy('tanggal_pinjam')->get();
-            if ($daftar->isEmpty()) {
-                $teks = $mode === self::MODE_SERAH ? 'ajuan disetujui yang siap diambil' : 'barang yang sedang dipinjam';
-                throw new PeminjamanException("{$user->name} tidak memiliki {$teks}.");
-            }
-
-            return $daftar;
-        }
-
-        // 3) Kode unit
+        // 2) Kode unit
         $unit = UnitBarang::where('kode_unit', $kode)->first();
         if (! $unit) {
             throw new PeminjamanException("QR tidak dikenal: {$kode}.");
         }
 
         if ($mode === self::MODE_SERAH) {
-            throw new PeminjamanException("{$kode} adalah kode unit. Scan kartu peminjam atau kode peminjaman terlebih dahulu.");
+            throw new PeminjamanException("{$kode} adalah kode unit. Scan QR kode peminjaman terlebih dahulu.");
         }
 
         // Mode pengembalian: cari pinjaman yang sedang memegang unit ini
         $baris = PeminjamanUnit::with('peminjaman')
             ->where('unit_barang_id', $unit->id)
             ->whereNull('dikembalikan_pada')
-            ->whereHas('peminjaman', fn ($q) => $q->where('status', Peminjaman::STATUS_DIPINJAM))
+            ->whereHas('peminjaman', fn ($q) => $q->where('status', StatusPeminjaman::Dipinjam))
             ->first();
         if (! $baris) {
             throw new PeminjamanException("Unit {$kode} tidak sedang dipinjam.");
@@ -127,7 +106,7 @@ class ScanService
     /**
      * Validasi satu unit hasil scan.
      *
-     * @param  array<int>  $sudah  id unit yang sudah di-scan untuk transaksi ini
+     * @param  array<string>  $sudah  id unit yang sudah di-scan untuk transaksi ini
      *
      * @throws PeminjamanException
      */
@@ -137,10 +116,10 @@ class ScanService
         $p->loadMissing('detail.barang');
 
         if ($p->status !== $this->statusUntuk($mode)) {
-            throw new PeminjamanException("Peminjaman {$p->kode_peminjaman} berstatus \"{$p->status}\".");
+            throw new PeminjamanException("Peminjaman {$p->kode_peminjaman} berstatus \"{$p->status->value}\".");
         }
 
-        if (str_starts_with($kode, 'PJM-') || $this->qr->pakaiFormatKartu($kode)) {
+        if (str_starts_with($kode, 'PJM-')) {
             throw new PeminjamanException('Yang di-scan bukan QR unit barang. Selesaikan transaksi ini dulu atau klik "Ganti transaksi".');
         }
 
@@ -151,12 +130,12 @@ class ScanService
 
         if ($mode === self::MODE_SERAH) {
             // Jenis sesuai ajuan, unit tersedia, tidak dobel, tidak melebihi jumlah ajuan
-            $this->peminjaman->cekUnitUntukSerah($p, $unit, array_map('intval', $sudah));
+            $this->peminjaman->cekUnitUntukSerah($p, $unit, $sudah);
 
             return $unit;
         }
 
-        if (in_array($unit->id, array_map('intval', $sudah), true)) {
+        if (in_array($unit->id, $sudah, true)) {
             throw new PeminjamanException("Unit {$unit->kode_unit} sudah di-scan.");
         }
 

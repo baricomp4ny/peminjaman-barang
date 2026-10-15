@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Enums\StatusUnit;
 use App\Models\Barang;
 use App\Models\Kategori;
 use App\Models\Lokasi;
@@ -19,7 +20,9 @@ class BarangUnitTest extends TestCase
     use RefreshDatabase;
 
     private User $admin;
+
     private Kategori $kategori;
+
     private Lokasi $lokasi;
 
     protected function setUp(): void
@@ -128,7 +131,7 @@ class BarangUnitTest extends TestCase
     {
         $this->tambahUnit($this->barang(), 1, 'rusak');
 
-        $this->assertSame(UnitBarang::STATUS_PERBAIKAN, UnitBarang::first()->status);
+        $this->assertSame(StatusUnit::Perbaikan, UnitBarang::first()->status);
     }
 
     public function test_validasi_tambah_unit_input_salah(): void
@@ -172,7 +175,7 @@ class BarangUnitTest extends TestCase
 
         $this->put("/admin/unit/{$unit->id}", ['lokasi_id' => $this->lokasi->id, 'kondisi' => 'rusak', 'status' => 'perbaikan'])
             ->assertSessionHasNoErrors();
-        $this->assertSame('perbaikan', $unit->fresh()->status);
+        $this->assertSame('perbaikan', $unit->fresh()->status->value);
     }
 
     public function test_unit_yang_sedang_dipinjam_tidak_bisa_diubah_manual(): void
@@ -186,7 +189,7 @@ class BarangUnitTest extends TestCase
             'lokasi_id' => $this->lokasi->id, 'kondisi' => 'baik', 'status' => 'tersedia',
         ])->assertSessionHasErrors('status');
 
-        $this->assertSame('dipinjam', $unit->fresh()->status);
+        $this->assertSame('dipinjam', $unit->fresh()->status->value);
     }
 
     public function test_unit_dan_barang_dengan_riwayat_tidak_bisa_dihapus(): void

@@ -79,9 +79,9 @@
                 <div x-show="!transaksi && pilihan.length === 0" class="rounded-3xl bg-white p-6 shadow-lembut ring-1 ring-marian-100">
                     <h3 class="font-semibold text-marian-900">Langkah 1: buka transaksi</h3>
                     @if ($mode === 'serah')
-                        <p class="mt-2 text-sm text-marian-600">Scan <strong>kartu QR peminjam</strong> atau ketik <strong>kode peminjaman</strong> (PJM-…). Ajuan yang muncul hanya yang berstatus <em>disetujui</em>.</p>
+                        <p class="mt-2 text-sm text-marian-600">Scan <strong>QR kode peminjaman</strong> dari layar/email peminjam atau ketik kodenya (PJM-…). Ajuan yang muncul hanya yang berstatus <em>disetujui</em>.</p>
                     @else
-                        <p class="mt-2 text-sm text-marian-600">Scan <strong>QR salah satu unit</strong> yang dikembalikan, <strong>kartu QR peminjam</strong>, atau ketik <strong>kode peminjaman</strong>.</p>
+                        <p class="mt-2 text-sm text-marian-600">Scan <strong>QR salah satu unit</strong> yang dikembalikan atau <strong>QR kode peminjaman</strong>.</p>
                     @endif
                 </div>
 

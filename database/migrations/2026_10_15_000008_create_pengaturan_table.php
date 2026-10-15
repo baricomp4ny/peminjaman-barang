@@ -10,7 +10,7 @@ return new class extends Migration
     {
         // Aturan bisnis yang bisa diubah admin (lama pinjam, denda, dll.)
         Schema::create('pengaturan', function (Blueprint $table) {
-            $table->id();
+            $table->ulid('id')->primary();
             $table->string('key', 50)->unique();
             $table->string('value')->nullable();
             $table->timestamps();

@@ -13,7 +13,7 @@ class PengaturanController extends Controller
 {
     public function edit(): View
     {
-        $nilai = collect(Pengaturan::DEFAULT)->mapWithKeys(fn ($default, $key) => [$key => Pengaturan::nilai($key)]);
+        $nilai = collect(Pengaturan::DEFAULT)->mapWithKeys(fn ($default, $key) => [$key => Pengaturan::angka($key)]);
 
         return view('admin.pengaturan.edit', compact('nilai'));
     }

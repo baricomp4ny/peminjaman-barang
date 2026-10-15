@@ -7,11 +7,11 @@ use App\Models\Peminjaman;
 use App\Models\PeminjamanUnit;
 use App\Models\UnitBarang;
 use App\Models\User;
-use App\Services\QrService;
 use App\Services\ScanService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Str;
 use Tests\Concerns\DataPeminjaman;
 use Tests\TestCase;
 
@@ -21,6 +21,7 @@ class PencocokanScanTest extends TestCase
     use DataPeminjaman, RefreshDatabase;
 
     private User $admin;
+
     private User $peminjam;
 
     protected function setUp(): void
@@ -34,12 +35,12 @@ class PencocokanScanTest extends TestCase
         $this->buatBarang('LPT', 3, 'Laptop');
     }
 
-    private function id(string $kode): int
+    private function id(string $kode): string
     {
         return Barang::where('kode', $kode)->value('id');
     }
 
-    private function unitId(string $kode): int
+    private function unitId(string $kode): string
     {
         return UnitBarang::where('kode_unit', $kode)->value('id');
     }
@@ -86,9 +87,7 @@ class PencocokanScanTest extends TestCase
     public function test_ajuan_multi_barang_dari_scan_pertama_sampai_dipinjam(): void
     {
         $p = $this->buatPeminjaman($this->peminjam, 'disetujui', '2026-10-10', '2026-10-11', [$this->id('PRJ') => 2, $this->id('LPT') => 1]);
-        $kartu = app(QrService::class)->isiKartu($this->peminjam);
-
-        $this->actingAs($this->admin)->postJson('/admin/scan/cari', ['kode' => $kartu, 'mode' => 'serah'])
+        $this->actingAs($this->admin)->postJson('/admin/scan/cari', ['kode' => $p->kode_peminjaman, 'mode' => 'serah'])
             ->assertOk()->assertJsonPath('transaksi.0.id', $p->id)->assertJsonCount(2, 'transaksi.0.detail');
 
         // Urutan scan nyata, termasuk kesalahan di tengahnya
@@ -103,7 +102,7 @@ class PencocokanScanTest extends TestCase
         $this->post("/admin/peminjaman/{$p->id}/serah", ['kode_unit' => ['LPT-001', 'PRJ-001', 'PRJ-003'], 'dari_scan' => 1])
             ->assertSessionHas('success');
 
-        $this->assertSame('dipinjam', $p->fresh()->status);
+        $this->assertSame('dipinjam', $p->fresh()->status->value);
         $this->assertEqualsCanonicalizing(['LPT-001', 'PRJ-001', 'PRJ-003'], UnitBarang::where('status', 'dipinjam')->pluck('kode_unit')->all());
     }
 
@@ -118,7 +117,7 @@ class PencocokanScanTest extends TestCase
         $this->post("/admin/peminjaman/{$p->id}/serah", ['kode_unit' => ['PRJ-001'], 'dari_scan' => 1])
             ->assertSessionHas('error', fn ($e) => str_contains($e, 'tidak bisa dipinjam'));
 
-        $this->assertSame('disetujui', $p->fresh()->status);
+        $this->assertSame('disetujui', $p->fresh()->status->value);
         $this->assertSame(0, PeminjamanUnit::count());
     }
 
@@ -140,24 +139,20 @@ class PencocokanScanTest extends TestCase
         $this->cek($p, 'PRJ-002', ['LPT-001'])->assertOk();
     }
 
-    public function test_kartu_milik_admin_tidak_berlaku(): void
+    public function test_kartu_qr_peminjam_lama_tidak_lagi_dikenali(): void
     {
-        $kartuAdmin = app(QrService::class)->isiKartu($this->admin);
-
-        $this->actingAs($this->admin)->postJson('/admin/scan/cari', ['kode' => $kartuAdmin, 'mode' => 'serah'])
-            ->assertStatus(422)->assertJsonPath('pesan', 'Kartu QR tidak valid atau sudah tidak berlaku.');
+        $this->actingAs($this->admin)->postJson('/admin/scan/cari', ['kode' => 'PMJ.1.abcdef0123', 'mode' => 'serah'])
+            ->assertStatus(422)->assertJsonPath('pesan', 'QR tidak dikenal: PMJ.1.ABCDEF0123.');
     }
 
-    public function test_kartu_dan_kode_peminjaman_tidak_bisa_dipakai_sebagai_unit_di_mode_kembali(): void
+    public function test_kode_peminjaman_tidak_bisa_dipakai_sebagai_unit_di_mode_kembali(): void
     {
         $p = $this->buatPeminjaman($this->peminjam, 'disetujui', '2026-10-09', '2026-10-11', [$this->id('PRJ') => 1]);
         $this->serahkanUnit($p, ['PRJ-001']);
-        $kartu = app(QrService::class)->isiKartu($this->peminjam);
 
-        $this->actingAs($this->admin)->postJson('/admin/scan/cari', ['kode' => $kartu, 'mode' => 'kembali'])
+        $this->actingAs($this->admin)->postJson('/admin/scan/cari', ['kode' => $p->kode_peminjaman, 'mode' => 'kembali'])
             ->assertOk()->assertJsonPath('transaksi.0.belum_kembali.0.kode_unit', 'PRJ-001');
 
-        $this->cek($p, $kartu, [], 'kembali')->assertStatus(422)->assertJsonPath('pesan', fn ($m) => str_contains($m, 'bukan QR unit'));
         $this->cek($p, $p->kode_peminjaman, [], 'kembali')->assertStatus(422)->assertJsonPath('pesan', fn ($m) => str_contains($m, 'bukan QR unit'));
     }
 
@@ -178,7 +173,7 @@ class PencocokanScanTest extends TestCase
 
     public function test_endpoint_scan_menolak_validasi_dasar(): void
     {
-        $this->actingAs($this->admin)->postJson('/admin/scan/cek-unit', ['peminjaman_id' => 999999, 'kode' => 'PRJ-001', 'mode' => 'serah'])
+        $this->actingAs($this->admin)->postJson('/admin/scan/cek-unit', ['peminjaman_id' => (string) Str::ulid(), 'kode' => 'PRJ-001', 'mode' => 'serah'])
             ->assertStatus(422)->assertJsonValidationErrors('peminjaman_id');
         $this->postJson('/admin/scan/cari', ['kode' => 'PRJ-001', 'mode' => 'pinjam'])
             ->assertStatus(422)->assertJsonValidationErrors('mode');

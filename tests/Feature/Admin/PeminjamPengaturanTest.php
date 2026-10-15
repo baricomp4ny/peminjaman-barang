@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Enums\Peran;
 use App\Models\Peminjaman;
 use App\Models\Pengaturan;
 use App\Models\User;
@@ -38,7 +39,7 @@ class PeminjamPengaturanTest extends TestCase
             ->assertSessionHasNoErrors()->assertSessionHas('success');
 
         $user = User::where('email', 'fajar@example.com')->firstOrFail();
-        $this->assertSame(User::ROLE_PEMINJAM, $user->role);
+        $this->assertSame(Peran::Peminjam, $user->role);
         // Peminjam tidak punya akun login
         $this->assertNull($user->password);
     }
@@ -72,7 +73,7 @@ class PeminjamPengaturanTest extends TestCase
 
         $peminjam->refresh();
         $this->assertSame('089999999999', $peminjam->no_hp);
-        $this->assertSame('nonaktif', $peminjam->status);
+        $this->assertSame('nonaktif', $peminjam->status->value);
         $this->assertNull($peminjam->password);
     }
 
@@ -85,6 +86,7 @@ class PeminjamPengaturanTest extends TestCase
         $this->assertGuest();
         $this->assertNotNull($peminjam->fresh());
     }
+
     public function test_peminjam_dengan_riwayat_tidak_bisa_dihapus(): void
     {
         $denganRiwayat = User::factory()->create();
@@ -131,8 +133,8 @@ class PeminjamPengaturanTest extends TestCase
             'batas_ambil_hari' => 2,
         ])->assertSessionHasNoErrors()->assertSessionHas('success');
 
-        $this->assertEquals(14, Pengaturan::nilai(Pengaturan::LAMA_PINJAM_MAKS));
-        $this->assertEquals(0, Pengaturan::nilai(Pengaturan::DENDA_PER_HARI));
+        $this->assertEquals(14, Pengaturan::angka(Pengaturan::LAMA_PINJAM_MAKS));
+        $this->assertEquals(0, Pengaturan::angka(Pengaturan::DENDA_PER_HARI));
     }
 
     public function test_validasi_pengaturan_input_salah(): void
@@ -145,7 +147,7 @@ class PeminjamPengaturanTest extends TestCase
         ])->assertSessionHasErrors(['lama_pinjam_maks', 'unit_maks_per_ajuan', 'denda_per_hari', 'batas_ambil_hari']);
 
         // Nilai lama (default) tidak berubah
-        $this->assertEquals(7, Pengaturan::nilai(Pengaturan::LAMA_PINJAM_MAKS));
+        $this->assertEquals(7, Pengaturan::angka(Pengaturan::LAMA_PINJAM_MAKS));
     }
 
     public function test_peminjam_tidak_bisa_akses_data_peminjam_dan_pengaturan(): void

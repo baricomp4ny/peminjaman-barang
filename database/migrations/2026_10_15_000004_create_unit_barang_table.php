@@ -10,10 +10,10 @@ return new class extends Migration
     {
         // Satu baris = satu unit fisik = satu label QR
         Schema::create('unit_barang', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('barang_id')->constrained('barang')->restrictOnDelete();
-            $table->foreignId('lokasi_id')->constrained('lokasi')->restrictOnDelete();
-            $table->string('kode_unit', 30)->unique(); // isi QR, contoh PRJ-001
+            $table->ulid('id')->primary();
+            $table->foreignUlid('barang_id')->constrained('barang')->restrictOnDelete();
+            $table->foreignUlid('lokasi_id')->constrained('lokasi')->restrictOnDelete();
+            $table->string('kode_unit', 30)->unique(); // isi QR, contoh MKR-001
             $table->enum('kondisi', ['baik', 'rusak', 'hilang'])->default('baik');
             $table->enum('status', ['tersedia', 'dipinjam', 'perbaikan', 'hilang'])->default('tersedia');
             $table->date('tanggal_perolehan')->nullable();

@@ -2,7 +2,8 @@
 
 namespace Database\Factories;
 
-use App\Models\User;
+use App\Enums\Peran;
+use App\Enums\StatusAkun;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -27,11 +28,11 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             // Peminjam tidak punya akun login → tanpa password
             'password' => null,
-            'role' => User::ROLE_PEMINJAM,
+            'role' => Peran::Peminjam,
             'nomor_identitas' => fake()->unique()->numerify('##########'),
             'unit' => fake()->randomElement(['Teknologi Industri Benih', 'Manajemen Agribisnis', 'Analisis Kimia', 'Teknologi Produksi dan Pengembangan Masyarakat Pertanian']),
             'no_hp' => fake()->numerify('08##########'),
-            'status' => User::STATUS_AKTIF,
+            'status' => StatusAkun::Aktif,
             'remember_token' => null,
         ];
     }
@@ -40,7 +41,7 @@ class UserFactory extends Factory
     public function admin(): static
     {
         return $this->state(fn () => [
-            'role' => User::ROLE_ADMIN,
+            'role' => Peran::Admin,
             // Hash dibuat sekali sesuai konfigurasi aktif (cast 'hashed' menolak cost yang berbeda)
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
@@ -51,7 +52,7 @@ class UserFactory extends Factory
 
     public function nonaktif(): static
     {
-        return $this->state(fn () => ['status' => User::STATUS_NONAKTIF]);
+        return $this->state(fn () => ['status' => StatusAkun::Nonaktif]);
     }
 
     /**

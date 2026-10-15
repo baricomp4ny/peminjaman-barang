@@ -8,8 +8,8 @@
             <x-text-input name="q" :value="request('q')" placeholder="Kode / nama / NIM…" />
             <x-select name="status">
                 <option value="">Semua status</option>
-                @foreach (\App\Models\Peminjaman::STATUS as $s)
-                    <option value="{{ $s }}" @selected(request('status') === $s)>{{ ucfirst($s) }}</option>
+                @foreach ($daftarStatus as $s)
+                    <option value="{{ $s->value }}" @selected(request('status') === $s->value)>{{ $s->label() }}</option>
                 @endforeach
             </x-select>
             <x-text-input type="date" name="dari" :value="request('dari')" aria-label="Dari tanggal" />
@@ -45,7 +45,7 @@
                             </td>
                             <td class="whitespace-nowrap px-4 py-3 text-right">
                                 @php $d = $r->peminjamanUnit->sum('denda'); @endphp
-                                {{ $d ? 'Rp'.number_format($d, 0, ',', '.') : '—' }}
+                                {{ $d ? rupiah($d) : '—' }}
                             </td>
                         </tr>
                     @empty

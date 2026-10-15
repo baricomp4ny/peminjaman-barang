@@ -28,7 +28,7 @@ class LokasiController extends Controller
 
     public function create(): View
     {
-        return view('admin.lokasi.form', ['lokasi' => new Lokasi()]);
+        return view('admin.lokasi.form', ['lokasi' => new Lokasi]);
     }
 
     public function store(LokasiRequest $request): RedirectResponse

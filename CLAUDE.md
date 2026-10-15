@@ -46,6 +46,7 @@ Cabang: ajuan disetujui tapi tidak diambil dalam [1] hari → kedaluwarsa (sched
 - Cek ketersediaan WAJIB menghitung ajuan berstatus disetujui/dipinjam yang rentang tanggalnya bertabrakan (mulai_A <= selesai_B dan selesai_A >= mulai_B), bukan hanya stok hari ini. Cek ulang di dalam DB::transaction saat admin menyetujui.
 
 ## Database
+Semua primary key ULID (tanpa auto increment), foreign key `foreignUlid`.
 - users: name, email, password (nullable — peminjam tanpa password), role (admin, peminjam), nomor_identitas, unit, no_hp, status (aktif, nonaktif). Peminjam dicocokkan berdasarkan nomor_identitas.
 - kategori: nama
 - lokasi: nama, keterangan
@@ -53,7 +54,7 @@ Cabang: ajuan disetujui tapi tidak diambil dalam [1] hari → kedaluwarsa (sched
 - unit_barang: barang_id, lokasi_id, kode_unit (unik, isi QR, otomatis, contoh PRJ-001), kondisi (baik, rusak, hilang), status (tersedia, dipinjam, perbaikan, hilang), tanggal_perolehan
 - peminjaman: kode_peminjaman (unik), user_id, tujuan, tanggal_pinjam, tanggal_rencana_kembali, status (menunggu, disetujui, ditolak, dipinjam, selesai, dibatalkan, kedaluwarsa), alasan_penolakan, diverifikasi_oleh, diverifikasi_pada, diserahkan_pada
 - peminjaman_detail: peminjaman_id, barang_id, jumlah
-- peminjaman_unit: peminjaman_id, unit_barang_id, diserahkan_pada, dikembalikan_pada, kondisi_kembali, hari_terlambat, denda, catatan
+- peminjaman_unit: peminjaman_id, unit_barang_id, dikembalikan_pada, kondisi_kembali, hari_terlambat, denda, catatan
 - pengaturan: key, value
 "Terlambat" dihitung otomatis, bukan kolom.
 Seeder: 2 admin (admin@, petugas@), 5 peminjam tanpa akun login (NIM format SV IPB, mis. J0301201001), 4 kategori alat lab (Alat Ukur & Analisis, Peralatan Inokulasi, Persiapan Media & Sterilisasi, Wadah & Gelas Kultur), 3 lokasi (Ruang Persiapan Media, Ruang Tanam Aseptik, Gudang Alat), 10 jenis alat kultur jaringan (MKR, PHM, HPS, TBA, BNS, PSN, MPP, CTP, ERL, STR), 30 unit, contoh transaksi di semua status.
@@ -100,8 +101,8 @@ Responsif, menu aktif ditandai, pesan sukses/gagal jelas.
 - Nama mitra untuk kop laporan/email: MITRA_NAMA di .env (config/peminjaman.php).
 
 ## Catatan desain (disetujui di Sprint 4)
-- Isi QR unit = kode_unit. Isi QR kartu peminjam = PMJ.<id>.<10 hex HMAC-SHA256 APP_KEY> (QrService); ganti APP_KEY = semua kartu harus dicetak ulang.
-- Halaman /admin/scan: mode serah|kembali. Langkah 1 ScanService::cari() (PJM-…, kartu, atau kode unit untuk pengembalian); langkah 2 ScanService::cekUnit() per scan (JSON, daftar unit disimpan di browser); langkah 3 form ke endpoint serahkan/pengembalian.store yang sama dengan form (dari_scan=1 → kembali ke halaman scan).
+- Isi QR unit = kode_unit. (Kartu QR peminjam PMJ.… dihapus — lihat catatan clean code.)
+- Halaman /admin/scan: mode serah|kembali. Langkah 1 ScanService::cari() (PJM-… atau kode unit untuk pengembalian); langkah 2 ScanService::cekUnit() per scan (JSON, daftar unit disimpan di browser); langkah 3 form ke endpoint serahkan/pengembalian.store yang sama dengan form (dari_scan=1 → kembali ke halaman scan).
 - html5-qrcode 2.3.8 disimpan di public/vendor/html5-qrcode (bukan CDN). Kamera butuh HTTPS atau localhost.
 - Debounce kamera: kode sama diabaikan 2,5 detik.
 
@@ -117,7 +118,7 @@ Responsif, menu aktif ditandai, pesan sukses/gagal jelas.
 - Akses halaman status: kode + NIM (StatusController, disimpan di session), tautan URL::signedRoute di email, atau langsung setelah mengirim ajuan. POST /ajuan & /status dibatasi throttle 10/menit + honeypot "website".
 - Notifikasi peminjam hanya email (+ AjuanTerkirim berisi kode); tetap dicatat di tabel notifications.
 - Pengaturan > Data Admin (AkunAdminController, {akunAdmin} hanya role admin): tidak bisa menonaktifkan/menghapus diri sendiri, minimal satu admin aktif, admin yang pernah memverifikasi tidak bisa dihapus.
-- Kartu QR peminjam diganti QR kode peminjaman; scan kartu PMJ lama masih dikenali.
+- Kartu QR peminjam diganti QR kode peminjaman.
 
 ## Catatan desain tampilan (disetujui)
 - Warna tunggal: gradasi Marian Blue, skala `marian-50 … marian-950` (#263C92 = marian-800) di tailwind.config.js; `indigo` dipetakan ke skala yang sama. Merah hanya untuk pesan gagal/ditolak/hilang.
@@ -125,3 +126,13 @@ Responsif, menu aktif ditandai, pesan sukses/gagal jelas.
 - Responsif & fleksibel: grid `repeat(auto-fit|auto-fill, minmax(min(100%,Xrem),1fr))` dan ukuran huruf `clamp()`; tanpa scroll horizontal di 360 px.
 - Komponen: `x-ikon-alat` (ikon garis per jenis alat/kategori), `x-ilustrasi-lab`, `x-kartu-alat`. Font: Plus Jakarta Sans (bunny.net).
 - Info lab di config/peminjaman.php: MITRA_NAMA, MITRA_SINGKAT, MITRA_ALAMAT, MITRA_JAM_LAYANAN.
+
+## Catatan desain (clean code, disetujui)
+- Primary key ULID (trait HasUlids) di semua tabel aplikasi; validasi id memakai rule `ulid`. Tabel notifications: uuid + ulidMorphs. Hanya tabel internal `migrations` yang tetap auto increment.
+- Field ganda dihapus: `peminjaman_unit.diserahkan_pada` (waktu serah-terima cukup di `peminjaman.diserahkan_pada`).
+- Nilai status/peran memakai PHP Enum di app/Enums (Peran, StatusAkun, StatusPeminjaman, StatusUnit, KondisiUnit) + cast Eloquent; Form Request memakai Rule::enum. Bandingkan dengan Enum, bukan string.
+- Kartu QR peminjam PMJ.… beserta logikanya dihapus; kode PMJ lama dianggap "QR tidak dikenal".
+- Menu sidebar admin disiapkan App\View\Composers\AdminLayoutComposer (didaftarkan di AppServiceProvider).
+- Helper global `rupiah()` di app/helpers.php (autoload files composer).
+- Kode mati dihapus: Sanctum + routes/api.php, verifikasi email & konfirmasi password Breeze, failed_jobs/personal_access_tokens.
+- Format kode: Laravel Pint (`vendor\bin\pint`).

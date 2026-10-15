@@ -7,7 +7,6 @@ use App\Models\Peminjaman;
 use App\Models\PeminjamanUnit;
 use App\Models\UnitBarang;
 use App\Models\User;
-use App\Services\QrService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Tests\Concerns\DataPeminjaman;
@@ -18,7 +17,9 @@ class ScanTest extends TestCase
     use DataPeminjaman, RefreshDatabase;
 
     private User $admin;
+
     private User $peminjam;
+
     private Peminjaman $ajuan;
 
     protected function setUp(): void
@@ -36,12 +37,12 @@ class ScanTest extends TestCase
         $this->ajuan = $this->buatPeminjaman($this->peminjam, 'disetujui', '2026-10-10', '2026-10-12', [$this->idBarang('PRJ') => 2]);
     }
 
-    private function idBarang(string $kode): int
+    private function idBarang(string $kode): string
     {
         return Barang::where('kode', $kode)->value('id');
     }
 
-    private function idUnit(string $kode): int
+    private function idUnit(string $kode): string
     {
         return UnitBarang::where('kode_unit', $kode)->value('id');
     }
@@ -76,29 +77,10 @@ class ScanTest extends TestCase
             ->assertJsonPath('transaksi.0.detail.0.jumlah', 2);
     }
 
-    public function test_buka_transaksi_dengan_kartu_peminjam(): void
-    {
-        $kartu = app(QrService::class)->isiKartu($this->peminjam);
-
-        $this->cari($kartu)->assertOk()->assertJsonCount(1, 'transaksi');
-
-        // Dua ajuan disetujui → dua pilihan
-        $this->buatPeminjaman($this->peminjam, 'disetujui', '2026-10-11', '2026-10-12', [$this->idBarang('LPT') => 1]);
-        $this->cari($kartu)->assertOk()->assertJsonCount(2, 'transaksi');
-    }
-
-    public function test_kartu_palsu_dan_kartu_tanpa_ajuan_ditolak(): void
-    {
-        $this->cari('PMJ.'.$this->peminjam->id.'.0000000000')->assertStatus(422)->assertJsonPath('pesan', 'Kartu QR tidak valid atau sudah tidak berlaku.');
-
-        $lain = User::factory()->create(['name' => 'Tanpa Ajuan']);
-        $this->cari(app(QrService::class)->isiKartu($lain))->assertStatus(422)
-            ->assertJsonPath('pesan', fn ($p) => str_contains($p, 'tidak memiliki ajuan disetujui'));
-    }
-
     public function test_qr_tidak_dikenal_saat_membuka_transaksi(): void
     {
         $this->cari('ABC-123')->assertStatus(422)->assertJsonPath('pesan', 'QR tidak dikenal: ABC-123.');
+        $this->cari('PMJ.1.0000000000')->assertStatus(422)->assertJsonPath('pesan', 'QR tidak dikenal: PMJ.1.0000000000.');
         $this->cari('PJM-20990101-9999')->assertStatus(422)->assertJsonPath('pesan', fn ($p) => str_contains($p, 'tidak ditemukan'));
         $this->cari('')->assertStatus(422)->assertJsonValidationErrors('kode');
     }
@@ -109,7 +91,7 @@ class ScanTest extends TestCase
             ->assertJsonPath('pesan', fn ($p) => str_contains($p, 'berstatus "disetujui"'));
 
         // Di mode serah-terima, kode unit tidak bisa dipakai membuka transaksi
-        $this->cari('PRJ-001', 'serah')->assertStatus(422)->assertJsonPath('pesan', fn ($p) => str_contains($p, 'Scan kartu peminjam'));
+        $this->cari('PRJ-001', 'serah')->assertStatus(422)->assertJsonPath('pesan', fn ($p) => str_contains($p, 'Scan QR kode peminjaman'));
     }
 
     // ---------- Langkah 2: serah-terima ----------
@@ -166,7 +148,7 @@ class ScanTest extends TestCase
             ->assertRedirect('/admin/scan?mode=serah')
             ->assertSessionHas('success');
 
-        $this->assertSame('dipinjam', $this->ajuan->fresh()->status);
+        $this->assertSame('dipinjam', $this->ajuan->fresh()->status->value);
         $this->assertSame(2, UnitBarang::where('status', 'dipinjam')->count());
     }
 
@@ -175,7 +157,7 @@ class ScanTest extends TestCase
         $this->actingAs($this->admin)->post("/admin/peminjaman/{$this->ajuan->id}/serah", ['kode_unit' => ['PRJ-001'], 'dari_scan' => 1])
             ->assertSessionHas('error', fn ($e) => str_contains($e, 'belum lengkap'));
 
-        $this->assertSame('disetujui', $this->ajuan->fresh()->status);
+        $this->assertSame('disetujui', $this->ajuan->fresh()->status->value);
     }
 
     // ---------- Pengembalian ----------
@@ -220,8 +202,8 @@ class ScanTest extends TestCase
             'unit' => [$id1 => ['pilih' => 1, 'kondisi' => 'rusak', 'catatan' => 'Lensa retak']],
         ])->assertRedirect('/admin/scan?mode=kembali')->assertSessionHas('success');
 
-        $this->assertSame('dipinjam', $p->fresh()->status);
-        $this->assertSame('perbaikan', UnitBarang::find($id1)->status);
+        $this->assertSame('dipinjam', $p->fresh()->status->value);
+        $this->assertSame('perbaikan', UnitBarang::find($id1)->status->value);
 
         // Unit yang sudah kembali tidak bisa di-scan lagi
         $this->cek($p, 'PRJ-001', [], 'kembali')->assertStatus(422)->assertJsonPath('pesan', fn ($m) => str_contains($m, 'sudah dikembalikan'));

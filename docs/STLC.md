@@ -402,15 +402,14 @@ Prasyarat: login admin.
 | KQ-01 | QR di halaman status | Setelah AJ-01 / Cek Status | QR + kode PJM + nama peminjam tampil | P | AjuanVerifikasiTest | | |
 | KQ-02 ★ | QR membuka transaksi | Admin Scan Barcode (mode serah) → scan QR di layar HP peminjam | Ajuan terbuka | P | ScanTest | | |
 | KQ-03 | QR ajuan yang belum disetujui | Scan QR ajuan menunggu | "…berstatus "menunggu", bukan "disetujui"." | N | ScanTest | | |
-| KQ-04 | Kartu QR lama (PMJ.…) palsu | `PMJ.3.0000000000` | "Kartu QR tidak valid atau sudah tidak berlaku." | N | ScanTest, QrLabelTest | | |
-| KQ-05 | Kartu milik admin | (data uji) isi kartu admin | Tidak berlaku | N | PencocokanScanTest | | |
+| KQ-04 | Kartu QR lama (PMJ.…) | `PMJ.1.0000000000` | "QR tidak dikenal: PMJ.1.0000000000." (kartu peminjam sudah dihapus) | N | ScanTest, PencocokanScanTest | | |
 ### 4.19 Scan — Serah-terima (SS)
 Prasyarat: admin → Scan Barcode → mode Serah-terima; ajuan Budi (Timbangan Analitik×1, Bunsen Burner×1). Input lewat kamera, scanner USB, atau ketik + Enter.
 
 | ID | Skenario | Input | Hasil yang diharapkan | J | Tes otomatis | Hasil aktual | Status |
 |---|---|---|---|---|---|---|---|
 | SS-01 ★ | Buka dengan QR/kode peminjaman | QR di halaman status Budi atau ketik PJM-… | Transaksi terbuka, Timbangan Analitik 0/1, Bunsen Burner 0/1 | P | ScanTest | | |
-| SS-02 | Kode unit sebelum transaksi | TBA-001 | "…Scan kartu peminjam atau kode peminjaman terlebih dahulu." | N | ScanTest | | |
+| SS-02 | Kode unit sebelum transaksi | TBA-001 | "…Scan QR kode peminjaman terlebih dahulu." | N | ScanTest | | |
 | SS-03 ★ | **QR tidak dikenal** (buka transaksi) | ABC-123 | "QR tidak dikenal: ABC-123." + bunyi gagal + kotak merah berkedip | N | ScanTest | | |
 | SS-04 | Kode peminjaman beda status | PJM-… Dewi | "…berstatus "dipinjam", bukan "disetujui"." | N | ScanTest | | |
 | SS-05 ★ | **QR tidak dikenal** (scan unit) | XYZ-999 | "✖ QR tidak dikenal: XYZ-999." + saran periksa label | N | ScanTest, PencocokanScanTest | | |
@@ -441,7 +440,7 @@ Prasyarat: admin → Scan Barcode → mode Serah-terima; ajuan Budi (Timbangan A
 | SK-08 | Unit sudah kembali | CTP-001 lagi pada transaksi sama | "…sudah dikembalikan pada …" | N | ScanTest | | |
 | SK-09 | Terlambat via scan | PHM-001 → Simpan | Peringatan terlambat; denda Rp2.000, selesai | P | — | | |
 | SK-10 | Buka dengan QR kode peminjaman | QR status pinjaman Dewi | Pinjaman Dewi terbuka | P | ScanTest | | |
-| SK-11 | Kartu/kode peminjaman sebagai unit | Kartu / PJM saat transaksi terbuka | "bukan QR unit" | N | PencocokanScanTest | | |
+| SK-11 | Kode peminjaman sebagai unit | PJM-… saat transaksi terbuka | "bukan QR unit" | N | PencocokanScanTest | | |
 
 ### 4.21 Scanner USB 2D & Penanganan Error Scan (SU)
 Prasyarat: scanner USB mode keyboard (akhiran Enter, sebagian tes juga dengan akhiran Tab); halaman Scan Barcode.
@@ -539,11 +538,11 @@ php artisan schedule:work                                 # menjalankan jadwal s
 
 ## 7. Tes Otomatis (Feature Test)
 
-Jalankan: `php artisan test` (database terpisah `peminjaman_barang_test`). Hasil terakhir (peminjam tanpa login): **194 tes lulus (1014 assertion)**.
+Jalankan: `php artisan test` (database terpisah `peminjaman_barang_test`). Hasil terakhir (refactor ULID + Enum): **185 tes lulus (991 assertion)**.
 
 | Kelas tes | Jumlah | Cakupan |
 |---|---|---|
-| Auth\* (Breeze) + ProfileTest | 21 | Login admin, reset/ubah password, profil |
+| Auth\* (Breeze) + ProfileTest | 15 | Login admin, reset/ubah password, profil |
 | RoleAccessTest | 10 | Halaman publik tanpa login, panel admin terlindungi, peminjam tidak bisa login, registrasi dihapus, reset password khusus admin |
 | Admin\KategoriLokasiTest | 6 | CRUD + larangan hapus + validasi |
 | Admin\BarangUnitTest | 13 | Barang, foto, kode unit otomatis, kondisi/status unit |
@@ -553,11 +552,11 @@ Jalankan: `php artisan test` (database terpisah `peminjaman_barang_test`). Hasil
 | Transaksi\AjuanVerifikasiTest | 22 | Ajuan publik + identitas (NIM/email), jebakan bot, setujui/tolak, cek status kode+NIM, tautan email, pembatalan |
 | Transaksi\SerahPengembalianTest | 19 | Serah-terima, pengembalian, denda |
 | Transaksi\SchedulerNotifikasiLaporanTest | 10 | Kedaluwarsa, pengingat, email (tautan status & admin), laporan, dashboard, halaman publik |
-| Scan\QrLabelTest | 4 | QR SVG, label massal, kartu bertanda tangan |
-| Scan\ScanTest | 18 | Buka transaksi & pencocokan scan |
+| Scan\QrLabelTest | 3 | QR SVG, label massal, hak akses |
+| Scan\ScanTest | 16 | Buka transaksi & pencocokan scan |
 | **KetersediaanServiceTest** (Sprint 5) | 6 | Penjumlahan tabrakan, multi-barang, unit rusak, terlambat memblokir, uji acak 200 skenario |
 | **PersetujuanAjuanTest** (Sprint 5) | 9 | Atomik, overbooking, terlambat, persetujuan ganda, admin nonaktif, alasan spasi |
-| **PencocokanScanTest** (Sprint 5) | 15 | Normalisasi kode scanner, panjang, alur multi-barang, race condition, kartu admin |
+| **PencocokanScanTest** (Sprint 5) | 15 | Normalisasi kode scanner, panjang, alur multi-barang, race condition, kode PMJ lama ditolak |
 | **PerhitunganDendaTest** (Sprint 5) | 13 | Kalender (lintas bulan/tahun/kabisat), unit hilang, perkiraan, tarif berubah, laporan |
 | ExampleTest (Feature + Unit) | 2 | Halaman awal = katalog publik |
 
@@ -583,7 +582,7 @@ Jalankan: `php artisan test` (database terpisah `peminjaman_barang_test`). Hasil
 | Lulus / Gagal / Tertunda | ____ / ____ / ____ |
 | Persentase lulus | ____ % |
 | Kasus prioritas Tinggi (★) lulus | ____ / 80 |
-| Feature Test otomatis | 194 lulus / 0 gagal |
+| Feature Test otomatis | 185 lulus / 0 gagal |
 | Cacat ditemukan (Kritis/Tinggi/Sedang/Rendah) | ____ |
 | Cacat masih terbuka | ____ |
 

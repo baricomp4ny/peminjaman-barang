@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Admin;
 
-use App\Models\UnitBarang;
+use App\Enums\StatusUnit;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -18,10 +18,10 @@ class LabelRequest extends FormRequest
     {
         return [
             'unit' => ['nullable', 'array', 'max:500'],
-            'unit.*' => ['integer'],
-            'barang_id' => ['nullable', 'integer', 'exists:barang,id'],
-            'lokasi_id' => ['nullable', 'integer', 'exists:lokasi,id'],
-            'status' => ['nullable', Rule::in([UnitBarang::STATUS_TERSEDIA, UnitBarang::STATUS_DIPINJAM, UnitBarang::STATUS_PERBAIKAN, UnitBarang::STATUS_HILANG])],
+            'unit.*' => ['ulid'],
+            'barang_id' => ['nullable', 'ulid', 'exists:barang,id'],
+            'lokasi_id' => ['nullable', 'ulid', 'exists:lokasi,id'],
+            'status' => ['nullable', Rule::enum(StatusUnit::class)],
             'kolom' => ['nullable', 'integer', 'in:3,4,5'],
         ];
     }

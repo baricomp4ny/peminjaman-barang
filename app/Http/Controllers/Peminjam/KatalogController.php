@@ -40,9 +40,9 @@ class KatalogController extends Controller
                 'unit' => collect($stokSemua)->sum('kapasitas'),
             ],
             'aturan' => [
-                'lama' => (int) Pengaturan::nilai(Pengaturan::LAMA_PINJAM_MAKS),
-                'unit' => (int) Pengaturan::nilai(Pengaturan::UNIT_MAKS_PER_AJUAN),
-                'denda' => (int) Pengaturan::nilai(Pengaturan::DENDA_PER_HARI),
+                'lama' => Pengaturan::angka(Pengaturan::LAMA_PINJAM_MAKS),
+                'unit' => Pengaturan::angka(Pengaturan::UNIT_MAKS_PER_AJUAN),
+                'denda' => Pengaturan::angka(Pengaturan::DENDA_PER_HARI),
             ],
             'adaFoto' => file_exists(public_path('images/hero-lab.jpg')),
             'sedangCari' => $request->hasAny(['q', 'kategori_id']),
@@ -68,7 +68,7 @@ class KatalogController extends Controller
             'lainnya' => $lainnya,
             'stokLain' => $ketersediaan->hitung($lainnya->pluck('id')->all(), today(), today()),
             'lokasi' => $barang->unit->pluck('lokasi.nama')->unique()->values(),
-            'maksHari' => (int) Pengaturan::nilai(Pengaturan::LAMA_PINJAM_MAKS),
+            'maksHari' => Pengaturan::angka(Pengaturan::LAMA_PINJAM_MAKS),
         ]);
     }
 }

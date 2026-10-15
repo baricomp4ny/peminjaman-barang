@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Admin;
 
-use App\Models\User;
+use App\Enums\StatusAkun;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -25,7 +25,7 @@ class PeminjamRequest extends FormRequest
             'unit' => ['nullable', 'string', 'max:100'],
             'no_hp' => ['nullable', 'regex:/^[0-9+\-\s]{8,20}$/'],
             // Nonaktif = tidak bisa mengajukan peminjaman lewat halaman publik
-            'status' => ['required', Rule::in([User::STATUS_AKTIF, User::STATUS_NONAKTIF])],
+            'status' => ['required', Rule::enum(StatusAkun::class)],
         ];
     }
 

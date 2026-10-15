@@ -21,9 +21,7 @@ class LaporanService
         'denda' => 'Laporan Denda',
     ];
 
-    public function __construct(private DendaService $denda)
-    {
-    }
+    public function __construct(private DendaService $denda) {}
 
     /**
      * @return array{jenis:string, judul:string, periode:string, kolom:array<string>, baris:array<array>, ringkasan:array<string, string|int>}
@@ -61,11 +59,11 @@ class LaporanService
             'kolom' => ['No', 'Kode', 'Peminjam', 'No. Identitas', 'Barang', 'Tgl Pinjam', 'Rencana Kembali', 'Status'],
             'baris' => $data->values()->map(fn ($p, $i) => [
                 $i + 1, $p->kode_peminjaman, $p->peminjam->name, $p->peminjam->nomor_identitas, $p->ringkasanBarang(),
-                $p->tanggal_pinjam->format('d/m/Y'), $p->tanggal_rencana_kembali->format('d/m/Y'), ucfirst($p->status),
+                $p->tanggal_pinjam->format('d/m/Y'), $p->tanggal_rencana_kembali->format('d/m/Y'), $p->status->label(),
             ])->all(),
             'ringkasan' => array_merge(
                 ['Total transaksi' => $data->count()],
-                $data->countBy('status')->mapWithKeys(fn ($n, $s) => ['Status '.$s => $n])->all()
+                $data->countBy(fn ($r) => $r->status->value)->mapWithKeys(fn ($n, $s) => ['Status '.$s => $n])->all()
             ),
         ];
     }
@@ -81,15 +79,15 @@ class LaporanService
             'kolom' => ['No', 'Kode Peminjaman', 'Peminjam', 'Kode Unit', 'Barang', 'Diserahkan', 'Dikembalikan', 'Kondisi', 'Terlambat (hari)', 'Denda (Rp)'],
             'baris' => $data->values()->map(fn ($u, $i) => [
                 $i + 1, $u->peminjaman->kode_peminjaman, $u->peminjaman->peminjam->name, $u->unitBarang->kode_unit,
-                $u->unitBarang->barang->nama, $u->diserahkan_pada->format('d/m/Y'), $u->dikembalikan_pada->format('d/m/Y H:i'),
-                ucfirst($u->kondisi_kembali), $u->hari_terlambat, $u->denda,
+                $u->unitBarang->barang->nama, $u->peminjaman->diserahkan_pada->format('d/m/Y'), $u->dikembalikan_pada->format('d/m/Y H:i'),
+                $u->kondisi_kembali->label(), $u->hari_terlambat, $u->denda,
             ])->all(),
             'ringkasan' => [
                 'Unit dikembalikan' => $data->count(),
                 'Kondisi baik' => $data->where('kondisi_kembali', 'baik')->count(),
                 'Kondisi rusak' => $data->where('kondisi_kembali', 'rusak')->count(),
                 'Hilang' => $data->where('kondisi_kembali', 'hilang')->count(),
-                'Total denda' => $this->rupiah($data->sum('denda')),
+                'Total denda' => rupiah($data->sum('denda')),
             ],
         ];
     }
@@ -102,11 +100,11 @@ class LaporanService
             'kolom' => ['No', 'Kode Unit', 'Barang', 'Kategori', 'Lokasi', 'Kondisi', 'Status', 'Tgl Perolehan'],
             'baris' => $data->values()->map(fn ($u, $i) => [
                 $i + 1, $u->kode_unit, $u->barang->nama, $u->barang->kategori->nama, $u->lokasi->nama,
-                ucfirst($u->kondisi), ucfirst($u->status), $u->tanggal_perolehan?->format('d/m/Y') ?? '-',
+                $u->kondisi->label(), $u->status->label(), $u->tanggal_perolehan?->format('d/m/Y') ?? '-',
             ])->all(),
             'ringkasan' => array_merge(
                 ['Total unit' => $data->count()],
-                $data->countBy('status')->mapWithKeys(fn ($n, $s) => ['Status '.$s => $n])->all()
+                $data->countBy(fn ($r) => $r->status->value)->mapWithKeys(fn ($n, $s) => ['Status '.$s => $n])->all()
             ),
         ];
     }
@@ -165,13 +163,8 @@ class LaporanService
             'ringkasan' => [
                 'Jumlah unit kena denda' => $data->count(),
                 'Jumlah peminjam' => $data->pluck('peminjaman.user_id')->unique()->count(),
-                'Total denda' => $this->rupiah($data->sum('denda')),
+                'Total denda' => rupiah($data->sum('denda')),
             ],
         ];
-    }
-
-    private function rupiah(int|float $nilai): string
-    {
-        return 'Rp'.number_format($nilai, 0, ',', '.');
     }
 }

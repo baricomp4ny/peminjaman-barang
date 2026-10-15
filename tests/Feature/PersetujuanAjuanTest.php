@@ -19,6 +19,7 @@ class PersetujuanAjuanTest extends TestCase
     use DataPeminjaman, RefreshDatabase;
 
     private User $admin;
+
     private User $peminjam;
 
     protected function setUp(): void
@@ -44,7 +45,7 @@ class PersetujuanAjuanTest extends TestCase
         $this->setujui($p)->assertSessionHas('error', fn ($e) => str_contains($e, 'diminta 2, sisa 1'));
 
         $p->refresh();
-        $this->assertSame('menunggu', $p->status);
+        $this->assertSame('menunggu', $p->status->value);
         $this->assertNull($p->diverifikasi_oleh);
         $this->assertNull($p->diverifikasi_pada);
         Notification::assertNothingSent();
@@ -58,7 +59,7 @@ class PersetujuanAjuanTest extends TestCase
         UnitBarang::where('kode_unit', 'PRJ-002')->update(['kondisi' => 'rusak', 'status' => 'perbaikan']);
 
         $this->setujui($p)->assertSessionHas('error');
-        $this->assertSame('menunggu', $p->fresh()->status);
+        $this->assertSame('menunggu', $p->fresh()->status->value);
     }
 
     public function test_pinjaman_terlambat_memblokir_persetujuan(): void
@@ -125,7 +126,7 @@ class PersetujuanAjuanTest extends TestCase
         $adminNonaktif = User::factory()->admin()->nonaktif()->create();
 
         $this->actingAs($adminNonaktif)->post("/admin/ajuan/{$p->id}/setujui")->assertRedirect('/login');
-        $this->assertSame('menunggu', $p->fresh()->status);
+        $this->assertSame('menunggu', $p->fresh()->status->value);
     }
 
     public function test_alasan_penolakan_berisi_spasi_saja_ditolak_dan_disimpan_rapi(): void

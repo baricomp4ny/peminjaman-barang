@@ -1,3 +1,4 @@
+@use('App\Enums\KondisiUnit')
 <x-app-layout>
     <x-slot name="header"><span class="text-sm text-marian-500">Data Barang</span></x-slot>
 
@@ -49,8 +50,8 @@
                 <div>
                     <x-input-label for="kondisi" value="Kondisi *" />
                     <x-select id="kondisi" name="kondisi" class="mt-1 block w-full" required>
-                        @foreach (['baik', 'rusak', 'hilang'] as $k)
-                            <option value="{{ $k }}" @selected(old('kondisi', 'baik') === $k)>{{ ucfirst($k) }}</option>
+                        @foreach (KondisiUnit::cases() as $k)
+                            <option value="{{ $k->value }}" @selected(old('kondisi', KondisiUnit::Baik->value) === $k->value)>{{ $k->label() }}</option>
                         @endforeach
                     </x-select>
                     <x-input-error :messages="$errors->get('kondisi')" class="mt-2" />

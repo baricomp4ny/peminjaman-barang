@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Transaksi;
 
-use App\Models\Peminjaman;
+use App\Enums\StatusPeminjaman;
 use App\Models\PeminjamanUnit;
 use App\Models\UnitBarang;
 use App\Models\User;
@@ -16,6 +16,7 @@ class KetersediaanTest extends TestCase
     use DataPeminjaman, RefreshDatabase;
 
     private KetersediaanService $svc;
+
     private User $user;
 
     protected function setUp(): void
@@ -121,7 +122,7 @@ class KetersediaanTest extends TestCase
     public function test_endpoint_json_ketersediaan_untuk_form_ajuan(): void
     {
         $b = $this->buatBarang('PRJ', 3);
-        $this->buatPeminjaman($this->user, Peminjaman::STATUS_DISETUJUI, '2026-10-11', '2026-10-12', [$b->id => 1]);
+        $this->buatPeminjaman($this->user, StatusPeminjaman::Disetujui, '2026-10-11', '2026-10-12', [$b->id => 1]);
 
         // Endpoint publik (form ajuan tanpa login)
         $this->getJson('/ketersediaan?mulai=2026-10-11&selesai=2026-10-11&barang[]='.$b->id)

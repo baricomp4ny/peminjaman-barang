@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\StatusUnit;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\BarangRequest;
 use App\Models\Barang;
 use App\Models\Kategori;
-use App\Models\UnitBarang;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -20,7 +20,7 @@ class BarangController extends Controller
             ->with('kategori')
             ->withCount([
                 'unit',
-                'unit as unit_tersedia_count' => fn ($q) => $q->where('status', UnitBarang::STATUS_TERSEDIA),
+                'unit as unit_tersedia_count' => fn ($q) => $q->where('status', StatusUnit::Tersedia),
             ])
             ->when($request->filled('q'), fn ($q) => $q->where(function ($q) use ($request) {
                 $q->where('nama', 'like', '%'.$request->q.'%')
@@ -39,7 +39,7 @@ class BarangController extends Controller
     public function create(): View
     {
         return view('admin.barang.form', [
-            'barang' => new Barang(),
+            'barang' => new Barang,
             'kategori' => Kategori::orderBy('nama')->get(),
         ]);
     }

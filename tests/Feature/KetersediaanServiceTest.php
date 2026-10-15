@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Models\Peminjaman;
+use App\Enums\StatusPeminjaman;
 use App\Models\PeminjamanUnit;
 use App\Models\UnitBarang;
 use App\Models\User;
@@ -22,6 +22,7 @@ class KetersediaanServiceTest extends TestCase
     use DataPeminjaman, RefreshDatabase;
 
     private KetersediaanService $svc;
+
     private User $user;
 
     protected function setUp(): void
@@ -98,7 +99,7 @@ class KetersediaanServiceTest extends TestCase
 
         PeminjamanUnit::where('peminjaman_id', $p->id)->update(['dikembalikan_pada' => now(), 'kondisi_kembali' => 'baik']);
         UnitBarang::where('kode_unit', 'PRJ-001')->update(['status' => 'tersedia']);
-        $p->update(['status' => Peminjaman::STATUS_SELESAI]);
+        $p->update(['status' => StatusPeminjaman::Selesai]);
 
         $this->assertSame(1, $this->svc->sisa($b->id, '2026-10-10', '2026-10-11'));
     }
@@ -156,7 +157,7 @@ class KetersediaanServiceTest extends TestCase
         }
 
         // Perhitungan manual (rumus dari CLAUDE.md)
-        $manual = function (int $barangId, Carbon $mulai, Carbon $selesai) use ($rekaman, $hariIni) {
+        $manual = function (string $barangId, Carbon $mulai, Carbon $selesai) use ($rekaman, $hariIni) {
             $kapasitas = UnitBarang::where('barang_id', $barangId)->where('kondisi', 'baik')
                 ->whereIn('status', ['tersedia', 'dipinjam'])->count();
             $terpakai = 0;

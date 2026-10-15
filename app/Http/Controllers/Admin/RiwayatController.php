@@ -2,22 +2,17 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\StatusPeminjaman;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\RiwayatRequest;
 use App\Models\Peminjaman;
-use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 /** Semua transaksi dengan filter status, kata kunci, dan rentang tanggal pinjam. */
 class RiwayatController extends Controller
 {
-    public function index(Request $request): View
+    public function index(RiwayatRequest $request): View
     {
-        $request->validate([
-            'dari' => ['nullable', 'date'],
-            'sampai' => ['nullable', 'date', 'after_or_equal:dari'],
-            'status' => ['nullable', 'in:'.implode(',', Peminjaman::STATUS)],
-        ]);
-
         $riwayat = Peminjaman::with(['peminjam', 'detail.barang', 'peminjamanUnit'])
             ->when($request->filled('status'), fn ($q) => $q->where('status', $request->status))
             ->when($request->filled('q'), fn ($q) => $q->where(function ($q) use ($request) {
@@ -31,6 +26,9 @@ class RiwayatController extends Controller
             ->paginate(20)
             ->withQueryString();
 
-        return view('admin.riwayat.index', compact('riwayat'));
+        return view('admin.riwayat.index', [
+            'riwayat' => $riwayat,
+            'daftarStatus' => StatusPeminjaman::cases(),
+        ]);
     }
 }

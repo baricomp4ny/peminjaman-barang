@@ -25,7 +25,7 @@ class KategoriController extends Controller
 
     public function create(): View
     {
-        return view('admin.kategori.form', ['kategori' => new Kategori()]);
+        return view('admin.kategori.form', ['kategori' => new Kategori]);
     }
 
     public function store(KategoriRequest $request): RedirectResponse

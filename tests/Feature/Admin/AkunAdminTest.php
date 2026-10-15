@@ -39,7 +39,7 @@ class AkunAdminTest extends TestCase
         $this->post('/admin/pengaturan/admin', $this->data(['role' => 'peminjam']))->assertSessionHasNoErrors()->assertSessionHas('success');
 
         $baru = User::where('email', 'petugas@example.com')->firstOrFail();
-        $this->assertSame('admin', $baru->role);
+        $this->assertSame('admin', $baru->role->value);
         $this->assertTrue(Hash::check('rahasia123', $baru->password));
 
         auth()->logout();
@@ -75,7 +75,7 @@ class AkunAdminTest extends TestCase
         ]))->assertSessionHasErrors('status');
 
         $this->delete("/admin/pengaturan/admin/{$this->admin->id}")->assertSessionHas('error');
-        $this->assertSame('aktif', $this->admin->fresh()->status);
+        $this->assertSame('aktif', $this->admin->fresh()->status->value);
     }
 
     public function test_admin_yang_pernah_memverifikasi_tidak_bisa_dihapus(): void

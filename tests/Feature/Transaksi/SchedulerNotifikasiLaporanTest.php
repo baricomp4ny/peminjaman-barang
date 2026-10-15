@@ -2,8 +2,11 @@
 
 namespace Tests\Feature\Transaksi;
 
+use App\Models\Barang;
 use App\Models\Peminjaman;
+use App\Models\Pengaturan;
 use App\Models\User;
+use App\Notifications\AjuanBaru;
 use App\Notifications\AjuanKedaluwarsa;
 use App\Notifications\PengingatPengembalian;
 use Illuminate\Console\Scheduling\Schedule;
@@ -39,9 +42,9 @@ class SchedulerNotifikasiLaporanTest extends TestCase
 
         $this->artisan('peminjaman:kedaluwarsa')->expectsOutputToContain('1 ajuan')->assertSuccessful();
 
-        $this->assertSame('kedaluwarsa', $lewat->fresh()->status);
-        $this->assertSame('disetujui', $masih->fresh()->status);
-        $this->assertSame('menunggu', $menunggu->fresh()->status);
+        $this->assertSame('kedaluwarsa', $lewat->fresh()->status->value);
+        $this->assertSame('disetujui', $masih->fresh()->status->value);
+        $this->assertSame('menunggu', $menunggu->fresh()->status->value);
         Notification::assertSentToTimes($this->peminjam, AjuanKedaluwarsa::class, 1);
 
         // Dijalankan lagi tidak memproses ulang
@@ -54,21 +57,21 @@ class SchedulerNotifikasiLaporanTest extends TestCase
         $p = $this->buatPeminjaman($this->peminjam, 'disetujui', '2026-10-15', '2026-10-16', [$b->id => 1]);
 
         $this->artisan('peminjaman:kedaluwarsa', ['--tanggal' => '2026-10-16'])->assertSuccessful();
-        $this->assertSame('disetujui', $p->fresh()->status);
+        $this->assertSame('disetujui', $p->fresh()->status->value);
 
         $this->artisan('peminjaman:kedaluwarsa', ['--tanggal' => '2026-10-17'])->assertSuccessful();
-        $this->assertSame('kedaluwarsa', $p->fresh()->status);
+        $this->assertSame('kedaluwarsa', $p->fresh()->status->value);
     }
 
     public function test_batas_ambil_mengikuti_pengaturan(): void
     {
-        \App\Models\Pengaturan::atur(\App\Models\Pengaturan::BATAS_AMBIL_HARI, 3);
+        Pengaturan::atur(Pengaturan::BATAS_AMBIL_HARI, 3);
         $b = $this->buatBarang('PRJ', 5);
         $p = $this->buatPeminjaman($this->peminjam, 'disetujui', '2026-10-08', '2026-10-15', [$b->id => 1]);
 
         $this->artisan('peminjaman:kedaluwarsa')->assertSuccessful();
 
-        $this->assertSame('disetujui', $p->fresh()->status);
+        $this->assertSame('disetujui', $p->fresh()->status->value);
     }
 
     // ---------- Scheduler: pengingat H-1 ----------
@@ -119,7 +122,7 @@ class SchedulerNotifikasiLaporanTest extends TestCase
         $b = $this->buatBarang('PRJ', 1);
         $p = $this->buatPeminjaman($this->peminjam, 'menunggu', '2026-10-11', '2026-10-12', [$b->id => 1]);
 
-        $mail = (new \App\Notifications\AjuanBaru($p))->toMail($admin);
+        $mail = (new AjuanBaru($p))->toMail($admin);
 
         $this->assertSame(route('admin.peminjaman.show', $p), $mail->actionUrl);
     }
@@ -177,7 +180,7 @@ class SchedulerNotifikasiLaporanTest extends TestCase
         // Halaman publik peminjam (tanpa login)
         auth()->logout();
         $this->get('/')->assertOk()->assertSee('Mikroskop Stereo')->assertSee('Kategori Alat');
-        $this->get('/katalog/'.\App\Models\Barang::value('id'))->assertOk();
+        $this->get('/katalog/'.Barang::value('id'))->assertOk();
         $this->get('/ajuan')->assertOk();
         foreach ($andi->peminjaman as $p) {
             $this->post('/status', ['kode' => $p->kode_peminjaman, 'nomor_identitas' => $andi->nomor_identitas]);

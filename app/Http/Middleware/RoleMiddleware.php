@@ -32,7 +32,7 @@ class RoleMiddleware
         }
 
         // Menyembunyikan menu saja tidak cukup: peran yang tidak cocok ditolak 403
-        if (! in_array($user->role, $roles, true)) {
+        if (! in_array($user->role->value, $roles, true)) {
             abort(403, 'Anda tidak memiliki akses ke halaman ini.');
         }
 

@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Http\Controllers\Peminjam\StatusController;
 use App\Models\Peminjaman;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -16,9 +17,7 @@ abstract class NotifikasiPeminjaman extends Notification
 {
     use Queueable;
 
-    public function __construct(public Peminjaman $peminjaman)
-    {
-    }
+    public function __construct(public Peminjaman $peminjaman) {}
 
     abstract public function judul(): string;
 
@@ -29,7 +28,7 @@ abstract class NotifikasiPeminjaman extends Notification
     {
         return $notifiable->isAdmin()
             ? route('admin.peminjaman.show', $this->peminjaman)
-            : \App\Http\Controllers\Peminjam\StatusController::tautan($this->peminjaman);
+            : StatusController::tautan($this->peminjaman);
     }
 
     /** Baris tambahan di email (opsional). */
@@ -45,7 +44,7 @@ abstract class NotifikasiPeminjaman extends Notification
 
     public function toMail(object $notifiable): MailMessage
     {
-        $mail = (new MailMessage())
+        $mail = (new MailMessage)
             ->subject($this->judul().' — '.$this->peminjaman->kode_peminjaman)
             ->greeting('Halo, '.$notifiable->name)
             ->line($this->pesan());

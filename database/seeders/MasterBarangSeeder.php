@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Enums\KondisiUnit;
+use App\Enums\StatusUnit;
 use App\Models\Barang;
 use App\Models\Kategori;
 use App\Models\Lokasi;
@@ -49,8 +51,8 @@ class MasterBarangSeeder extends Seeder
                     'barang_id' => $barang->id,
                     'lokasi_id' => $lokasi[$namaLokasi]->id,
                     'kode_unit' => sprintf('%s-%03d', $prefix, $n), // contoh MKR-001
-                    'kondisi' => UnitBarang::KONDISI_BAIK,
-                    'status' => UnitBarang::STATUS_TERSEDIA,
+                    'kondisi' => KondisiUnit::Baik,
+                    'status' => StatusUnit::Tersedia,
                     'tanggal_perolehan' => now()->subMonths(rand(3, 36))->startOfMonth(),
                 ]);
             }
@@ -58,10 +60,10 @@ class MasterBarangSeeder extends Seeder
 
         // Contoh unit yang tidak bisa dipinjam
         UnitBarang::where('kode_unit', 'HPS-003')->update([
-            'kondisi' => UnitBarang::KONDISI_RUSAK, 'status' => UnitBarang::STATUS_PERBAIKAN,
+            'kondisi' => KondisiUnit::Rusak, 'status' => StatusUnit::Perbaikan,
         ]);
         UnitBarang::where('kode_unit', 'MPP-002')->update([
-            'kondisi' => UnitBarang::KONDISI_HILANG, 'status' => UnitBarang::STATUS_HILANG,
+            'kondisi' => KondisiUnit::Hilang, 'status' => StatusUnit::Hilang,
         ]);
     }
 }

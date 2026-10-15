@@ -47,7 +47,7 @@ class AjuanRequest extends FormRequest
             'tanggal_pinjam' => ['required', 'date', 'after_or_equal:today'],
             'tanggal_rencana_kembali' => ['required', 'date', 'after_or_equal:tanggal_pinjam'],
             'items' => ['required', 'array', 'min:1'],
-            'items.*.barang_id' => ['required', 'integer', 'distinct', 'exists:barang,id'],
+            'items.*.barang_id' => ['required', 'ulid', 'distinct', 'exists:barang,id'],
             'items.*.jumlah' => ['required', 'integer', 'min:1'],
         ];
     }
@@ -81,12 +81,12 @@ class AjuanRequest extends FormRequest
                 $selesai = Carbon::parse($this->input('tanggal_rencana_kembali'));
 
                 // Lama pinjam = selisih tanggal (tgl 1 → tgl 8 = 7 hari)
-                $maksHari = (int) Pengaturan::nilai(Pengaturan::LAMA_PINJAM_MAKS);
+                $maksHari = Pengaturan::angka(Pengaturan::LAMA_PINJAM_MAKS);
                 if ($mulai->diffInDays($selesai) > $maksHari) {
                     $validator->errors()->add('tanggal_rencana_kembali', "Lama pinjam maksimal {$maksHari} hari.");
                 }
 
-                $maksUnit = (int) Pengaturan::nilai(Pengaturan::UNIT_MAKS_PER_AJUAN);
+                $maksUnit = Pengaturan::angka(Pengaturan::UNIT_MAKS_PER_AJUAN);
                 $total = collect($this->input('items'))->sum('jumlah');
                 if ($total > $maksUnit) {
                     $validator->errors()->add('items', "Total maksimal {$maksUnit} unit per ajuan (Anda meminta {$total}).");
@@ -98,8 +98,8 @@ class AjuanRequest extends FormRequest
                 if ($kurang !== []) {
                     $nama = Barang::whereIn('id', array_keys($kurang))->pluck('nama', 'id');
                     foreach ($this->input('items') as $i => $item) {
-                        if (array_key_exists((int) $item['barang_id'], $kurang)) {
-                            $sisa = $kurang[(int) $item['barang_id']];
+                        if (array_key_exists($item['barang_id'], $kurang)) {
+                            $sisa = $kurang[$item['barang_id']];
                             $validator->errors()->add("items.$i.jumlah", "{$nama[$item['barang_id']]} hanya tersisa {$sisa} unit pada tanggal tersebut.");
                         }
                     }

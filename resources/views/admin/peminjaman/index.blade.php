@@ -1,3 +1,4 @@
+@use('App\Enums\StatusPeminjaman')
 <x-app-layout>
     <x-slot name="header"><span class="text-sm text-marian-500">Transaksi</span></x-slot>
 
@@ -46,7 +47,7 @@
                                 @endif
                             </td>
                             <td class="whitespace-nowrap px-4 py-3 text-right">
-                                @if ($p->status === 'disetujui')
+                                @if ($p->status === StatusPeminjaman::Disetujui)
                                     <x-link-button :href="route('admin.peminjaman.serah', $p)" class="!px-3">Serah-terima</x-link-button>
                                 @else
                                     <x-link-button :href="route('admin.pengembalian.create', $p)" class="!px-3">Pengembalian</x-link-button>

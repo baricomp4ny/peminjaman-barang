@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\KondisiUnit;
 use App\Models\Barang;
 use App\Models\UnitBarang;
 use Illuminate\Support\Collection;
@@ -32,7 +33,7 @@ class KodeUnitService
                     'kode_unit' => $this->format($barang->kode, $nomor + $i),
                     'kondisi' => $data['kondisi'],
                     // Unit rusak/hilang tidak boleh berstatus tersedia
-                    'status' => UnitBarang::statusDariKondisi($data['kondisi']),
+                    'status' => KondisiUnit::from($data['kondisi'])->statusUnit(),
                     'tanggal_perolehan' => $data['tanggal_perolehan'] ?? null,
                 ]));
             }

@@ -16,12 +16,12 @@ class ScanCekUnitRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'peminjaman_id' => ['required', 'integer', 'exists:peminjaman,id'],
+            'peminjaman_id' => ['required', 'ulid', 'exists:peminjaman,id'],
             // Batas longgar: karakter sisa scanner dibuang dulu, panjang akhir dicek di ScanService
             'kode' => ['required', 'string', 'max:500'],
             'mode' => ['required', Rule::in([ScanService::MODE_SERAH, ScanService::MODE_KEMBALI])],
             'sudah' => ['nullable', 'array', 'max:100'],
-            'sudah.*' => ['integer'],
+            'sudah.*' => ['ulid'],
         ];
     }
 

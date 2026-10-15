@@ -76,7 +76,7 @@
                 <li class="rounded-3xl bg-white/10 p-4 ring-1 ring-white/15"><div class="text-3xl font-extrabold">{{ $aturan['lama'] }}</div><div class="text-xs text-marian-100">hari maksimal</div></li>
                 <li class="rounded-3xl bg-white/10 p-4 ring-1 ring-white/15"><div class="text-3xl font-extrabold">{{ $aturan['unit'] }}</div><div class="text-xs text-marian-100">unit per ajuan</div></li>
                 <li class="rounded-3xl bg-white/10 p-4 ring-1 ring-white/15">
-                    <div class="text-2xl font-extrabold">{{ $aturan['denda'] > 0 ? 'Rp'.number_format($aturan['denda'], 0, ',', '.') : 'Gratis' }}</div>
+                    <div class="text-2xl font-extrabold">{{ $aturan['denda'] > 0 ? rupiah($aturan['denda']) : 'Gratis' }}</div>
                     <div class="text-xs text-marian-100">{{ $aturan['denda'] > 0 ? 'denda/unit/hari' : 'tanpa denda' }}</div>
                 </li>
             </ul>

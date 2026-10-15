@@ -1,13 +1,14 @@
+@use('App\Enums\StatusPeminjaman')
 @php $p = $peminjaman; @endphp
 
 <x-app-layout>
     <x-slot name="header"><span class="text-sm text-marian-500">Transaksi</span></x-slot>
 
     <x-admin.judul :judul="'Peminjaman '.$p->kode_peminjaman" :kembali="url()->previous() !== url()->current() ? url()->previous() : route('admin.riwayat.index')">
-        @if ($p->status === 'disetujui')
+        @if ($p->status === StatusPeminjaman::Disetujui)
             <x-link-button variant="secondary" :href="route('admin.peminjaman.serah', $p)">Serah-terima (form)</x-link-button>
             <x-link-button :href="route('admin.scan.index', ['mode' => 'serah', 'peminjaman' => $p->id])">Serah-terima (Scan QR)</x-link-button>
-        @elseif ($p->status === 'dipinjam')
+        @elseif ($p->status === StatusPeminjaman::Dipinjam)
             <x-link-button variant="secondary" :href="route('admin.pengembalian.create', $p)">Pengembalian (form)</x-link-button>
             <x-link-button :href="route('admin.scan.index', ['mode' => 'kembali', 'peminjaman' => $p->id])">Pengembalian (Scan QR)</x-link-button>
         @endif
@@ -19,7 +20,7 @@
         </div>
 
         <div class="space-y-4">
-            @if ($p->status === 'menunggu')
+            @if ($p->status === StatusPeminjaman::Menunggu)
                 {{-- Panel verifikasi: identitas, ketersediaan, aturan --}}
                 <div class="rounded-3xl bg-white p-5 shadow-lembut ring-1 ring-marian-100">
                     <h3 class="font-semibold text-marian-900">Verifikasi</h3>
@@ -81,7 +82,7 @@
                         </div>
                     </div>
                 </div>
-            @elseif ($p->status === 'disetujui')
+            @elseif ($p->status === StatusPeminjaman::Disetujui)
                 <div class="rounded-lg bg-indigo-50 p-5 text-sm text-indigo-800 shadow-lembut ring-1 ring-marian-100">
                     Siap diambil mulai <strong>{{ $p->tanggal_pinjam->translatedFormat('d M Y') }}</strong>
                     sampai <strong>{{ $batasAmbil->translatedFormat('d M Y') }}</strong>. Setelah itu otomatis kedaluwarsa.
@@ -89,7 +90,7 @@
             @elseif ($perkiraanDenda > 0)
                 <div class="rounded-lg bg-red-50 p-5 text-sm text-red-800 shadow-lembut ring-1 ring-marian-100">
                     Terlambat {{ $p->hariTerlambatBerjalan() }} hari. Perkiraan denda bila dikembalikan hari ini:
-                    <strong>Rp{{ number_format($perkiraanDenda, 0, ',', '.') }}</strong>.
+                    <strong>{{ rupiah($perkiraanDenda) }}</strong>.
                 </div>
             @endif
         </div>

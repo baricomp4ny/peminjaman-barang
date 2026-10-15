@@ -2,6 +2,8 @@
 
 namespace Tests\Concerns;
 
+use App\Enums\StatusPeminjaman;
+use App\Enums\StatusUnit;
 use App\Models\Barang;
 use App\Models\Kategori;
 use App\Models\Lokasi;
@@ -35,9 +37,9 @@ trait DataPeminjaman
     }
 
     /**
-     * @param  array<int, int>  $barang  barang_id => jumlah
+     * @param  array<string, int>  $barang  barang_id => jumlah
      */
-    protected function buatPeminjaman(User $user, string $status, $mulai, $selesai, array $barang, array $extra = []): Peminjaman
+    protected function buatPeminjaman(User $user, StatusPeminjaman|string $status, $mulai, $selesai, array $barang, array $extra = []): Peminjaman
     {
         $p = Peminjaman::create(array_merge([
             'kode_peminjaman' => 'PJM-TES-'.sprintf('%04d', ++$this->urutKode),
@@ -62,10 +64,10 @@ trait DataPeminjaman
 
         foreach ($kodeUnit as $kode) {
             $unit = UnitBarang::where('kode_unit', $kode)->firstOrFail();
-            PeminjamanUnit::create(['peminjaman_id' => $p->id, 'unit_barang_id' => $unit->id, 'diserahkan_pada' => $waktu]);
-            $unit->update(['status' => UnitBarang::STATUS_DIPINJAM]);
+            PeminjamanUnit::create(['peminjaman_id' => $p->id, 'unit_barang_id' => $unit->id]);
+            $unit->update(['status' => StatusUnit::Dipinjam]);
         }
 
-        $p->update(['status' => Peminjaman::STATUS_DIPINJAM, 'diserahkan_pada' => $waktu]);
+        $p->update(['status' => StatusPeminjaman::Dipinjam, 'diserahkan_pada' => $waktu]);
     }
 }

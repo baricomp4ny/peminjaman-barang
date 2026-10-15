@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\StatusPeminjaman;
 use App\Exceptions\PeminjamanException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\TolakRequest;
@@ -17,7 +18,7 @@ class AjuanController extends Controller
     public function index(): View
     {
         $ajuan = Peminjaman::with(['peminjam', 'detail.barang'])
-            ->where('status', Peminjaman::STATUS_MENUNGGU)
+            ->where('status', StatusPeminjaman::Menunggu)
             ->orderBy('tanggal_pinjam')   // yang paling dekat tanggal pinjamnya di atas
             ->orderBy('created_at')
             ->paginate(15);

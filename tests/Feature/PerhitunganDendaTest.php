@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\StatusUnit;
 use App\Models\Barang;
 use App\Models\Peminjaman;
 use App\Models\PeminjamanUnit;
@@ -21,6 +22,7 @@ class PerhitunganDendaTest extends TestCase
     use DataPeminjaman, RefreshDatabase;
 
     private User $admin;
+
     private User $peminjam;
 
     protected function setUp(): void
@@ -91,7 +93,7 @@ class PerhitunganDendaTest extends TestCase
         $row = PeminjamanUnit::first();
         $this->assertSame(2, $row->hari_terlambat);
         $this->assertSame(2000, $row->denda);
-        $this->assertSame('hilang', UnitBarang::where('kode_unit', 'PRJ-001')->value('status'));
+        $this->assertSame(StatusUnit::Hilang, UnitBarang::where('kode_unit', 'PRJ-001')->value('status'));
     }
 
     public function test_perkiraan_denda_berjalan_berkurang_setelah_pengembalian_sebagian(): void
@@ -122,7 +124,7 @@ class PerhitunganDendaTest extends TestCase
         $denda = PeminjamanUnit::orderBy('id')->pluck('denda')->all();
         $this->assertSame([2000, 9000], $denda);
         $this->assertSame(11000, $p->fresh()->totalDenda());
-        $this->assertSame('selesai', $p->fresh()->status);
+        $this->assertSame('selesai', $p->fresh()->status->value);
     }
 
     public function test_total_denda_di_laporan_sama_dengan_database(): void

@@ -9,9 +9,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('peminjaman', function (Blueprint $table) {
-            $table->id();
+            $table->ulid('id')->primary();
             $table->string('kode_peminjaman', 30)->unique(); // contoh PJM-20261015-0001
-            $table->foreignId('user_id')->constrained('users')->restrictOnDelete();
+            $table->foreignUlid('user_id')->constrained('users')->restrictOnDelete();
             $table->text('tujuan');
             $table->date('tanggal_pinjam');
             $table->date('tanggal_rencana_kembali');
@@ -19,8 +19,9 @@ return new class extends Migration
                 'menunggu', 'disetujui', 'ditolak', 'dipinjam', 'selesai', 'dibatalkan', 'kedaluwarsa',
             ])->default('menunggu');
             $table->text('alasan_penolakan')->nullable();
-            $table->foreignId('diverifikasi_oleh')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignUlid('diverifikasi_oleh')->nullable()->constrained('users')->nullOnDelete();
             $table->dateTime('diverifikasi_pada')->nullable();
+            // Waktu serah-terima (berlaku untuk semua unit; tidak diulang di peminjaman_unit)
             $table->dateTime('diserahkan_pada')->nullable();
             $table->timestamps();
 

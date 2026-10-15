@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Auth;
 
+use App\Enums\Peran;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
@@ -42,7 +43,7 @@ class LoginRequest extends FormRequest
         $this->ensureIsNotRateLimited();
 
         // Login hanya untuk admin; peminjam mengajukan lewat halaman publik tanpa akun
-        $kredensial = $this->only('email', 'password') + ['role' => \App\Models\User::ROLE_ADMIN];
+        $kredensial = $this->only('email', 'password') + ['role' => Peran::Admin];
 
         if (! Auth::attempt($kredensial, $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey());

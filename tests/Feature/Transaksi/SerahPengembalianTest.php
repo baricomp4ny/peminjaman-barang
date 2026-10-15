@@ -2,6 +2,9 @@
 
 namespace Tests\Feature\Transaksi;
 
+use App\Enums\KondisiUnit;
+use App\Enums\StatusUnit;
+use App\Models\Barang;
 use App\Models\Peminjaman;
 use App\Models\PeminjamanUnit;
 use App\Models\Pengaturan;
@@ -20,6 +23,7 @@ class SerahPengembalianTest extends TestCase
     use DataPeminjaman, RefreshDatabase;
 
     private User $admin;
+
     private User $peminjam;
 
     protected function setUp(): void
@@ -33,9 +37,9 @@ class SerahPengembalianTest extends TestCase
         $this->buatBarang('LPT', 2, 'Laptop');
     }
 
-    private function id(string $kode): int
+    private function id(string $kode): string
     {
-        return \App\Models\Barang::where('kode', $kode)->value('id');
+        return Barang::where('kode', $kode)->value('id');
     }
 
     private function serah(Peminjaman $p, array $kode)
@@ -52,7 +56,7 @@ class SerahPengembalianTest extends TestCase
         $this->actingAs($this->admin)->get("/admin/peminjaman/{$p->id}/serah")->assertOk()->assertSee('PRJ-001');
         $this->serah($p, ['PRJ-001', 'prj-002', 'LPT-001'])->assertSessionHas('success');
 
-        $this->assertSame('dipinjam', $p->fresh()->status);
+        $this->assertSame('dipinjam', $p->fresh()->status->value);
         $this->assertNotNull($p->fresh()->diserahkan_pada);
         $this->assertSame(3, PeminjamanUnit::where('peminjaman_id', $p->id)->count());
         $this->assertSame(3, UnitBarang::where('status', 'dipinjam')->count());
@@ -64,7 +68,7 @@ class SerahPengembalianTest extends TestCase
 
         $this->actingAs($this->admin)->post("/admin/peminjaman/{$p->id}/serah", ['kode_manual' => 'PRJ-001, PRJ-003'])
             ->assertSessionHas('success');
-        $this->assertSame('dipinjam', $p->fresh()->status);
+        $this->assertSame('dipinjam', $p->fresh()->status->value);
     }
 
     /** @dataProvider kasusSerahSalah */
@@ -75,7 +79,7 @@ class SerahPengembalianTest extends TestCase
 
         $this->serah($p, $kode)->assertSessionHas('error', fn ($e) => str_contains($e, $pesan));
 
-        $this->assertSame('disetujui', $p->fresh()->status);
+        $this->assertSame('disetujui', $p->fresh()->status->value);
         $this->assertSame(0, PeminjamanUnit::count());
         $this->assertSame(0, UnitBarang::where('status', 'dipinjam')->count());
     }
@@ -115,7 +119,7 @@ class SerahPengembalianTest extends TestCase
         $p = $this->buatPeminjaman($this->peminjam, 'menunggu', '2026-10-10', '2026-10-12', [$this->id('PRJ') => 1]);
 
         $this->serah($p, ['PRJ-001'])->assertSessionHas('error');
-        $this->assertSame('menunggu', $p->fresh()->status);
+        $this->assertSame('menunggu', $p->fresh()->status->value);
     }
 
     // ---------- Pengembalian & denda ----------
@@ -146,11 +150,11 @@ class SerahPengembalianTest extends TestCase
         $this->actingAs($this->admin)->get("/admin/pengembalian/{$p->id}")->assertOk();
         $this->kembalikan($p, ['PRJ-001' => 'baik'])->assertSessionHas('success');
 
-        $this->assertSame('selesai', $p->fresh()->status);
+        $this->assertSame('selesai', $p->fresh()->status->value);
         $row = PeminjamanUnit::first();
         $this->assertSame(0, $row->hari_terlambat);
         $this->assertSame(0, $row->denda);
-        $this->assertSame('tersedia', UnitBarang::where('kode_unit', 'PRJ-001')->value('status'));
+        $this->assertSame(StatusUnit::Tersedia, UnitBarang::where('kode_unit', 'PRJ-001')->value('status'));
         Notification::assertSentTo($this->peminjam, PengembalianDicatat::class);
     }
 
@@ -171,13 +175,13 @@ class SerahPengembalianTest extends TestCase
         $p = $this->pinjamanBerjalan('2026-10-08', '2026-10-12', ['PRJ-001', 'PRJ-002']);
 
         $this->kembalikan($p, ['PRJ-001' => 'baik'])->assertSessionHas('success');
-        $this->assertSame('dipinjam', $p->fresh()->status);
+        $this->assertSame('dipinjam', $p->fresh()->status->value);
 
         // Unit yang sama tidak bisa dikembalikan dua kali
         $this->kembalikan($p, ['PRJ-001' => 'baik'])->assertSessionHas('error');
 
         $this->kembalikan($p, ['PRJ-002' => 'baik'])->assertSessionHas('success');
-        $this->assertSame('selesai', $p->fresh()->status);
+        $this->assertSame('selesai', $p->fresh()->status->value);
     }
 
     public function test_kondisi_kembali_menentukan_status_unit(): void
@@ -187,10 +191,10 @@ class SerahPengembalianTest extends TestCase
         $this->kembalikan($p, ['PRJ-001' => 'baik', 'PRJ-002' => 'rusak', 'PRJ-003' => 'hilang']);
 
         $unit = UnitBarang::pluck('status', 'kode_unit');
-        $this->assertSame('tersedia', $unit['PRJ-001']);
-        $this->assertSame('perbaikan', $unit['PRJ-002']);
-        $this->assertSame('hilang', $unit['PRJ-003']);
-        $this->assertSame('rusak', UnitBarang::where('kode_unit', 'PRJ-002')->value('kondisi'));
+        $this->assertSame(StatusUnit::Tersedia, $unit['PRJ-001']);
+        $this->assertSame(StatusUnit::Perbaikan, $unit['PRJ-002']);
+        $this->assertSame(StatusUnit::Hilang, $unit['PRJ-003']);
+        $this->assertSame(KondisiUnit::Rusak, UnitBarang::where('kode_unit', 'PRJ-002')->value('kondisi'));
     }
 
     public function test_perubahan_tarif_tidak_mengubah_denda_yang_sudah_tercatat(): void
@@ -239,7 +243,7 @@ class SerahPengembalianTest extends TestCase
             'tanggal_kembali' => '2026-10-10', 'unit' => [$id => ['pilih' => 0, 'kondisi' => 'baik']],
         ])->assertSessionHas('error');
 
-        $this->assertSame('dipinjam', $p->fresh()->status);
+        $this->assertSame('dipinjam', $p->fresh()->status->value);
     }
 
     public function test_hari_terlambat_mengabaikan_jam(): void

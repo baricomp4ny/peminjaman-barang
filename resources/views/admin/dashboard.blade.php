@@ -10,7 +10,7 @@
             ['Siap diambil', $kartu['siapAmbil'], route('admin.peminjaman.index', ['tab' => 'disetujui']), 'text-indigo-600'],
             ['Sedang dipinjam', $kartu['dipinjam'], route('admin.peminjaman.index', ['tab' => 'dipinjam']), 'text-marian-700'],
             ['Terlambat', $kartu['terlambat'], route('admin.peminjaman.index', ['tab' => 'terlambat']), 'text-red-600'],
-            ['Denda bulan ini', 'Rp'.number_format($kartu['dendaBulanIni'], 0, ',', '.'), route('admin.laporan.show', 'denda'), 'text-marian-900'],
+            ['Denda bulan ini', rupiah($kartu['dendaBulanIni']), route('admin.laporan.show', 'denda'), 'text-marian-900'],
         ] as [$label, $nilai, $url, $warna])
             <a href="{{ $url }}" class="rounded-3xl bg-white p-4 shadow-lembut ring-1 ring-marian-100 hover:ring-2 hover:ring-indigo-200">
                 <div class="text-sm text-marian-500">{{ $label }}</div>

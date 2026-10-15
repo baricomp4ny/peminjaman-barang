@@ -8,6 +8,7 @@ use App\Http\Requests\Admin\LaporanRequest;
 use App\Services\LaporanService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -19,7 +20,7 @@ class LaporanController extends Controller
     }
 
     /** Tampilkan laporan di web, atau unduh sebagai PDF/Excel (?format=pdf|excel). */
-    public function show(LaporanRequest $request, string $jenis, LaporanService $service): Response|\Illuminate\View\View
+    public function show(LaporanRequest $request, string $jenis, LaporanService $service): Response|View
     {
         $laporan = $service->buat($jenis, $request->dari(), $request->sampai());
         $namaFile = 'laporan-'.$jenis.'-'.now()->format('Ymd-His');

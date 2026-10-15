@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Enums\Peran;
+use App\Enums\StatusAkun;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -29,7 +31,7 @@ class IdentitasPeminjamService
      * Periksa identitas yang diisi di form.
      *
      * @param  array{name:string, nomor_identitas:string, email:string, unit?:?string, no_hp?:?string}  $data
-     * @return array<string, string>  field => pesan error (kosong bila valid)
+     * @return array<string, string> field => pesan error (kosong bila valid)
      */
     public function periksa(array $data): array
     {
@@ -84,7 +86,7 @@ class IdentitasPeminjamService
                 'no_hp' => $data['no_hp'] ?? null,
             ]);
             // role & status tidak ada di $fillable; peminjam tanpa password (tidak bisa login)
-            $user->forceFill(['role' => User::ROLE_PEMINJAM, 'status' => User::STATUS_AKTIF, 'password' => null])->save();
+            $user->forceFill(['role' => Peran::Peminjam, 'status' => StatusAkun::Aktif, 'password' => null])->save();
 
             return $user;
         });

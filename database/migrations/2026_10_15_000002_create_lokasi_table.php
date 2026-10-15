@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('lokasi', function (Blueprint $table) {
-            $table->id();
+            $table->ulid('id')->primary();
             $table->string('nama', 100)->unique();
             $table->string('keterangan')->nullable();
             $table->timestamps();

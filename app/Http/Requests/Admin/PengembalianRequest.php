@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Admin;
 
-use App\Models\UnitBarang;
+use App\Enums\KondisiUnit;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -23,7 +23,7 @@ class PengembalianRequest extends FormRequest
             'tanggal_kembali' => ['required', 'date', 'before_or_equal:today'],
             'unit' => ['required', 'array'],
             'unit.*.pilih' => ['nullable', 'boolean'],
-            'unit.*.kondisi' => ['required_if:unit.*.pilih,1', 'nullable', Rule::in([UnitBarang::KONDISI_BAIK, UnitBarang::KONDISI_RUSAK, UnitBarang::KONDISI_HILANG])],
+            'unit.*.kondisi' => ['required_if:unit.*.pilih,1', 'nullable', Rule::enum(KondisiUnit::class)],
             'unit.*.catatan' => ['nullable', 'string', 'max:255'],
         ];
     }

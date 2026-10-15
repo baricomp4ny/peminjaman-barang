@@ -2,28 +2,25 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Enums\Peran;
+use App\Enums\StatusAkun;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
 
+/**
+ * Admin (login) dan peminjam (tanpa login, dicocokkan lewat nomor_identitas).
+ */
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
-
-    public const ROLE_ADMIN = 'admin';
-    public const ROLE_PEMINJAM = 'peminjam';
-
-    public const STATUS_AKTIF = 'aktif';
-    public const STATUS_NONAKTIF = 'nonaktif';
+    use HasFactory, HasUlids, Notifiable;
 
     /**
-     * Kolom yang boleh diisi massal.
-     * Sengaja tanpa `role` dan `status` supaya tidak bisa disisipkan lewat form
-     * (misal registrasi publik). Keduanya diisi eksplisit oleh admin/seeder.
+     * Sengaja tanpa `role` dan `status` supaya tidak bisa disisipkan lewat form;
+     * keduanya diisi eksplisit (forceFill) oleh admin/seeder.
      *
      * @var array<int, string>
      */
@@ -36,24 +33,18 @@ class User extends Authenticatable
         'no_hp',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
+    /** @var array<int, string> */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
+    /** @var array<string, string> */
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'role' => Peran::class,
+        'status' => StatusAkun::class,
     ];
 
     // ---------- Relasi ----------
@@ -70,32 +61,37 @@ class User extends Authenticatable
         return $this->hasMany(Peminjaman::class, 'diverifikasi_oleh');
     }
 
+    // ---------- Scope ----------
+
+    public function scopePeminjam(Builder $query): Builder
+    {
+        return $query->where('role', Peran::Peminjam);
+    }
+
+    public function scopeAdmin(Builder $query): Builder
+    {
+        return $query->where('role', Peran::Admin);
+    }
+
+    public function scopeAktif(Builder $query): Builder
+    {
+        return $query->where('status', StatusAkun::Aktif);
+    }
+
     // ---------- Helper ----------
 
     public function isAdmin(): bool
     {
-        return $this->role === self::ROLE_ADMIN;
+        return $this->role === Peran::Admin;
     }
 
     public function isPeminjam(): bool
     {
-        return $this->role === self::ROLE_PEMINJAM;
+        return $this->role === Peran::Peminjam;
     }
 
     public function isAktif(): bool
     {
-        return $this->status === self::STATUS_AKTIF;
-    }
-
-    /** Halaman awal sesuai peran. */
-    public function homeRoute(): string
-    {
-        // Hanya admin yang login; peminjam memakai halaman publik
-        return $this->isAdmin() ? route('admin.dashboard') : route('peminjam.katalog.index');
-    }
-
-    public function scopePeminjam(Builder $query): Builder
-    {
-        return $query->where('role', self::ROLE_PEMINJAM);
+        return $this->status === StatusAkun::Aktif;
     }
 }

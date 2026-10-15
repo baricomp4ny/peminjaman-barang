@@ -8,10 +8,11 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // Tabel jenis barang (misal: Proyektor). Unit fisiknya ada di unit_barang.
+        // Jenis alat (misal: Mikroskop Stereo). Unit fisiknya ada di unit_barang.
         Schema::create('barang', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('kategori_id')->constrained('kategori')->restrictOnDelete();
+            $table->ulid('id')->primary();
+            $table->foreignUlid('kategori_id')->constrained('kategori')->restrictOnDelete();
+            $table->string('kode', 5)->unique(); // prefix kode unit, misal MKR → MKR-001
             $table->string('nama');
             $table->text('deskripsi')->nullable();
             $table->string('foto')->nullable(); // path file di storage

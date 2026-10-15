@@ -1,3 +1,4 @@
+@use('App\Enums\StatusUnit')
 <x-app-layout>
     <x-slot name="header"><span class="text-sm text-marian-500">Data Barang</span></x-slot>
 
@@ -23,8 +24,8 @@
             </x-select>
             <x-select name="status">
                 <option value="">Semua status</option>
-                @foreach (['tersedia', 'dipinjam', 'perbaikan', 'hilang'] as $s)
-                    <option value="{{ $s }}" @selected(request('status') === $s)>{{ ucfirst($s) }}</option>
+                @foreach (StatusUnit::cases() as $s)
+                    <option value="{{ $s->value }}" @selected(request('status') === $s->value)>{{ $s->label() }}</option>
                 @endforeach
             </x-select>
             <x-secondary-button type="submit" class="justify-center">Filter</x-secondary-button>

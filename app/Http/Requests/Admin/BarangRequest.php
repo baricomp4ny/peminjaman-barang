@@ -25,7 +25,7 @@ class BarangRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'kategori_id' => ['required', 'integer', 'exists:kategori,id'],
+            'kategori_id' => ['required', 'ulid', 'exists:kategori,id'],
             'kode' => ['required', 'regex:/^[A-Z]{2,5}$/', Rule::unique('barang', 'kode')->ignore($this->route('barang'))],
             'nama' => ['required', 'string', 'max:150'],
             'deskripsi' => ['nullable', 'string', 'max:2000'],

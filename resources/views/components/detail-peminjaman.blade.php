@@ -94,7 +94,7 @@
                             <td class="whitespace-nowrap px-3 py-2">{{ $u->dikembalikan_pada?->translatedFormat('d M Y H:i') ?? 'Belum' }}</td>
                             <td class="px-3 py-2">@if ($u->kondisi_kembali)<x-admin.badge :value="$u->kondisi_kembali" />@else — @endif</td>
                             <td class="px-3 py-2 text-right">{{ $u->hari_terlambat ? $u->hari_terlambat.' hari' : '—' }}</td>
-                            <td class="whitespace-nowrap px-3 py-2 text-right">{{ $u->denda ? 'Rp'.number_format($u->denda, 0, ',', '.') : '—' }}</td>
+                            <td class="whitespace-nowrap px-3 py-2 text-right">{{ $u->denda ? rupiah($u->denda) : '—' }}</td>
                         </tr>
                         @if ($u->catatan)
                             <tr><td colspan="6" class="px-3 pb-2 text-xs text-marian-500">Catatan: {{ $u->catatan }}</td></tr>
@@ -105,7 +105,7 @@
                     <tfoot class="bg-marian-50 font-semibold">
                         <tr>
                             <td colspan="5" class="px-3 py-2 text-right">Total denda</td>
-                            <td class="whitespace-nowrap px-3 py-2 text-right">Rp{{ number_format($p->peminjamanUnit->sum('denda'), 0, ',', '.') }}</td>
+                            <td class="whitespace-nowrap px-3 py-2 text-right">{{ rupiah($p->peminjamanUnit->sum('denda')) }}</td>
                         </tr>
                     </tfoot>
                 @endif

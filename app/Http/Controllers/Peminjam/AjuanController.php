@@ -20,9 +20,9 @@ class AjuanController extends Controller
     {
         return view('peminjam.ajuan.create', [
             'barang' => Barang::orderBy('nama')->get(['id', 'nama', 'kode']),
-            'barangDipilih' => $request->integer('barang_id') ?: null,
-            'maksHari' => (int) Pengaturan::nilai(Pengaturan::LAMA_PINJAM_MAKS),
-            'maksUnit' => (int) Pengaturan::nilai(Pengaturan::UNIT_MAKS_PER_AJUAN),
+            'barangDipilih' => $request->query('barang_id'),
+            'maksHari' => Pengaturan::angka(Pengaturan::LAMA_PINJAM_MAKS),
+            'maksUnit' => Pengaturan::angka(Pengaturan::UNIT_MAKS_PER_AJUAN),
         ]);
     }
 

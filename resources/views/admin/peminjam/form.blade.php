@@ -39,8 +39,8 @@
                 <div>
                     <x-input-label for="status" value="Status Akun *" />
                     <x-select id="status" name="status" class="mt-1 block w-full" required>
-                        <option value="aktif" @selected(old('status', $peminjam->status) === 'aktif')>Aktif</option>
-                        <option value="nonaktif" @selected(old('status', $peminjam->status) === 'nonaktif')>Nonaktif (tidak bisa mengajukan)</option>
+                        <option value="aktif" @selected(old('status', $peminjam->status?->value) === 'aktif')>Aktif</option>
+                        <option value="nonaktif" @selected(old('status', $peminjam->status?->value) === 'nonaktif')>Nonaktif (tidak bisa mengajukan)</option>
                     </x-select>
                     <x-input-error :messages="$errors->get('status')" class="mt-2" />
                 </div>

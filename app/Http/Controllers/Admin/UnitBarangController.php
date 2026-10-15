@@ -47,7 +47,7 @@ class UnitBarangController extends Controller
             'barang' => $barang,
             'lokasi' => Lokasi::orderBy('nama')->get(['id', 'nama']),
             'kodeBerikutnya' => $kodeBerikutnya,
-            'barangDipilih' => $request->integer('barang_id') ?: null,
+            'barangDipilih' => $request->query('barang_id'),
         ]);
     }
 

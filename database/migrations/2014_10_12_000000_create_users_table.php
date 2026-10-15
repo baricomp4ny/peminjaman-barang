@@ -6,19 +6,17 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
-            $table->id();
+            // ULID: unik, tidak bisa ditebak, tetap urut waktu (bukan auto increment)
+            $table->ulid('id')->primary();
             $table->string('name');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
+            $table->string('password')->nullable(); // null untuk peminjam (tidak login)
             $table->enum('role', ['admin', 'peminjam'])->default('peminjam');
-            $table->string('nomor_identitas', 50)->nullable()->unique(); // NIM/NIP/NIK
+            $table->string('nomor_identitas', 50)->nullable()->unique(); // NIM/NIP, kunci pencocokan peminjam
             $table->string('unit', 100)->nullable(); // prodi/bagian
             $table->string('no_hp', 20)->nullable();
             $table->enum('status', ['aktif', 'nonaktif'])->default('aktif');
@@ -27,9 +25,6 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('users');

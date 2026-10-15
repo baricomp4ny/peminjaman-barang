@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Enums\Peran;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -34,12 +35,12 @@ class PasswordResetLinkController extends Controller
         // need to show to the user. Finally, we'll send out a proper response.
         // Reset password hanya untuk admin; peminjam tidak punya akun login
         $status = Password::sendResetLink(
-            ['email' => $request->input('email'), 'role' => \App\Models\User::ROLE_ADMIN]
+            ['email' => $request->input('email'), 'role' => Peran::Admin]
         );
 
         return $status == Password::RESET_LINK_SENT
                     ? back()->with('status', __($status))
                     : back()->withInput($request->only('email'))
-                            ->withErrors(['email' => __($status)]);
+                        ->withErrors(['email' => __($status)]);
     }
 }

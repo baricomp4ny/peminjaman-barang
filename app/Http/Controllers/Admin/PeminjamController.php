@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\Peran;
+use App\Enums\StatusAkun;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\PeminjamRequest;
 use App\Models\User;
@@ -31,7 +33,7 @@ class PeminjamController extends Controller
 
     public function create(): View
     {
-        return view('admin.peminjam.form', ['peminjam' => (new User())->forceFill(['status' => User::STATUS_AKTIF])]);
+        return view('admin.peminjam.form', ['peminjam' => (new User)->forceFill(['status' => StatusAkun::Aktif])]);
     }
 
     public function store(PeminjamRequest $request): RedirectResponse
@@ -42,7 +44,7 @@ class PeminjamController extends Controller
         // role & status tidak ada di $fillable; peminjam tanpa password (tidak login)
         $peminjam->forceFill([
             'password' => null,
-            'role' => User::ROLE_PEMINJAM,
+            'role' => Peran::Peminjam,
             'status' => $data['status'],
         ])->save();
 

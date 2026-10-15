@@ -2,7 +2,9 @@
 
 namespace App\Services;
 
-use App\Models\Peminjaman;
+use App\Enums\KondisiUnit;
+use App\Enums\StatusPeminjaman;
+use App\Enums\StatusUnit;
 use App\Models\PeminjamanDetail;
 use App\Models\PeminjamanUnit;
 use App\Models\UnitBarang;
@@ -25,12 +27,12 @@ use Illuminate\Support\Carbon;
 class KetersediaanService
 {
     /**
-     * @param  array<int>  $barangIds
-     * @return array<int, array{kapasitas:int, terpakai:int, sisa:int}>  dikunci barang_id
+     * @param  array<string>  $barangIds
+     * @return array<int, array{kapasitas:int, terpakai:int, sisa:int}> dikunci barang_id
      */
-    public function hitung(array $barangIds, $mulai, $selesai, ?int $kecualiPeminjamanId = null): array
+    public function hitung(array $barangIds, $mulai, $selesai, ?string $kecualiPeminjamanId = null): array
     {
-        $barangIds = array_values(array_unique(array_map('intval', $barangIds)));
+        $barangIds = array_values(array_unique(array_map('strval', $barangIds)));
         if ($barangIds === []) {
             return [];
         }
@@ -40,8 +42,8 @@ class KetersediaanService
 
         $kapasitas = UnitBarang::query()
             ->whereIn('barang_id', $barangIds)
-            ->where('kondisi', UnitBarang::KONDISI_BAIK)
-            ->whereIn('status', [UnitBarang::STATUS_TERSEDIA, UnitBarang::STATUS_DIPINJAM])
+            ->where('kondisi', KondisiUnit::Baik)
+            ->whereIn('status', [StatusUnit::Tersedia, StatusUnit::Dipinjam])
             ->selectRaw('barang_id, COUNT(*) as total')
             ->groupBy('barang_id')
             ->pluck('total', 'barang_id');
@@ -50,7 +52,7 @@ class KetersediaanService
         $dipesan = PeminjamanDetail::query()
             ->join('peminjaman', 'peminjaman.id', '=', 'peminjaman_detail.peminjaman_id')
             ->whereIn('peminjaman_detail.barang_id', $barangIds)
-            ->where('peminjaman.status', Peminjaman::STATUS_DISETUJUI)
+            ->where('peminjaman.status', StatusPeminjaman::Disetujui)
             ->when($kecualiPeminjamanId, fn ($q) => $q->where('peminjaman.id', '!=', $kecualiPeminjamanId))
             ->whereDate('peminjaman.tanggal_pinjam', '<=', $selesai)
             ->whereDate('peminjaman.tanggal_rencana_kembali', '>=', $mulai)
@@ -66,7 +68,7 @@ class KetersediaanService
             ->join('peminjaman', 'peminjaman.id', '=', 'peminjaman_unit.peminjaman_id')
             ->join('unit_barang', 'unit_barang.id', '=', 'peminjaman_unit.unit_barang_id')
             ->whereIn('unit_barang.barang_id', $barangIds)
-            ->where('peminjaman.status', Peminjaman::STATUS_DIPINJAM)
+            ->where('peminjaman.status', StatusPeminjaman::Dipinjam)
             ->whereNull('peminjaman_unit.dikembalikan_pada')
             ->when($kecualiPeminjamanId, fn ($q) => $q->where('peminjaman.id', '!=', $kecualiPeminjamanId))
             ->whereDate('peminjaman.tanggal_pinjam', '<=', $selesai)
@@ -87,7 +89,7 @@ class KetersediaanService
     }
 
     /** Sisa unit satu jenis barang pada rentang tanggal. */
-    public function sisa(int $barangId, $mulai, $selesai, ?int $kecualiPeminjamanId = null): int
+    public function sisa(string $barangId, $mulai, $selesai, ?string $kecualiPeminjamanId = null): int
     {
         return $this->hitung([$barangId], $mulai, $selesai, $kecualiPeminjamanId)[$barangId]['sisa'];
     }
@@ -95,10 +97,10 @@ class KetersediaanService
     /**
      * Cek apakah seluruh detail ajuan bisa dipenuhi.
      *
-     * @param  array<int, int>  $permintaan  barang_id => jumlah
-     * @return array<int, int>  barang_id => sisa, hanya untuk barang yang KURANG
+     * @param  array<string, int>  $permintaan  barang_id => jumlah
+     * @return array<string, int> barang_id => sisa, hanya untuk barang yang KURANG
      */
-    public function kekurangan(array $permintaan, CarbonInterface|string $mulai, CarbonInterface|string $selesai, ?int $kecualiPeminjamanId = null): array
+    public function kekurangan(array $permintaan, CarbonInterface|string $mulai, CarbonInterface|string $selesai, ?string $kecualiPeminjamanId = null): array
     {
         $stok = $this->hitung(array_keys($permintaan), $mulai, $selesai, $kecualiPeminjamanId);
 

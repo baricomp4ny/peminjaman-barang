@@ -2,12 +2,14 @@
 
 namespace Tests\Feature\Transaksi;
 
+use App\Http\Controllers\Peminjam\StatusController;
 use App\Models\Peminjaman;
 use App\Models\Pengaturan;
 use App\Models\User;
 use App\Notifications\AjuanBaru;
 use App\Notifications\AjuanDisetujui;
 use App\Notifications\AjuanDitolak;
+use App\Notifications\AjuanTerkirim;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Tests\Concerns\DataPeminjaman;
@@ -18,6 +20,7 @@ class AjuanVerifikasiTest extends TestCase
     use DataPeminjaman, RefreshDatabase;
 
     private User $admin;
+
     private User $peminjam;
 
     protected function setUp(): void
@@ -66,8 +69,8 @@ class AjuanVerifikasiTest extends TestCase
         $res->assertRedirect("/status/{$p->kode_peminjaman}");
         $this->get("/status/{$p->kode_peminjaman}")->assertOk()->assertSee($p->kode_peminjaman)->assertSee('<svg', false);
         $this->assertSame($this->peminjam->id, $p->user_id);
-        Notification::assertSentTo($this->peminjam, \App\Notifications\AjuanTerkirim::class);
-        $this->assertSame('menunggu', $p->status);
+        Notification::assertSentTo($this->peminjam, AjuanTerkirim::class);
+        $this->assertSame('menunggu', $p->status->value);
         $this->assertMatchesRegularExpression('/^PJM-20261010-\d{4}$/', $p->kode_peminjaman);
         $this->assertSame(1, $p->detail()->first()->jumlah);
         Notification::assertSentTo($this->admin, AjuanBaru::class);
@@ -157,7 +160,7 @@ class AjuanVerifikasiTest extends TestCase
         $this->ajukan(['name' => 'Rina Baru', 'nomor_identitas' => '2299001', 'email' => 'Rina@Example.com'])->assertSessionHasNoErrors();
 
         $rina = User::where('nomor_identitas', '2299001')->firstOrFail();
-        $this->assertSame('peminjam', $rina->role);
+        $this->assertSame('peminjam', $rina->role->value);
         $this->assertSame('rina@example.com', $rina->email);
         $this->assertNull($rina->password);
         $this->assertSame(1, $rina->peminjaman()->count());
@@ -225,7 +228,7 @@ class AjuanVerifikasiTest extends TestCase
         $this->post("/admin/ajuan/{$p->id}/setujui")->assertSessionHas('success');
 
         $p->refresh();
-        $this->assertSame('disetujui', $p->status);
+        $this->assertSame('disetujui', $p->status->value);
         $this->assertSame($this->admin->id, $p->diverifikasi_oleh);
         $this->assertNotNull($p->diverifikasi_pada);
         Notification::assertSentTo($this->peminjam, AjuanDisetujui::class);
@@ -240,8 +243,8 @@ class AjuanVerifikasiTest extends TestCase
         $this->actingAs($this->admin)->post("/admin/ajuan/{$a->id}/setujui")->assertSessionHas('success');
         $this->post("/admin/ajuan/{$b->id}/setujui")->assertSessionHas('error');
 
-        $this->assertSame('disetujui', $a->fresh()->status);
-        $this->assertSame('menunggu', $b->fresh()->status);
+        $this->assertSame('disetujui', $a->fresh()->status->value);
+        $this->assertSame('menunggu', $b->fresh()->status->value);
     }
 
     public function test_tolak_wajib_alasan(): void
@@ -253,10 +256,10 @@ class AjuanVerifikasiTest extends TestCase
             ->assertSessionHasErrorsIn('tolak', 'alasan_penolakan');
         $this->post("/admin/ajuan/{$p->id}/tolak", ['alasan_penolakan' => 'pendek'])
             ->assertSessionHasErrorsIn('tolak', 'alasan_penolakan');
-        $this->assertSame('menunggu', $p->fresh()->status);
+        $this->assertSame('menunggu', $p->fresh()->status->value);
 
         $this->post("/admin/ajuan/{$p->id}/tolak", ['alasan_penolakan' => 'Barang sedang dipakai untuk ujian.'])->assertSessionHas('success');
-        $this->assertSame('ditolak', $p->fresh()->status);
+        $this->assertSame('ditolak', $p->fresh()->status->value);
         $this->assertSame('Barang sedang dipakai untuk ujian.', $p->fresh()->alasan_penolakan);
         Notification::assertSentTo($this->peminjam, AjuanDitolak::class);
     }
@@ -268,7 +271,7 @@ class AjuanVerifikasiTest extends TestCase
 
         $this->actingAs($this->admin)->post("/admin/ajuan/{$p->id}/setujui")->assertSessionHas('error');
         $this->post("/admin/ajuan/{$p->id}/tolak", ['alasan_penolakan' => 'Alasan cukup panjang'])->assertSessionHas('error');
-        $this->assertSame('dibatalkan', $p->fresh()->status);
+        $this->assertSame('dibatalkan', $p->fresh()->status->value);
     }
 
     public function test_peminjam_tidak_bisa_menyetujui(): void
@@ -277,7 +280,7 @@ class AjuanVerifikasiTest extends TestCase
         $p = $this->buatPeminjaman($this->peminjam, 'menunggu', '2026-10-11', '2026-10-12', [$this->barang->id => 1]);
 
         $this->actingAs($this->peminjam)->post("/admin/ajuan/{$p->id}/setujui")->assertForbidden();
-        $this->assertSame('menunggu', $p->fresh()->status);
+        $this->assertSame('menunggu', $p->fresh()->status->value);
     }
 
     // ---------- Cek status & pembatalan (tanpa login) ----------
@@ -309,7 +312,7 @@ class AjuanVerifikasiTest extends TestCase
         $this->siapkanBarang();
         $p = $this->buatPeminjaman($this->peminjam, 'menunggu', '2026-10-11', '2026-10-12', [$this->barang->id => 1]);
 
-        $this->get(\App\Http\Controllers\Peminjam\StatusController::tautan($p))->assertOk()->assertSee($p->kode_peminjaman);
+        $this->get(StatusController::tautan($p))->assertOk()->assertSee($p->kode_peminjaman);
 
         // Tanda tangan diubah → tidak berlaku
         $this->flushSession();
@@ -327,8 +330,8 @@ class AjuanVerifikasiTest extends TestCase
         $this->bukaStatus($disetujui);
         $this->post("/status/{$disetujui->kode_peminjaman}/batal")->assertSessionHas('success');
 
-        $this->assertSame('dibatalkan', $menunggu->fresh()->status);
-        $this->assertSame('dibatalkan', $disetujui->fresh()->status);
+        $this->assertSame('dibatalkan', $menunggu->fresh()->status->value);
+        $this->assertSame('dibatalkan', $disetujui->fresh()->status->value);
     }
 
     public function test_tidak_bisa_membatalkan_yang_sudah_dipinjam_atau_tanpa_akses(): void
@@ -345,7 +348,7 @@ class AjuanVerifikasiTest extends TestCase
         $this->post("/status/{$milikLain->kode_peminjaman}/batal")->assertForbidden();
         $this->get("/status/{$milikLain->kode_peminjaman}")->assertRedirect('/status');
 
-        $this->assertSame('dipinjam', $dipinjam->fresh()->status);
-        $this->assertSame('menunggu', $milikLain->fresh()->status);
+        $this->assertSame('dipinjam', $dipinjam->fresh()->status->value);
+        $this->assertSame('menunggu', $milikLain->fresh()->status->value);
     }
 }

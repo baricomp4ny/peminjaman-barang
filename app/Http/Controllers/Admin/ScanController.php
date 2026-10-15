@@ -21,11 +21,11 @@ class ScanController extends Controller
         return view('admin.scan.index', [
             'mode' => $mode,
             // Bisa dibuka langsung dari halaman detail: ?mode=serah&peminjaman=ID
-            'awal' => $request->filled('peminjaman') ? Peminjaman::find($request->integer('peminjaman'))?->kode_peminjaman : null,
+            'awal' => $request->filled('peminjaman') ? Peminjaman::find($request->query('peminjaman'))?->kode_peminjaman : null,
         ]);
     }
 
-    /** Langkah 1: kenali kode (PJM / kartu / unit) dan kembalikan transaksi yang cocok. */
+    /** Langkah 1: kenali kode (PJM / unit) dan kembalikan transaksi yang cocok. */
     public function cari(ScanCariRequest $request, ScanService $scan): JsonResponse
     {
         try {

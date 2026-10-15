@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\StatusPeminjaman;
 use App\Exceptions\PeminjamanException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\PengembalianRequest;
@@ -19,7 +20,7 @@ class PengembalianController extends Controller
     public function index(Request $request): View
     {
         $peminjaman = Peminjaman::with(['peminjam', 'detail.barang', 'peminjamanUnit'])
-            ->where('status', Peminjaman::STATUS_DIPINJAM)
+            ->where('status', StatusPeminjaman::Dipinjam)
             ->when($request->filled('q'), fn ($q) => $q->where(function ($q) use ($request) {
                 $q->where('kode_peminjaman', 'like', '%'.$request->q.'%')
                     ->orWhereHas('peminjam', fn ($u) => $u->where('name', 'like', '%'.$request->q.'%'));
@@ -33,7 +34,7 @@ class PengembalianController extends Controller
 
     public function create(Peminjaman $peminjaman, DendaService $denda): View|RedirectResponse
     {
-        if ($peminjaman->status !== Peminjaman::STATUS_DIPINJAM) {
+        if ($peminjaman->status !== StatusPeminjaman::Dipinjam) {
             return redirect()->route('admin.peminjaman.show', $peminjaman)
                 ->with('error', 'Pengembalian hanya untuk peminjaman berstatus dipinjam.');
         }
@@ -65,8 +66,8 @@ class PengembalianController extends Controller
 
         $denda = (int) $hasil->sum('denda');
         $pesan = "{$hasil->count()} unit dikembalikan."
-            .($denda > 0 ? ' Denda: Rp'.number_format($denda, 0, ',', '.').'.' : ' Tanpa denda.')
-            .($peminjaman->fresh()->status === Peminjaman::STATUS_SELESAI ? ' Peminjaman selesai.' : ' Masih ada unit yang belum kembali.');
+            .($denda > 0 ? ' Denda: '.rupiah($denda).'.' : ' Tanpa denda.')
+            .($peminjaman->fresh()->status === StatusPeminjaman::Selesai ? ' Peminjaman selesai.' : ' Masih ada unit yang belum kembali.');
 
         $pesan = "{$peminjaman->kode_peminjaman}: {$pesan}";
 

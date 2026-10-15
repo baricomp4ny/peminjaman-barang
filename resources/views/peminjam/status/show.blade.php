@@ -1,3 +1,4 @@
+@use('App\Enums\StatusPeminjaman')
 @php $p = $peminjaman; @endphp
 
 <x-app-layout>
@@ -14,7 +15,7 @@
         <div class="relative flex flex-wrap items-center justify-between gap-4">
             <div>
                 <div class="font-mono text-sm text-marian-200">{{ $p->kode_peminjaman }}</div>
-                <h1 class="mt-1 font-extrabold [font-size:clamp(1.4rem,3vw,2.2rem)]">Status Ajuan: <span class="capitalize">{{ $p->status }}</span></h1>
+                <h1 class="mt-1 font-extrabold [font-size:clamp(1.4rem,3vw,2.2rem)]">Status Ajuan: <span class="capitalize">{{ $p->status->label() }}</span></h1>
                 <p class="mt-1 text-sm text-marian-100">{{ $p->peminjam->name }} · {{ $p->tanggal_pinjam->translatedFormat('d M Y') }} s/d {{ $p->tanggal_rencana_kembali->translatedFormat('d M Y') }}</p>
             </div>
             <button type="button" onclick="window.print()" class="no-print rounded-full bg-white px-5 py-2.5 text-sm font-bold text-marian-900 hover:bg-marian-100">Cetak bukti</button>
@@ -23,22 +24,22 @@
 
     <div class="mt-6 grid items-start gap-6 lg:[grid-template-columns:minmax(0,1fr)_20rem]">
         <div class="space-y-4">
-            @if ($p->status === 'disetujui')
+            @if ($p->status === StatusPeminjaman::Disetujui)
                 <div class="rounded-4xl bg-marian-100 p-5 text-sm text-marian-900 ring-1 ring-marian-200">
                     Ajuan <strong>disetujui</strong>. Ambil alat ke petugas mulai <strong>{{ $p->tanggal_pinjam->translatedFormat('d F Y') }}</strong>
                     paling lambat <strong>{{ $batasAmbil->translatedFormat('d F Y') }}</strong>. Tunjukkan QR dan bawa kartu identitas asli.
                     Lewat dari batas itu ajuan otomatis kedaluwarsa.
                 </div>
-            @elseif ($p->status === 'menunggu')
+            @elseif ($p->status === StatusPeminjaman::Menunggu)
                 <div class="rounded-4xl bg-white p-5 text-sm text-marian-800 shadow-lembut ring-1 ring-marian-100">
-                    Ajuan sedang <strong>menunggu verifikasi</strong> petugas. Kabar persetujuan dikirim ke {{ app(\App\Services\IdentitasPeminjamService::class)->samarkan($p->peminjam->email) }}.
+                    Ajuan sedang <strong>menunggu verifikasi</strong> petugas. Kabar persetujuan dikirim ke {{ $emailSamar }}.
                 </div>
             @endif
 
             @if ($perkiraanDenda > 0)
                 <div class="rounded-4xl border border-red-200 bg-red-50 p-5 text-sm text-red-800">
                     Pinjaman ini terlambat {{ $p->hariTerlambatBerjalan() }} hari. Perkiraan denda sampai hari ini:
-                    <strong>Rp{{ number_format($perkiraanDenda, 0, ',', '.') }}</strong>. Segera kembalikan alat.
+                    <strong>{{ rupiah($perkiraanDenda) }}</strong>. Segera kembalikan alat.
                 </div>
             @endif
 

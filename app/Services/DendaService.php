@@ -12,7 +12,7 @@ class DendaService
 {
     public function tarif(): int
     {
-        return (int) Pengaturan::nilai(Pengaturan::DENDA_PER_HARI);
+        return Pengaturan::angka(Pengaturan::DENDA_PER_HARI);
     }
 
     /** Jumlah hari terlambat, dihitung per tanggal (jam diabaikan). */

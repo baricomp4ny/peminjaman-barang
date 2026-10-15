@@ -2,29 +2,17 @@
 
 namespace App\Models;
 
+use App\Enums\StatusPeminjaman;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Peminjaman extends Model
 {
-    use HasFactory;
-
-    public const STATUS_MENUNGGU = 'menunggu';
-    public const STATUS_DISETUJUI = 'disetujui';
-    public const STATUS_DITOLAK = 'ditolak';
-    public const STATUS_DIPINJAM = 'dipinjam';
-    public const STATUS_SELESAI = 'selesai';
-    public const STATUS_DIBATALKAN = 'dibatalkan';
-    public const STATUS_KEDALUWARSA = 'kedaluwarsa';
-
-    public const STATUS = [
-        self::STATUS_MENUNGGU, self::STATUS_DISETUJUI, self::STATUS_DITOLAK, self::STATUS_DIPINJAM,
-        self::STATUS_SELESAI, self::STATUS_DIBATALKAN, self::STATUS_KEDALUWARSA,
-    ];
+    use HasFactory, HasUlids;
 
     protected $table = 'peminjaman';
 
@@ -34,6 +22,7 @@ class Peminjaman extends Model
     ];
 
     protected $casts = [
+        'status' => StatusPeminjaman::class,
         'tanggal_pinjam' => 'date',
         'tanggal_rencana_kembali' => 'date',
         'diverifikasi_pada' => 'datetime',
@@ -57,18 +46,10 @@ class Peminjaman extends Model
         return $this->hasMany(PeminjamanDetail::class);
     }
 
-    /** Baris serah-terima per unit (berisi data pengembalian & denda). */
+    /** Unit yang diserahkan (berisi data pengembalian & denda). */
     public function peminjamanUnit(): HasMany
     {
         return $this->hasMany(PeminjamanUnit::class);
-    }
-
-    public function unit(): BelongsToMany
-    {
-        return $this->belongsToMany(UnitBarang::class, 'peminjaman_unit')
-            ->using(PeminjamanUnit::class)
-            ->withPivot(['diserahkan_pada', 'dikembalikan_pada', 'kondisi_kembali', 'hari_terlambat', 'denda', 'catatan'])
-            ->withTimestamps();
     }
 
     // ---------- Scope ----------
@@ -79,26 +60,16 @@ class Peminjaman extends Model
      */
     public function scopeTerlambat(Builder $query): Builder
     {
-        return $query->where('status', self::STATUS_DIPINJAM)
-            ->whereDate('tanggal_rencana_kembali', '<', now()->toDateString())
+        return $query->where('status', StatusPeminjaman::Dipinjam)
+            ->whereDate('tanggal_rencana_kembali', '<', today()->toDateString())
             ->whereHas('peminjamanUnit', fn (Builder $q) => $q->whereNull('dikembalikan_pada'));
-    }
-
-    /**
-     * Ajuan yang rentang tanggalnya bertabrakan dengan [$mulai, $selesai].
-     * Rumus: mulai_A <= selesai_B dan selesai_A >= mulai_B.
-     */
-    public function scopeBertabrakan(Builder $query, $mulai, $selesai): Builder
-    {
-        return $query->whereDate('tanggal_pinjam', '<=', $selesai)
-            ->whereDate('tanggal_rencana_kembali', '>=', $mulai);
     }
 
     // ---------- Helper ----------
 
     public function isTerlambat(): bool
     {
-        if ($this->status !== self::STATUS_DIPINJAM || ! $this->tanggal_rencana_kembali->lt(today())) {
+        if ($this->status !== StatusPeminjaman::Dipinjam || ! $this->tanggal_rencana_kembali->lt(today())) {
             return false;
         }
 
@@ -108,33 +79,27 @@ class Peminjaman extends Model
             : $this->peminjamanUnit()->whereNull('dikembalikan_pada')->exists();
     }
 
-    public function totalDenda(): int
-    {
-        return (int) $this->peminjamanUnit()->sum('denda');
-    }
-
     /** Hari terlambat sampai hari ini (0 bila belum jatuh tempo / tidak sedang dipinjam). */
     public function hariTerlambatBerjalan(): int
     {
-        if ($this->status !== self::STATUS_DIPINJAM) {
+        if ($this->status !== StatusPeminjaman::Dipinjam) {
             return 0;
         }
 
         return max(0, (int) $this->tanggal_rencana_kembali->diffInDays(today(), false));
     }
 
-    public function totalUnit(): int
+    public function totalDenda(): int
     {
-        return (int) $this->detail->sum('jumlah');
+        return (int) $this->peminjamanUnit()->sum('denda');
     }
 
-    /** Peminjam boleh membatalkan selama barang belum diambil. */
     public function bisaDibatalkan(): bool
     {
-        return in_array($this->status, [self::STATUS_MENUNGGU, self::STATUS_DISETUJUI], true);
+        return $this->status->bisaDibatalkan();
     }
 
-    /** Ringkasan barang, contoh: "Proyektor ×1, Laptop ×2". */
+    /** Ringkasan alat, contoh: "Mikroskop Stereo ×1, pH Meter Digital ×2". */
     public function ringkasanBarang(): string
     {
         return $this->detail->map(fn ($d) => $d->barang->nama.' ×'.$d->jumlah)->join(', ');

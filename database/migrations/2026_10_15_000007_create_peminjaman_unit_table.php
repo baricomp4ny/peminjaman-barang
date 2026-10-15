@@ -8,16 +8,16 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // Unit fisik yang benar-benar diserahkan (hasil scan) beserta data pengembaliannya
+        // Unit fisik yang diserahkan (hasil scan) beserta data pengembaliannya.
+        // Waktu serah-terima cukup di peminjaman.diserahkan_pada (tidak diduplikasi di sini).
         Schema::create('peminjaman_unit', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('peminjaman_id')->constrained('peminjaman')->cascadeOnDelete();
-            $table->foreignId('unit_barang_id')->constrained('unit_barang')->restrictOnDelete();
-            $table->dateTime('diserahkan_pada');
+            $table->ulid('id')->primary();
+            $table->foreignUlid('peminjaman_id')->constrained('peminjaman')->cascadeOnDelete();
+            $table->foreignUlid('unit_barang_id')->constrained('unit_barang')->restrictOnDelete();
             $table->dateTime('dikembalikan_pada')->nullable();
             $table->enum('kondisi_kembali', ['baik', 'rusak', 'hilang'])->nullable();
             $table->unsignedInteger('hari_terlambat')->default(0);
-            $table->unsignedBigInteger('denda')->default(0); // dalam rupiah
+            $table->unsignedBigInteger('denda')->default(0); // dalam rupiah, tarif dibekukan saat dicatat
             $table->string('catatan')->nullable();
             $table->timestamps();
 

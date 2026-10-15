@@ -1,4 +1,6 @@
-@php $dipinjam = $unit->status === 'dipinjam'; @endphp
+@use('App\Enums\StatusUnit')
+@use('App\Enums\KondisiUnit')
+@php $dipinjam = $unit->status === StatusUnit::Dipinjam; @endphp
 
 <x-app-layout>
     <x-slot name="header"><span class="text-sm text-marian-500">Data Barang</span></x-slot>
@@ -35,8 +37,8 @@
                 <div>
                     <x-input-label for="kondisi" value="Kondisi *" />
                     <x-select id="kondisi" name="kondisi" class="mt-1 block w-full" required :disabled="$dipinjam">
-                        @foreach (['baik', 'rusak', 'hilang'] as $k)
-                            <option value="{{ $k }}" @selected(old('kondisi', $unit->kondisi) === $k)>{{ ucfirst($k) }}</option>
+                        @foreach (KondisiUnit::cases() as $k)
+                            <option value="{{ $k->value }}" @selected(old('kondisi', $unit->kondisi->value) === $k->value)>{{ $k->label() }}</option>
                         @endforeach
                     </x-select>
                     <x-input-error :messages="$errors->get('kondisi')" class="mt-2" />
@@ -47,8 +49,8 @@
                         @if ($dipinjam)
                             <option value="dipinjam" selected>Dipinjam</option>
                         @endif
-                        @foreach (['tersedia', 'perbaikan', 'hilang'] as $s)
-                            <option value="{{ $s }}" @selected(old('status', $unit->status) === $s)>{{ ucfirst($s) }}</option>
+                        @foreach (StatusUnit::pilihanManual() as $s)
+                            <option value="{{ $s->value }}" @selected(old('status', $unit->status->value) === $s->value)>{{ $s->label() }}</option>
                         @endforeach
                     </x-select>
                     <p class="mt-1 text-xs text-marian-500">Rusak → perbaikan, hilang → hilang. Hanya kondisi baik yang boleh tersedia.</p>

@@ -3,7 +3,9 @@
 namespace Tests\Feature;
 
 use App\Models\User;
+use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
 /** Hak akses: halaman publik untuk peminjam (tanpa login), panel /admin hanya untuk admin. */
@@ -84,14 +86,14 @@ class RoleAccessTest extends TestCase
 
     public function test_reset_password_hanya_untuk_admin(): void
     {
-        \Illuminate\Support\Facades\Notification::fake();
+        Notification::fake();
         $peminjam = User::factory()->create();
         $admin = User::factory()->admin()->create();
 
         $this->post('/forgot-password', ['email' => $peminjam->email])->assertSessionHasErrors('email');
         $this->post('/forgot-password', ['email' => $admin->email])->assertSessionHas('status');
 
-        \Illuminate\Support\Facades\Notification::assertNotSentTo($peminjam, \Illuminate\Auth\Notifications\ResetPassword::class);
-        \Illuminate\Support\Facades\Notification::assertSentTo($admin, \Illuminate\Auth\Notifications\ResetPassword::class);
+        Notification::assertNotSentTo($peminjam, ResetPassword::class);
+        Notification::assertSentTo($admin, ResetPassword::class);
     }
 }
