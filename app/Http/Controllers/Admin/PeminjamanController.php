@@ -95,7 +95,11 @@ class PeminjamanController extends Controller
             return back()->withInput()->with('error', $e->getMessage());
         }
 
-        return redirect()->route('admin.peminjaman.show', $peminjaman)
-            ->with('success', "Serah-terima {$peminjaman->kode_peminjaman} berhasil. Status: dipinjam.");
+        $pesan = "Serah-terima {$peminjaman->kode_peminjaman} berhasil. Status: dipinjam.";
+
+        // Dari halaman scan: kembali ke sana agar bisa langsung melayani peminjam berikutnya
+        return $request->boolean('dari_scan')
+            ? redirect()->route('admin.scan.index', ['mode' => 'serah'])->with('success', $pesan)
+            : redirect()->route('admin.peminjaman.show', $peminjaman)->with('success', $pesan);
     }
 }

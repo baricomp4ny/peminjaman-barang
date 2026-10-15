@@ -68,6 +68,10 @@ class PengembalianController extends Controller
             .($denda > 0 ? ' Denda: Rp'.number_format($denda, 0, ',', '.').'.' : ' Tanpa denda.')
             .($peminjaman->fresh()->status === Peminjaman::STATUS_SELESAI ? ' Peminjaman selesai.' : ' Masih ada unit yang belum kembali.');
 
-        return redirect()->route('admin.peminjaman.show', $peminjaman)->with('success', $pesan);
+        $pesan = "{$peminjaman->kode_peminjaman}: {$pesan}";
+
+        return $request->boolean('dari_scan')
+            ? redirect()->route('admin.scan.index', ['mode' => 'kembali'])->with('success', $pesan)
+            : redirect()->route('admin.peminjaman.show', $peminjaman)->with('success', $pesan);
     }
 }

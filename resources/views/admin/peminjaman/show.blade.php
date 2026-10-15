@@ -5,9 +5,11 @@
 
     <x-admin.judul :judul="'Peminjaman '.$p->kode_peminjaman" :kembali="url()->previous() !== url()->current() ? url()->previous() : route('admin.riwayat.index')">
         @if ($p->status === 'disetujui')
-            <x-link-button :href="route('admin.peminjaman.serah', $p)">Serah-terima</x-link-button>
+            <x-link-button variant="secondary" :href="route('admin.peminjaman.serah', $p)">Serah-terima (form)</x-link-button>
+            <x-link-button :href="route('admin.scan.index', ['mode' => 'serah', 'peminjaman' => $p->id])">Serah-terima (Scan QR)</x-link-button>
         @elseif ($p->status === 'dipinjam')
-            <x-link-button :href="route('admin.pengembalian.create', $p)">Catat Pengembalian</x-link-button>
+            <x-link-button variant="secondary" :href="route('admin.pengembalian.create', $p)">Pengembalian (form)</x-link-button>
+            <x-link-button :href="route('admin.scan.index', ['mode' => 'kembali', 'peminjaman' => $p->id])">Pengembalian (Scan QR)</x-link-button>
         @endif
     </x-admin.judul>
 

@@ -5,7 +5,7 @@
      */
     $menu = [
         ['label' => 'Dashboard', 'route' => 'admin.dashboard', 'aktif' => 'admin.dashboard'],
-        ['label' => 'Scan QR Code', 'route' => null],
+        ['label' => 'Scan QR Code', 'route' => 'admin.scan.index', 'aktif' => 'admin.scan.*'],
         ['grup' => 'Transaksi', 'items' => [
             ['label' => 'Ajuan Peminjaman', 'route' => 'admin.ajuan.index', 'aktif' => 'admin.ajuan.*', 'badge' => true],
             ['label' => 'Peminjaman', 'route' => 'admin.peminjaman.index', 'aktif' => 'admin.peminjaman.*'],
@@ -14,10 +14,10 @@
         ]],
         ['grup' => 'Data Barang', 'items' => [
             ['label' => 'Jenis Barang', 'route' => 'admin.barang.index', 'aktif' => 'admin.barang.*'],
-            ['label' => 'Unit Barang', 'route' => 'admin.unit.index', 'aktif' => 'admin.unit.*'],
+            ['label' => 'Unit Barang', 'route' => 'admin.unit.index', 'aktif' => ['admin.unit.index', 'admin.unit.create', 'admin.unit.edit']],
             ['label' => 'Kategori', 'route' => 'admin.kategori.index', 'aktif' => 'admin.kategori.*'],
             ['label' => 'Lokasi', 'route' => 'admin.lokasi.index', 'aktif' => 'admin.lokasi.*'],
-            ['label' => 'Cetak Label QR', 'route' => null],
+            ['label' => 'Cetak Label QR', 'route' => 'admin.unit.label', 'aktif' => 'admin.unit.label'],
         ]],
         ['label' => 'Data Peminjam', 'route' => 'admin.peminjam.index', 'aktif' => 'admin.peminjam.*'],
         ['grup' => 'Laporan', 'items' => collect(['peminjaman' => 'Peminjaman', 'pengembalian' => 'Pengembalian', 'inventaris' => 'Inventaris', 'keterlambatan' => 'Keterlambatan', 'denda' => 'Denda'])

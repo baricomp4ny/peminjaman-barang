@@ -3,7 +3,9 @@
 <x-app-layout>
     <x-slot name="header"><span class="text-sm text-gray-500">Transaksi</span></x-slot>
 
-    <x-admin.judul :judul="'Pengembalian '.$p->kode_peminjaman" :kembali="route('admin.peminjaman.show', $p)" />
+    <x-admin.judul :judul="'Pengembalian '.$p->kode_peminjaman" :kembali="route('admin.peminjaman.show', $p)">
+        <x-link-button variant="secondary" :href="route('admin.scan.index', ['mode' => 'kembali', 'peminjaman' => $p->id])">Pakai Scan QR</x-link-button>
+    </x-admin.judul>
 
     <div class="max-w-3xl rounded-lg bg-white p-6 shadow">
         <dl class="grid gap-3 text-sm sm:grid-cols-3">

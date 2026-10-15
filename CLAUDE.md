@@ -89,3 +89,9 @@ Responsif, menu aktif ditandai, pesan sukses/gagal jelas.
 - Serah-terima Sprint 3 lewat form pilih/ketik kode unit; Sprint 4 (scan QR) memanggil PeminjamanService::cekUnitUntukSerah() dan serahkan() yang sama.
 - Denda disimpan per unit saat pengembalian dicatat (tarif saat itu); perubahan tarif tidak mengubah denda lama.
 - Nama mitra untuk kop laporan/email: MITRA_NAMA di .env (config/peminjaman.php).
+
+## Catatan desain (disetujui di Sprint 4)
+- Isi QR unit = kode_unit. Isi QR kartu peminjam = PMJ.<id>.<10 hex HMAC-SHA256 APP_KEY> (QrService); ganti APP_KEY = semua kartu harus dicetak ulang.
+- Halaman /admin/scan: mode serah|kembali. Langkah 1 ScanService::cari() (PJM-…, kartu, atau kode unit untuk pengembalian); langkah 2 ScanService::cekUnit() per scan (JSON, daftar unit disimpan di browser); langkah 3 form ke endpoint serahkan/pengembalian.store yang sama dengan form (dari_scan=1 → kembali ke halaman scan).
+- html5-qrcode 2.3.8 disimpan di public/vendor/html5-qrcode (bukan CDN). Kamera butuh HTTPS atau localhost.
+- Debounce kamera: kode sama diabaikan 2,5 detik.

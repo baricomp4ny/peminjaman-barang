@@ -58,7 +58,7 @@
 
                                 <x-slot name="content">
                                     <x-dropdown-link :href="route('profile.edit')">Profil</x-dropdown-link>
-                                    <span class="block cursor-not-allowed px-4 py-2 text-sm text-gray-400" title="Segera hadir">Kartu QR</span>
+                                    <x-dropdown-link :href="route('peminjam.kartu-qr')">Kartu QR</x-dropdown-link>
                                     <form method="POST" action="{{ route('logout') }}">
                                         @csrf
                                         <x-dropdown-link :href="route('logout')" onclick="event.preventDefault(); this.closest('form').submit();">
@@ -105,6 +105,7 @@
 
                         <div class="mt-3 space-y-1">
                             <x-responsive-nav-link :href="route('profile.edit')" :active="request()->routeIs('profile.edit')">Profil</x-responsive-nav-link>
+                            <x-responsive-nav-link :href="route('peminjam.kartu-qr')" :active="request()->routeIs('peminjam.kartu-qr')">Kartu QR</x-responsive-nav-link>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
                                 <x-responsive-nav-link :href="route('logout')" onclick="event.preventDefault(); this.closest('form').submit();">

@@ -2,6 +2,7 @@
     <x-slot name="header"><span class="text-sm text-gray-500">Data Barang</span></x-slot>
 
     <x-admin.judul :judul="$barang->nama" :kembali="route('admin.barang.index')">
+        <x-link-button variant="secondary" :href="route('admin.unit.label', ['barang_id' => $barang->id])" target="_blank">Cetak Label QR</x-link-button>
         <x-link-button variant="secondary" :href="route('admin.barang.edit', $barang)">Ubah</x-link-button>
         <x-link-button :href="route('admin.unit.create', ['barang_id' => $barang->id])">+ Tambah Unit</x-link-button>
     </x-admin.judul>

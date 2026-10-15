@@ -16,7 +16,7 @@
         <p class="text-sm text-gray-600">
             Peminjam: <strong>{{ $p->peminjam->name }}</strong> ({{ $p->peminjam->nomor_identitas }}).
             Pilih unit fisik yang diserahkan. Jumlah tiap jenis harus <strong>sama persis</strong> dengan ajuan.
-            <span class="text-gray-500">(Scan QR tersedia di Sprint 4.)</span>
+            <a href="{{ route('admin.scan.index', ['mode' => 'serah', 'peminjaman' => $p->id]) }}" class="font-medium text-indigo-600 hover:underline">Pakai Scan QR &rarr;</a>
         </p>
 
         <form method="POST" action="{{ route('admin.peminjaman.serahkan', $p) }}" class="mt-5 space-y-6">
