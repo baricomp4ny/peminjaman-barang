@@ -49,7 +49,7 @@ Cabang: ajuan disetujui tapi tidak diambil dalam [1] hari → kedaluwarsa (sched
 - users: name, email, password, role (admin, peminjam), nomor_identitas, unit, no_hp, status (aktif, nonaktif)
 - kategori: nama
 - lokasi: nama, keterangan
-- barang: kategori_id, nama, deskripsi, foto
+- barang: kategori_id, kode (prefix kode unit, unik, misal PRJ — ditambahkan Sprint 2), nama, deskripsi, foto
 - unit_barang: barang_id, lokasi_id, kode_unit (unik, isi QR, otomatis, contoh PRJ-001), kondisi (baik, rusak, hilang), status (tersedia, dipinjam, perbaikan, hilang), tanggal_perolehan
 - peminjaman: kode_peminjaman (unik), user_id, tujuan, tanggal_pinjam, tanggal_rencana_kembali, status (menunggu, disetujui, ditolak, dipinjam, selesai, dibatalkan, kedaluwarsa), alasan_penolakan, diverifikasi_oleh, diverifikasi_pada, diserahkan_pada
 - peminjaman_detail: peminjaman_id, barang_id, jumlah

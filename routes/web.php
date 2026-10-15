@@ -30,6 +30,17 @@ Route::middleware(['auth', 'role:admin,peminjam'])->group(function () {
 // ---------- Admin ----------
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [Admin\DashboardController::class, 'index'])->name('dashboard');
+
+    // Data master
+    Route::resource('kategori', Admin\KategoriController::class)->except('show');
+    Route::resource('lokasi', Admin\LokasiController::class)->except('show');
+    Route::resource('barang', Admin\BarangController::class);
+    Route::resource('unit', Admin\UnitBarangController::class)->except('show');
+    Route::resource('peminjam', Admin\PeminjamController::class);
+
+    // Pengaturan aturan bisnis
+    Route::get('/pengaturan', [Admin\PengaturanController::class, 'edit'])->name('pengaturan.edit');
+    Route::put('/pengaturan', [Admin\PengaturanController::class, 'update'])->name('pengaturan.update');
 });
 
 // ---------- Peminjam ----------

@@ -38,6 +38,7 @@ class MasterBarangSeeder extends Seeder
         foreach ($daftar as $i => [$namaKategori, $nama, $prefix, $jumlah, $deskripsi]) {
             $barang = Barang::create([
                 'kategori_id' => $kategori[$namaKategori]->id,
+                'kode' => $prefix,
                 'nama' => $nama,
                 'deskripsi' => $deskripsi,
             ]);

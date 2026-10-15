@@ -1,0 +1,50 @@
+<?php
+
+namespace App\Http\Requests\Admin;
+
+use App\Models\User;
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
+
+/** Dipakai untuk tambah (POST) dan ubah (PUT) data peminjam. */
+class PeminjamRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return $this->user()?->isAdmin() ?? false;
+    }
+
+    public function rules(): array
+    {
+        $peminjam = $this->route('peminjam');
+        $sedangEdit = $peminjam !== null;
+
+        return [
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique('users', 'email')->ignore($peminjam)],
+            'nomor_identitas' => ['required', 'string', 'max:50', Rule::unique('users', 'nomor_identitas')->ignore($peminjam)],
+            'unit' => ['nullable', 'string', 'max:100'],
+            'no_hp' => ['nullable', 'regex:/^[0-9+\-\s]{8,20}$/'],
+            'status' => ['required', Rule::in([User::STATUS_AKTIF, User::STATUS_NONAKTIF])],
+            // Saat tambah wajib; saat edit hanya diisi bila ingin reset password
+            'password' => [$sedangEdit ? 'nullable' : 'required', 'confirmed', Password::defaults()],
+        ];
+    }
+
+    public function attributes(): array
+    {
+        return [
+            'name' => 'nama',
+            'nomor_identitas' => 'nomor identitas',
+            'no_hp' => 'no. HP',
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'no_hp.regex' => 'No. HP hanya boleh berisi angka, spasi, + atau - (8–20 karakter).',
+        ];
+    }
+}

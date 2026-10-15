@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\User;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 use Illuminate\Http\Request;
@@ -25,6 +26,9 @@ class RouteServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureRateLimiting();
+
+        // {peminjam} hanya cocok dengan user ber-role peminjam; ID admin → 404
+        Route::bind('peminjam', fn ($id) => User::peminjam()->findOrFail($id));
 
         $this->routes(function () {
             Route::middleware('api')

@@ -13,13 +13,13 @@
             ['label' => 'Riwayat', 'route' => null],
         ]],
         ['grup' => 'Data Barang', 'items' => [
-            ['label' => 'Jenis Barang', 'route' => null],
-            ['label' => 'Unit Barang', 'route' => null],
-            ['label' => 'Kategori', 'route' => null],
-            ['label' => 'Lokasi', 'route' => null],
+            ['label' => 'Jenis Barang', 'route' => 'admin.barang.index', 'aktif' => 'admin.barang.*'],
+            ['label' => 'Unit Barang', 'route' => 'admin.unit.index', 'aktif' => 'admin.unit.*'],
+            ['label' => 'Kategori', 'route' => 'admin.kategori.index', 'aktif' => 'admin.kategori.*'],
+            ['label' => 'Lokasi', 'route' => 'admin.lokasi.index', 'aktif' => 'admin.lokasi.*'],
             ['label' => 'Cetak Label QR', 'route' => null],
         ]],
-        ['label' => 'Data Peminjam', 'route' => null],
+        ['label' => 'Data Peminjam', 'route' => 'admin.peminjam.index', 'aktif' => 'admin.peminjam.*'],
         ['grup' => 'Laporan', 'items' => [
             ['label' => 'Peminjaman', 'route' => null],
             ['label' => 'Pengembalian', 'route' => null],
@@ -27,7 +27,7 @@
             ['label' => 'Keterlambatan', 'route' => null],
             ['label' => 'Denda', 'route' => null],
         ]],
-        ['label' => 'Pengaturan', 'route' => null],
+        ['label' => 'Pengaturan', 'route' => 'admin.pengaturan.edit', 'aktif' => 'admin.pengaturan.*'],
     ];
 
     // Jumlah ajuan menunggu untuk badge menu
