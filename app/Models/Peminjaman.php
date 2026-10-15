@@ -102,11 +102,41 @@ class Peminjaman extends Model
             return false;
         }
 
-        return $this->peminjamanUnit()->whereNull('dikembalikan_pada')->exists();
+        // Pakai relasi yang sudah dimuat (eager loading) bila ada, supaya tidak query per baris
+        return $this->relationLoaded('peminjamanUnit')
+            ? $this->peminjamanUnit->whereNull('dikembalikan_pada')->isNotEmpty()
+            : $this->peminjamanUnit()->whereNull('dikembalikan_pada')->exists();
     }
 
     public function totalDenda(): int
     {
         return (int) $this->peminjamanUnit()->sum('denda');
+    }
+
+    /** Hari terlambat sampai hari ini (0 bila belum jatuh tempo / tidak sedang dipinjam). */
+    public function hariTerlambatBerjalan(): int
+    {
+        if ($this->status !== self::STATUS_DIPINJAM) {
+            return 0;
+        }
+
+        return max(0, (int) $this->tanggal_rencana_kembali->diffInDays(today(), false));
+    }
+
+    public function totalUnit(): int
+    {
+        return (int) $this->detail->sum('jumlah');
+    }
+
+    /** Peminjam boleh membatalkan selama barang belum diambil. */
+    public function bisaDibatalkan(): bool
+    {
+        return in_array($this->status, [self::STATUS_MENUNGGU, self::STATUS_DISETUJUI], true);
+    }
+
+    /** Ringkasan barang, contoh: "Proyektor ×1, Laptop ×2". */
+    public function ringkasanBarang(): string
+    {
+        return $this->detail->map(fn ($d) => $d->barang->nama.' ×'.$d->jumlah)->join(', ');
     }
 }

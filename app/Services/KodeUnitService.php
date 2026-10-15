@@ -32,7 +32,7 @@ class KodeUnitService
                     'kode_unit' => $this->format($barang->kode, $nomor + $i),
                     'kondisi' => $data['kondisi'],
                     // Unit rusak/hilang tidak boleh berstatus tersedia
-                    'status' => $this->statusAwal($data['kondisi']),
+                    'status' => UnitBarang::statusDariKondisi($data['kondisi']),
                     'tanggal_perolehan' => $data['tanggal_perolehan'] ?? null,
                 ]));
             }
@@ -54,14 +54,5 @@ class KodeUnitService
     public function format(string $prefix, int $nomor): string
     {
         return sprintf('%s-%03d', $prefix, $nomor);
-    }
-
-    public function statusAwal(string $kondisi): string
-    {
-        return match ($kondisi) {
-            UnitBarang::KONDISI_RUSAK => UnitBarang::STATUS_PERBAIKAN,
-            UnitBarang::KONDISI_HILANG => UnitBarang::STATUS_HILANG,
-            default => UnitBarang::STATUS_TERSEDIA,
-        };
     }
 }

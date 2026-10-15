@@ -21,7 +21,10 @@ class PeminjamanSeeder extends Seeder
     public function run(): void
     {
         $admin = User::where('role', User::ROLE_ADMIN)->first();
-        [$andi, $budi, $citra, $dewi, $eko] = User::peminjam()->orderBy('id')->get()->all();
+        // Ambil berdasarkan email agar tidak tertukar dengan user lain yang mungkin sudah ada
+        [$andi, $budi, $citra, $dewi, $eko] = collect(['andi', 'budi', 'citra', 'dewi', 'eko'])
+            ->map(fn ($nama) => User::where('email', "{$nama}@peminjaman.test")->firstOrFail())
+            ->all();
         $hariIni = today();
 
         // 1. Menunggu verifikasi

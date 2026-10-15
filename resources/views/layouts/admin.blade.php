@@ -7,10 +7,10 @@
         ['label' => 'Dashboard', 'route' => 'admin.dashboard', 'aktif' => 'admin.dashboard'],
         ['label' => 'Scan QR Code', 'route' => null],
         ['grup' => 'Transaksi', 'items' => [
-            ['label' => 'Ajuan Peminjaman', 'route' => null, 'badge' => true],
-            ['label' => 'Peminjaman', 'route' => null],
-            ['label' => 'Pengembalian', 'route' => null],
-            ['label' => 'Riwayat', 'route' => null],
+            ['label' => 'Ajuan Peminjaman', 'route' => 'admin.ajuan.index', 'aktif' => 'admin.ajuan.*', 'badge' => true],
+            ['label' => 'Peminjaman', 'route' => 'admin.peminjaman.index', 'aktif' => 'admin.peminjaman.*'],
+            ['label' => 'Pengembalian', 'route' => 'admin.pengembalian.index', 'aktif' => 'admin.pengembalian.*'],
+            ['label' => 'Riwayat', 'route' => 'admin.riwayat.index', 'aktif' => 'admin.riwayat.*'],
         ]],
         ['grup' => 'Data Barang', 'items' => [
             ['label' => 'Jenis Barang', 'route' => 'admin.barang.index', 'aktif' => 'admin.barang.*'],
@@ -20,13 +20,14 @@
             ['label' => 'Cetak Label QR', 'route' => null],
         ]],
         ['label' => 'Data Peminjam', 'route' => 'admin.peminjam.index', 'aktif' => 'admin.peminjam.*'],
-        ['grup' => 'Laporan', 'items' => [
-            ['label' => 'Peminjaman', 'route' => null],
-            ['label' => 'Pengembalian', 'route' => null],
-            ['label' => 'Inventaris', 'route' => null],
-            ['label' => 'Keterlambatan', 'route' => null],
-            ['label' => 'Denda', 'route' => null],
-        ]],
+        ['grup' => 'Laporan', 'items' => collect(['peminjaman' => 'Peminjaman', 'pengembalian' => 'Pengembalian', 'inventaris' => 'Inventaris', 'keterlambatan' => 'Keterlambatan', 'denda' => 'Denda'])
+            ->map(fn ($label, $jenis) => [
+                'label' => $label,
+                'route' => 'admin.laporan.show',
+                'params' => ['jenis' => $jenis],
+                // aktif bila sedang membuka laporan jenis ini
+                'aktif' => request()->routeIs('admin.laporan.show') && request()->route('jenis') === $jenis,
+            ])->values()->all()],
         ['label' => 'Pengaturan', 'route' => 'admin.pengaturan.edit', 'aktif' => 'admin.pengaturan.*'],
     ];
 
@@ -58,7 +59,7 @@
                 <nav class="space-y-1 px-3 py-4 text-sm">
                     @foreach ($menu as $item)
                         @if (isset($item['grup']))
-                            @php $grupAktif = collect($item['items'])->contains(fn ($i) => isset($i['aktif']) && request()->routeIs($i['aktif'])); @endphp
+                            @php $grupAktif = collect($item['items'])->contains(fn ($i) => isset($i['aktif']) && (is_bool($i['aktif']) ? $i['aktif'] : request()->routeIs($i['aktif']))); @endphp
                             <div x-data="{ buka: {{ $grupAktif ? 'true' : 'false' }} }">
                                 <button type="button" @click="buka = !buka"
                                         class="flex w-full items-center justify-between rounded-md px-3 py-2 text-slate-300 hover:bg-slate-700 hover:text-white">

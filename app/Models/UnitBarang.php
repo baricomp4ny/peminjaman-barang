@@ -53,6 +53,16 @@ class UnitBarang extends Model
             ->withTimestamps();
     }
 
+    /** Status yang sesuai untuk suatu kondisi: rusak → perbaikan, hilang → hilang, baik → tersedia. */
+    public static function statusDariKondisi(string $kondisi): string
+    {
+        return match ($kondisi) {
+            self::KONDISI_RUSAK => self::STATUS_PERBAIKAN,
+            self::KONDISI_HILANG => self::STATUS_HILANG,
+            default => self::STATUS_TERSEDIA,
+        };
+    }
+
     /** Unit boleh dipinjam hanya jika kondisinya baik dan statusnya tersedia. */
     public function bisaDipinjam(): bool
     {

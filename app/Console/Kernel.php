@@ -12,7 +12,9 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
+        // Jalankan `php artisan schedule:run` tiap menit (Task Scheduler Windows / cron)
+        $schedule->command('peminjaman:kedaluwarsa')->dailyAt('00:05')->withoutOverlapping();
+        $schedule->command('peminjaman:pengingat')->dailyAt('07:00')->withoutOverlapping();
     }
 
     /**

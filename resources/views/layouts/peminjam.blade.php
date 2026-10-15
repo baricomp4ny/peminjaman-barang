@@ -2,11 +2,14 @@
     // Menu navbar peminjam. 'route' = null artinya fitur belum dibuat (ditandai "segera").
     $menu = [
         ['label' => 'Beranda', 'route' => 'peminjam.beranda', 'aktif' => 'peminjam.beranda'],
-        ['label' => 'Katalog Barang', 'route' => null],
-        ['label' => 'Ajukan Peminjaman', 'route' => null],
-        ['label' => 'Pinjaman Saya', 'route' => null],
-        ['label' => 'Notifikasi', 'route' => null],
+        ['label' => 'Katalog Barang', 'route' => 'peminjam.katalog.index', 'aktif' => 'peminjam.katalog.*'],
+        ['label' => 'Ajukan Peminjaman', 'route' => 'peminjam.ajuan.create', 'aktif' => 'peminjam.ajuan.*'],
+        ['label' => 'Pinjaman Saya', 'route' => 'peminjam.pinjaman.index', 'aktif' => 'peminjam.pinjaman.*'],
+        ['label' => 'Notifikasi', 'route' => 'peminjam.notifikasi.index', 'aktif' => 'peminjam.notifikasi.*', 'badge' => true],
     ];
+
+    // Badge jumlah notifikasi belum dibaca
+    $jumlahBelumDibaca = Auth::user()->unreadNotifications()->count();
 @endphp
 <!DOCTYPE html>
 <html lang="id">
@@ -29,7 +32,7 @@
                                 @foreach ($menu as $item)
                                     @if ($item['route'])
                                         <x-nav-link :href="route($item['route'])" :active="request()->routeIs($item['aktif'])">
-                                            {{ $item['label'] }}
+                                            {{ $item['label'] }}@if (! empty($item['badge']) && $jumlahBelumDibaca > 0)<span class="ms-1 rounded-full bg-red-600 px-1.5 text-xs font-semibold text-white">{{ $jumlahBelumDibaca }}</span>@endif
                                         </x-nav-link>
                                     @else
                                         <span class="inline-flex cursor-not-allowed items-center gap-1 border-b-2 border-transparent px-1 pt-1 text-sm font-medium text-gray-400" title="Segera hadir">
@@ -84,7 +87,7 @@
                         @foreach ($menu as $item)
                             @if ($item['route'])
                                 <x-responsive-nav-link :href="route($item['route'])" :active="request()->routeIs($item['aktif'])">
-                                    {{ $item['label'] }}
+                                    {{ $item['label'] }}@if (! empty($item['badge']) && $jumlahBelumDibaca > 0)<span class="ms-1 rounded-full bg-red-600 px-1.5 text-xs font-semibold text-white">{{ $jumlahBelumDibaca }}</span>@endif
                                 </x-responsive-nav-link>
                             @else
                                 <span class="block cursor-not-allowed border-l-4 border-transparent py-2 pe-4 ps-3 text-base font-medium text-gray-400">

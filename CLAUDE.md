@@ -81,3 +81,11 @@ Responsif, menu aktif ditandai, pesan sukses/gagal jelas.
 - Prefix route: `/admin` (name `admin.`), `/peminjam` (name `peminjam.`). `/dashboard` redirect sesuai role.
 - Kunci pengaturan: lama_pinjam_maks, unit_maks_per_ajuan, denda_per_hari, batas_ambil_hari.
 - Tabel `notifications` ditambahkan di Sprint 3.
+
+## Catatan desain (disetujui di Sprint 3)
+- Lama pinjam = tanggal rencana kembali − tanggal pinjam (tgl 1 → tgl 8 = 7 hari).
+- Ketersediaan (KetersediaanService): kapasitas = unit kondisi baik berstatus tersedia/dipinjam; terpakai = jumlah ajuan "disetujui" yang bertabrakan + unit BELUM kembali dari pinjaman "dipinjam" yang bertabrakan (batas akhir pinjaman terlambat = max(rencana, hari ini)).
+- Batas ambil = min(tanggal pinjam + batas_ambil_hari, rencana kembali); lewat itu → kedaluwarsa (peminjaman:kedaluwarsa 00:05). Pengingat H-1: peminjaman:pengingat 07:00, tidak dobel. Keduanya punya opsi --tanggal untuk uji manual.
+- Serah-terima Sprint 3 lewat form pilih/ketik kode unit; Sprint 4 (scan QR) memanggil PeminjamanService::cekUnitUntukSerah() dan serahkan() yang sama.
+- Denda disimpan per unit saat pengembalian dicatat (tarif saat itu); perubahan tarif tidak mengubah denda lama.
+- Nama mitra untuk kop laporan/email: MITRA_NAMA di .env (config/peminjaman.php).
