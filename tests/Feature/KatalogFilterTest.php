@@ -11,7 +11,7 @@ use Illuminate\Support\Carbon;
 use Tests\Concerns\DataPeminjaman;
 use Tests\TestCase;
 
-/** Katalog publik bergaya etalase: sidebar filter (cari, tanggal, kategori, lokasi, tersedia) + urutan. */
+/** Katalog publik bergaya etalase: sidebar filter (cari, tanggal, kategori, lokasi, tersedia) */
 class KatalogFilterTest extends TestCase
 {
     use DataPeminjaman, RefreshDatabase;
@@ -72,16 +72,13 @@ class KatalogFilterTest extends TestCase
         $this->get('/?mulai=2026-10-12&selesai=2026-10-11')->assertSessionHasErrors('selesai');
     }
 
-    public function test_urutan_nama_dan_sisa_serta_paginasi(): void
+    public function test_urut_nama_dan_paginasi(): void
     {
         $this->buatBarang('AAA', 1, 'Alat A');
         $this->buatBarang('BBB', 3, 'Alat B');
         $this->buatBarang('CCC', 2, 'Alat C');
 
         $this->assertSame(['Alat A', 'Alat B', 'Alat C'], $this->namaDi('/'));
-        $this->assertSame(['Alat C', 'Alat B', 'Alat A'], $this->namaDi('/?urut=nama_desc'));
-        $this->assertSame(['Alat B', 'Alat C', 'Alat A'], $this->namaDi('/?urut=sisa'));
-        $this->get('/?urut=harga')->assertSessionHasErrors('urut');
 
         // 9 alat per halaman
         foreach (range(1, 8) as $i) {

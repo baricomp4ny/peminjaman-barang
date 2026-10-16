@@ -119,7 +119,7 @@
                     </button>
                 </div>
                 <form method="GET" action="{{ route('peminjam.katalog.index') }}#katalog" class="space-y-6">
-                    @foreach (['kategori_id', 'lokasi_id', 'urut'] as $tetap)
+                    @foreach (['kategori_id', 'lokasi_id'] as $tetap)
                         @if (request($tetap))<input type="hidden" name="{{ $tetap }}" value="{{ request($tetap) }}">@endif
                     @endforeach
 
@@ -216,26 +216,15 @@
 
             {{-- ---------- GRID ALAT ---------- --}}
             <div>
-                {{-- Bilah atas: tombol Filter (khusus HP) + urutan dalam satu baris --}}
-                <div class="flex items-center justify-between gap-3 md:justify-end">
+                {{-- Tombol Filter (khusus HP) --}}
+                <div class="md:hidden">
                     <button type="button" @click="filter = ! filter" class="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-marian-800 shadow-lembut ring-1 ring-marian-100 md:hidden" :aria-expanded="filter">
                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4" /></svg>
                         Filter
                     </button>
-                    <form method="GET" action="{{ route('peminjam.katalog.index') }}#katalog">
-                        @foreach (request()->except(['urut', 'page']) as $nama => $nilai)
-                            <input type="hidden" name="{{ $nama }}" value="{{ $nilai }}">
-                        @endforeach
-                        <x-select name="urut" class="py-2 text-sm" aria-label="Urutkan" onchange="this.form.submit()">
-                            @foreach ($urutan as $nilai => $teks)
-                                <option value="{{ $nilai }}" @selected(request('urut', 'nama') === $nilai)>{{ $teks }}</option>
-                            @endforeach
-                        </x-select>
-                        <noscript><button class="ms-2 text-sm font-semibold text-marian-800">Urutkan</button></noscript>
-                    </form>
                 </div>
 
-                <div class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-5">
+                <div class="mt-4 grid grid-cols-2 md:mt-0 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-5">
                     @forelse ($barang as $b)
                         <x-kartu-alat :barang="$b" :sisa="$stok[$b->id]['sisa'] ?? 0" />
                     @empty

@@ -36,15 +36,10 @@ class KatalogController extends Controller
         // Sisa unit pada rentang tanggal yang dipilih (default hari ini)
         $stok = $ketersediaan->hitung($cocok->pluck('id')->all(), $mulai, $selesai);
 
-        // Filter "hanya tersedia" & urutan "sisa" butuh angka sisa, jadi dikerjakan di koleksi.
+        // Filter "hanya tersedia" butuh angka sisa, jadi dikerjakan di koleksi.
         // Jumlah jenis alat lab kecil (puluhan), sehingga aman tanpa paginasi di database.
         $cocok = $cocok
             ->when($request->boolean('tersedia'), fn ($c) => $c->filter(fn ($b) => ($stok[$b->id]['sisa'] ?? 0) > 0))
-            ->pipe(fn ($c) => match ($request->urutan()) {
-                'nama_desc' => $c->sortByDesc('nama'),
-                'sisa' => $c->sortByDesc(fn ($b) => $stok[$b->id]['sisa'] ?? 0),
-                default => $c,
-            })
             ->values();
 
         $halaman = LengthAwarePaginator::resolveCurrentPage();
@@ -62,7 +57,6 @@ class KatalogController extends Controller
             'rentang' => ['mulai' => $mulai, 'selesai' => $selesai, 'dipilih' => $request->filled('mulai')],
             'kategori' => Kategori::withCount('barang')->orderBy('nama')->get(),
             'lokasi' => Lokasi::orderBy('nama')->get(),
-            'urutan' => KatalogRequest::URUTAN,
             // Alat yang paling sering dipinjam (jumlah unit dari pinjaman yang sudah diambil)
             'populer' => Barang::query()
                 ->withSum(['peminjamanDetail as total_dipinjam' => fn ($q) => $q->whereHas('peminjaman', fn ($p) => $p->whereIn('status', [StatusPeminjaman::Dipinjam, StatusPeminjaman::Selesai]))], 'jumlah')

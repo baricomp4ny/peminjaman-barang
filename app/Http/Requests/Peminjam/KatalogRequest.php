@@ -5,11 +5,9 @@ namespace App\Http\Requests\Peminjam;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Carbon;
 
-/** Filter katalog publik: cari, kategori, lokasi, rentang tanggal, hanya tersedia, urutan. */
+/** Filter katalog publik: cari, kategori, lokasi, rentang tanggal, hanya tersedia. */
 class KatalogRequest extends FormRequest
 {
-    public const URUTAN = ['nama' => 'Nama A–Z', 'nama_desc' => 'Nama Z–A', 'sisa' => 'Sisa terbanyak'];
-
     public function authorize(): bool
     {
         return true;
@@ -24,7 +22,6 @@ class KatalogRequest extends FormRequest
             'mulai' => ['nullable', 'date', 'after_or_equal:today'],
             'selesai' => ['nullable', 'date', 'after_or_equal:mulai'],
             'tersedia' => ['nullable', 'boolean'],
-            'urut' => ['nullable', 'in:'.implode(',', array_keys(self::URUTAN))],
         ];
     }
 
@@ -37,11 +34,6 @@ class KatalogRequest extends FormRequest
     public function selesai(): Carbon
     {
         return $this->filled('selesai') ? Carbon::parse($this->input('selesai')) : $this->mulai();
-    }
-
-    public function urutan(): string
-    {
-        return $this->input('urut', 'nama');
     }
 
     public function attributes(): array
