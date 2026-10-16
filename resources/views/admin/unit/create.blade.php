@@ -1,11 +1,11 @@
 @use('App\Enums\KondisiUnit')
 <x-app-layout>
-    <x-slot name="header"><span class="text-sm text-marian-500">Data Barang</span></x-slot>
+    <x-slot name="header"><span class="text-sm text-marian-950/55">Data Barang</span></x-slot>
 
     <x-admin.judul judul="Tambah Unit Barang"
                    :kembali="$barangDipilih ? route('admin.barang.show', $barangDipilih) : route('admin.unit.index')" />
 
-    <div class="max-w-2xl rounded-3xl bg-white p-6 shadow-lembut ring-1 ring-marian-100"
+    <div class="max-w-2xl rounded-3xl bg-white p-6 border border-marian-950/15"
          x-data="{ barang: '{{ old('barang_id', $barangDipilih) }}', kode: @js($kodeBerikutnya), jumlah: {{ (int) old('jumlah', 1) }} }">
         <form method="POST" action="{{ route('admin.unit.store') }}" class="space-y-4">
             @csrf
@@ -66,7 +66,7 @@
 
             <div class="flex items-center gap-3">
                 <x-primary-button>Simpan</x-primary-button>
-                <a href="{{ $barangDipilih ? route('admin.barang.show', $barangDipilih) : route('admin.unit.index') }}" class="text-sm text-marian-600 hover:text-marian-900">Batal</a>
+                <a href="{{ $barangDipilih ? route('admin.barang.show', $barangDipilih) : route('admin.unit.index') }}" class="text-sm text-marian-950/65 hover:text-marian-900">Batal</a>
             </div>
         </form>
     </div>

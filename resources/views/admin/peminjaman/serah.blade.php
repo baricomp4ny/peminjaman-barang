@@ -4,7 +4,7 @@
 @endphp
 
 <x-app-layout>
-    <x-slot name="header"><span class="text-sm text-marian-500">Transaksi</span></x-slot>
+    <x-slot name="header"><span class="text-sm text-marian-950/55">Transaksi</span></x-slot>
 
     <x-admin.judul :judul="'Serah-terima '.$p->kode_peminjaman" :kembali="route('admin.peminjaman.show', $p)" />
 
@@ -12,8 +12,8 @@
         <div class="mb-4 rounded-2xl border border-marian-200 bg-marian-50 p-4 text-sm text-marian-800">{{ $jendela }}</div>
     @endif
 
-    <div class="max-w-3xl rounded-3xl bg-white p-6 shadow-lembut ring-1 ring-marian-100">
-        <p class="text-sm text-marian-600">
+    <div class="max-w-3xl rounded-3xl bg-white p-6 border border-marian-950/15">
+        <p class="text-sm text-marian-950/65">
             Peminjam: <strong>{{ $p->peminjam->name }}</strong> ({{ $p->peminjam->nomor_identitas }}).
             Pilih unit fisik yang diserahkan. Jumlah tiap jenis harus <strong>sama persis</strong> dengan ajuan.
             <a href="{{ route('admin.scan.index', ['mode' => 'serah', 'peminjaman' => $p->id]) }}" class="font-medium text-indigo-600 hover:underline">Pakai Scan QR &rarr;</a>
@@ -35,7 +35,7 @@
                                     <input type="checkbox" name="kode_unit[]" value="{{ $u->kode_unit }}" class="rounded border-marian-200 text-indigo-600"
                                            @checked($dipilihLama->contains($u->kode_unit))>
                                     <span class="font-mono">{{ $u->kode_unit }}</span>
-                                    <span class="text-xs text-marian-500">{{ $u->lokasi->nama }}</span>
+                                    <span class="text-xs text-marian-950/55">{{ $u->lokasi->nama }}</span>
                                 </label>
                             @endforeach
                         </div>
@@ -51,7 +51,7 @@
 
             <div class="flex items-center gap-3">
                 <x-primary-button :disabled="(bool) $jendela" class="disabled:opacity-50">Serahkan</x-primary-button>
-                <a href="{{ route('admin.peminjaman.show', $p) }}" class="text-sm text-marian-600 hover:text-marian-900">Batal</a>
+                <a href="{{ route('admin.peminjaman.show', $p) }}" class="text-sm text-marian-950/65 hover:text-marian-900">Batal</a>
             </div>
         </form>
     </div>

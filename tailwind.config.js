@@ -2,7 +2,7 @@ import defaultTheme from 'tailwindcss/defaultTheme';
 import forms from '@tailwindcss/forms';
 
 /**
- * Skala warna tunggal: gradasi Marian Blue (#263C92 = marian-800).
+ * Skala warna tunggal Marian Blue (#263C92 = marian-800), dipakai sebagai aksen.
  * "indigo" diarahkan ke skala yang sama supaya semua komponen bawaan (Breeze)
  * otomatis memakai biru lab, tanpa warna lain.
  */
@@ -35,15 +35,27 @@ export default {
                 indigo: marian,
             },
             fontFamily: {
-                sans: ['"Plus Jakarta Sans"', 'Figtree', ...defaultTheme.fontFamily.sans],
-            },
-            borderRadius: {
-                '4xl': '2rem',
-                '5xl': '2.5rem',
+                sans: ['"IBM Plex Sans"', ...defaultTheme.fontFamily.sans],
+                mono: ['"IBM Plex Mono"', ...defaultTheme.fontFamily.mono],
             },
             boxShadow: {
-                lembut: '0 10px 30px -12px rgba(38, 60, 146, 0.25)',
+                // Gaya lab bersih: tanpa bayangan lembut besar, cukup garis tipis
+                lembut: '0 1px 0 rgba(19, 30, 74, 0.06)',
             },
+        },
+        // Sudut tajam ala instrumen lab: semua skala rounded maksimal 4px (kecuali full)
+        borderRadius: {
+            none: '0',
+            sm: '2px',
+            DEFAULT: '2px',
+            md: '3px',
+            lg: '3px',
+            xl: '4px',
+            '2xl': '4px',
+            '3xl': '4px',
+            '4xl': '4px',
+            '5xl': '4px',
+            full: '9999px',
         },
     },
 

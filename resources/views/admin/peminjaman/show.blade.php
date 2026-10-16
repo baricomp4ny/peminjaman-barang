@@ -2,7 +2,7 @@
 @php $p = $peminjaman; @endphp
 
 <x-app-layout>
-    <x-slot name="header"><span class="text-sm text-marian-500">Transaksi</span></x-slot>
+    <x-slot name="header"><span class="text-sm text-marian-950/55">Transaksi</span></x-slot>
 
     <x-admin.judul :judul="'Peminjaman '.$p->kode_peminjaman" :kembali="url()->previous() !== url()->current() ? url()->previous() : route('admin.riwayat.index')">
         @if ($p->status === StatusPeminjaman::Disetujui)
@@ -22,27 +22,27 @@
         <div class="space-y-4">
             @if ($p->status === StatusPeminjaman::Menunggu)
                 {{-- Panel verifikasi: identitas, ketersediaan, aturan --}}
-                <div class="rounded-3xl bg-white p-5 shadow-lembut ring-1 ring-marian-100">
+                <div class="rounded-3xl bg-white p-5 border border-marian-950/15">
                     <h3 class="font-semibold text-marian-900">Verifikasi</h3>
 
                     <ul class="mt-3 space-y-2 text-sm">
                         <li class="flex items-start gap-2">
-                            @if ($p->peminjam->isAktif()) <span class="text-marian-600">✔</span> Akun aktif
+                            @if ($p->peminjam->isAktif()) <span class="text-marian-950/65">✔</span> Akun aktif
                             @else <span class="text-red-600">✖</span> Akun nonaktif @endif
                         </li>
                         <li class="flex items-start gap-2">
-                            @if ($p->peminjam->nomor_identitas) <span class="text-marian-600">✔</span> Nomor identitas: {{ $p->peminjam->nomor_identitas }}
-                            @else <span class="text-marian-600">!</span> Nomor identitas belum diisi @endif
+                            @if ($p->peminjam->nomor_identitas) <span class="text-marian-950/65">✔</span> Nomor identitas: {{ $p->peminjam->nomor_identitas }}
+                            @else <span class="text-marian-950/65">!</span> Nomor identitas belum diisi @endif
                         </li>
                         <li class="flex items-start gap-2">
-                            @if (! $punyaTerlambat) <span class="text-marian-600">✔</span> Tidak punya pinjaman terlambat
+                            @if (! $punyaTerlambat) <span class="text-marian-950/65">✔</span> Tidak punya pinjaman terlambat
                             @else <span class="text-red-600">✖</span> Masih punya pinjaman terlambat @endif
                         </li>
                     </ul>
 
                     <h4 class="mt-4 text-sm font-semibold text-marian-700">Ketersediaan pada rentang tanggal</h4>
                     <table class="mt-2 w-full text-sm">
-                        <thead class="text-left text-xs text-marian-500"><tr><th class="py-1">Barang</th><th class="py-1 text-right">Diminta</th><th class="py-1 text-right">Sisa</th></tr></thead>
+                        <thead class="text-left text-xs text-marian-950/55"><tr><th class="py-1">Barang</th><th class="py-1 text-right">Diminta</th><th class="py-1 text-right">Sisa</th></tr></thead>
                         <tbody>
                             @foreach ($p->detail as $d)
                                 @php $sisa = $stok[$d->barang_id]['sisa'] ?? 0; @endphp
@@ -54,7 +54,7 @@
                             @endforeach
                         </tbody>
                     </table>
-                    <p class="mt-1 text-xs text-marian-500">Sisa sudah memperhitungkan ajuan disetujui & pinjaman lain yang tanggalnya bertabrakan. Dicek ulang saat menekan Setujui.</p>
+                    <p class="mt-1 text-xs text-marian-950/55">Sisa sudah memperhitungkan ajuan disetujui & pinjaman lain yang tanggalnya bertabrakan. Dicek ulang saat menekan Setujui.</p>
 
                     <div class="mt-4 flex gap-2" x-data="{ tolak: {{ $errors->tolak->any() ? 'true' : 'false' }} }">
                         <form method="POST" action="{{ route('admin.ajuan.setujui', $p) }}" onsubmit="return confirm('Setujui ajuan {{ $p->kode_peminjaman }}?');">
@@ -83,12 +83,12 @@
                     </div>
                 </div>
             @elseif ($p->status === StatusPeminjaman::Disetujui)
-                <div class="rounded-lg bg-indigo-50 p-5 text-sm text-indigo-800 shadow-lembut ring-1 ring-marian-100">
+                <div class="rounded-lg bg-indigo-50 p-5 text-sm text-indigo-800 border border-marian-950/15">
                     Siap diambil mulai <strong>{{ $p->tanggal_pinjam->translatedFormat('d M Y') }}</strong>
                     sampai <strong>{{ $batasAmbil->translatedFormat('d M Y') }}</strong>. Setelah itu otomatis kedaluwarsa.
                 </div>
             @elseif ($perkiraanDenda > 0)
-                <div class="rounded-lg bg-red-50 p-5 text-sm text-red-800 shadow-lembut ring-1 ring-marian-100">
+                <div class="rounded-lg bg-red-50 p-5 text-sm text-red-800 border border-marian-950/15">
                     Terlambat {{ $p->hariTerlambatBerjalan() }} hari. Perkiraan denda bila dikembalikan hari ini:
                     <strong>{{ rupiah($perkiraanDenda) }}</strong>.
                 </div>

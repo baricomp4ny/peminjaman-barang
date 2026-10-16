@@ -1,5 +1,5 @@
 @props(['value'])
 
-<label {{ $attributes->merge(['class' => 'block text-sm font-semibold text-marian-900']) }}>
+<label {{ $attributes->merge(['class' => 'block text-sm font-medium text-marian-950']) }}>
     {{ $value ?? $slot }}
 </label>
