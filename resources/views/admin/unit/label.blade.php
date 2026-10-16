@@ -15,7 +15,7 @@
 <body class="bg-marian-50 font-sans antialiased">
     <div class="no-print border-b bg-white">
         <div class="mx-auto flex max-w-5xl flex-wrap items-end gap-3 px-4 py-4">
-            <a href="{{ route('admin.unit.index') }}" class="text-sm text-marian-950/55 hover:text-marian-700">&larr; Unit Barang</a>
+            <a href="{{ route('admin.unit.index') }}" class="text-sm text-marian-500 hover:text-marian-700">&larr; Unit Barang</a>
             <h1 class="text-lg font-semibold text-marian-900">Cetak Label QR</h1>
 
             <form method="GET" class="ms-auto flex flex-wrap items-end gap-2">
@@ -57,7 +57,7 @@
                     <div class="w-full [&>svg]:h-auto [&>svg]:w-full">{!! $svg[$u->id] !!}</div>
                     <div class="mt-1 font-mono text-sm font-bold tracking-wide">{{ $u->kode_unit }}</div>
                     <div class="text-xs leading-tight">{{ $u->barang->nama }}</div>
-                    <div class="text-[9px] leading-tight text-marian-950/55">{{ config('peminjaman.mitra') }}</div>
+                    <div class="text-[9px] leading-tight text-marian-500">{{ config('peminjaman.mitra') }}</div>
                 </div>
             @endforeach
         </div>

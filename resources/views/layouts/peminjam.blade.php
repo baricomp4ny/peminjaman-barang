@@ -12,27 +12,27 @@
     <head>
         @include('layouts.partials.head')
     </head>
-    <body class="kertas-grid font-sans text-marian-950 antialiased">
+    <body class="bg-gradient-to-b from-marian-50 via-white to-marian-50 font-sans text-marian-950 antialiased">
         <div class="flex min-h-screen flex-col">
-            {{-- Navbar: putih polos dengan garis bawah, menu aktif = garis biru --}}
-            <header x-data="{ open: false }" class="sticky top-0 z-40 border-b border-marian-950/15 bg-white/95 backdrop-blur">
-                <nav class="mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-4 sm:px-6">
-                    <a href="{{ route('peminjam.katalog.index') }}" class="flex min-w-0 items-center gap-3">
-                        <span class="flex h-9 w-9 shrink-0 items-center justify-center border border-marian-800 text-marian-800">
-                            <x-ikon-alat nama="labu" class="h-5 w-5" />
+            {{-- Navbar: pil putih melayang --}}
+            <header x-data="{ open: false }" class="sticky top-0 z-40 px-3 pt-3 sm:px-6">
+                <nav class="mx-auto flex max-w-7xl items-center justify-between gap-3 rounded-full bg-white/90 px-3 py-2 shadow-lembut ring-1 ring-marian-100 backdrop-blur sm:px-4">
+                    <a href="{{ route('peminjam.katalog.index') }}" class="flex min-w-0 items-center gap-2.5">
+                        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-marian-900 to-marian-600 text-white">
+                            <x-ikon-alat nama="labu" class="h-6 w-6" />
                         </span>
                         <span class="min-w-0 leading-tight">
-                            <span class="block truncate text-sm font-semibold text-marian-950">Peminjaman Alat Lab</span>
-                            <span class="block truncate font-mono text-[11px] text-marian-600">{{ config('peminjaman.mitra_singkat') }}</span>
+                            <span class="block truncate text-sm font-extrabold text-marian-900">Peminjaman Alat</span>
+                            <span class="block truncate text-[11px] font-medium text-marian-500">{{ config('peminjaman.mitra_singkat') }}</span>
                         </span>
                     </a>
 
                     {{-- Menu desktop --}}
-                    <div class="hidden h-full items-stretch md:flex">
+                    <div class="hidden items-center gap-1 md:flex">
                         @foreach ($menu as $item)
                             @php $aktif = request()->routeIs($item['aktif']); @endphp
                             <a href="{{ route($item['route']) }}" @if ($aktif) aria-current="page" @endif
-                               class="flex items-center border-b-2 px-4 text-sm font-medium transition {{ $aktif ? 'border-marian-800 text-marian-900' : 'border-transparent text-marian-950/60 hover:text-marian-900' }}">
+                               class="rounded-full px-4 py-2 text-sm font-semibold transition {{ $aktif ? 'bg-marian-800 text-white shadow-sm' : 'text-marian-700 hover:bg-marian-50' }}">
                                 {{ $item['label'] }}
                             </a>
                         @endforeach
@@ -40,14 +40,14 @@
 
                     <div class="hidden md:block">
                         <a href="{{ $admin ? route('admin.dashboard') : route('login') }}"
-                           class="border border-marian-950/20 px-4 py-2 font-mono text-xs font-medium uppercase tracking-wider text-marian-900 transition hover:border-marian-800 hover:bg-marian-800 hover:text-white">
+                           class="rounded-full border border-marian-200 px-4 py-2 text-sm font-semibold text-marian-800 transition hover:bg-marian-800 hover:text-white">
                             {{ $admin ? 'Dashboard Admin' : 'Login Admin' }}
                         </a>
                     </div>
 
                     {{-- Tombol menu mobile --}}
-                    <button @click="open = ! open" class="flex h-10 w-10 items-center justify-center border border-marian-950/15 text-marian-900 md:hidden" :aria-expanded="open" aria-label="Buka menu">
-                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.75" stroke-linecap="square">
+                    <button @click="open = ! open" class="flex h-10 w-10 items-center justify-center rounded-full text-marian-800 hover:bg-marian-50 md:hidden" :aria-expanded="open" aria-label="Buka menu">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round">
                             <path x-show="!open" d="M4 7h16M4 12h16M4 17h16" />
                             <path x-show="open" d="M6 6l12 12M18 6L6 18" style="display: none;" />
                         </svg>
@@ -56,21 +56,20 @@
 
                 {{-- Menu mobile --}}
                 <div x-show="open" x-transition @click.outside="open = false" style="display: none;"
-                     class="border-t border-marian-950/10 bg-white md:hidden">
+                     class="mx-auto mt-2 max-w-7xl space-y-1 rounded-4xl bg-white p-3 shadow-lembut ring-1 ring-marian-100 md:hidden">
                     @foreach ($menu as $item)
-                        @php $aktif = request()->routeIs($item['aktif']); @endphp
                         <a href="{{ route($item['route']) }}"
-                           class="block border-l-2 px-5 py-3 text-sm font-medium {{ $aktif ? 'border-marian-800 bg-marian-50 text-marian-900' : 'border-transparent text-marian-950/70' }}">
+                           class="block rounded-full px-4 py-2.5 text-sm font-semibold {{ request()->routeIs($item['aktif']) ? 'bg-marian-800 text-white' : 'text-marian-800 hover:bg-marian-50' }}">
                             {{ $item['label'] }}
                         </a>
                     @endforeach
-                    <a href="{{ $admin ? route('admin.dashboard') : route('login') }}" class="block border-l-2 border-transparent px-5 py-3 font-mono text-xs uppercase tracking-wider text-marian-700">
+                    <a href="{{ $admin ? route('admin.dashboard') : route('login') }}" class="block rounded-full px-4 py-2.5 text-sm font-semibold text-marian-500 hover:bg-marian-50">
                         {{ $admin ? 'Dashboard Admin' : 'Login Admin' }}
                     </a>
                 </div>
             </header>
 
-            <main class="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6 lg:py-10">
+            <main class="mx-auto w-full max-w-7xl flex-1 px-3 py-6 sm:px-6 lg:py-8">
                 @include('layouts.partials.flash')
 
                 @isset($header)
@@ -80,31 +79,31 @@
                 {{ $slot }}
             </main>
 
-            {{-- Footer polos bergaris atas --}}
-            <footer class="mt-12 border-t border-marian-950/15 bg-white">
-                <div class="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 [grid-template-columns:repeat(auto-fit,minmax(min(100%,15rem),1fr))]">
+            {{-- Footer --}}
+            <footer class="mt-10 rounded-t-5xl bg-gradient-to-br from-marian-950 via-marian-900 to-marian-700 text-marian-100">
+                <div class="mx-auto grid max-w-7xl gap-8 px-6 py-10 [grid-template-columns:repeat(auto-fit,minmax(min(100%,15rem),1fr))]">
                     <div>
-                        <div class="flex items-center gap-3">
-                            <span class="flex h-9 w-9 items-center justify-center border border-marian-800 text-marian-800"><x-ikon-alat nama="labu" class="h-5 w-5" /></span>
-                            <span class="text-sm font-semibold">Peminjaman Alat Lab</span>
+                        <div class="flex items-center gap-2.5">
+                            <span class="flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-white"><x-ikon-alat nama="labu" class="h-6 w-6" /></span>
+                            <span class="text-base font-extrabold text-white">Peminjaman Alat</span>
                         </div>
-                        <p class="mt-3 text-sm leading-relaxed text-marian-950/70">{{ config('peminjaman.mitra') }}</p>
+                        <p class="mt-3 text-sm leading-relaxed text-marian-200">{{ config('peminjaman.mitra') }}</p>
                     </div>
                     <div class="text-sm">
-                        <div class="label-bagian">Lokasi & Layanan</div>
-                        <p class="mt-3 text-marian-950/70">{{ config('peminjaman.alamat') }}</p>
-                        <p class="mt-1 font-mono text-xs text-marian-950/70">{{ config('peminjaman.jam_layanan') }}</p>
+                        <div class="font-semibold text-white">Lokasi & Layanan</div>
+                        <p class="mt-2 text-marian-200">{{ config('peminjaman.alamat') }}</p>
+                        <p class="mt-1 text-marian-200">{{ config('peminjaman.jam_layanan') }}</p>
                     </div>
                     <div class="text-sm">
-                        <div class="label-bagian">Tautan</div>
-                        <ul class="mt-3 space-y-1.5">
+                        <div class="font-semibold text-white">Tautan</div>
+                        <ul class="mt-2 space-y-1.5">
                             @foreach ($menu as $item)
-                                <li><a href="{{ route($item['route']) }}" class="text-marian-950/70 hover:text-marian-800">→ {{ $item['label'] }}</a></li>
+                                <li><a href="{{ route($item['route']) }}" class="text-marian-200 hover:text-white">{{ $item['label'] }}</a></li>
                             @endforeach
                         </ul>
                     </div>
                 </div>
-                <div class="border-t border-marian-950/10 px-4 py-4 text-center font-mono text-[11px] text-marian-950/60">
+                <div class="border-t border-white/10 px-6 py-4 text-center text-xs text-marian-300">
                     Peminjam tidak perlu login — ajukan, lalu cek status dengan kode peminjaman dan NIM.
                 </div>
             </footer>

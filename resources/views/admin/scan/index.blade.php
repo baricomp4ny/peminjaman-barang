@@ -1,5 +1,5 @@
 <x-app-layout>
-    <x-slot name="header"><span class="text-sm text-marian-950/55">Scan QR Code</span></x-slot>
+    <x-slot name="header"><span class="text-sm text-marian-500">Scan QR Code</span></x-slot>
 
     <div x-data="halamanScan(@js([
             'mode' => $mode,
@@ -16,25 +16,25 @@
             <h2 class="me-2 text-xl font-semibold text-marian-900">Scan QR</h2>
             @foreach (['serah' => 'Serah-terima', 'kembali' => 'Pengembalian'] as $nilai => $label)
                 <a href="{{ route('admin.scan.index', ['mode' => $nilai]) }}"
-                   class="rounded-sm px-4 py-1.5 text-sm font-medium {{ $mode === $nilai ? 'bg-indigo-600 text-white' : 'bg-white text-marian-700 shadow-sm hover:bg-marian-50' }}">{{ $label }}</a>
+                   class="rounded-full px-4 py-1.5 text-sm font-medium {{ $mode === $nilai ? 'bg-indigo-600 text-white' : 'bg-white text-marian-700 shadow-sm hover:bg-marian-50' }}">{{ $label }}</a>
             @endforeach
         </div>
 
         <div class="grid gap-6 lg:grid-cols-5">
             {{-- Kiri: kamera + input manual --}}
             <div class="space-y-4 lg:col-span-2">
-                <div class="rounded-3xl bg-white p-4 border border-marian-950/15">
+                <div class="rounded-3xl bg-white p-4 shadow-lembut ring-1 ring-marian-100">
                     <div class="mb-2 flex items-center justify-between">
                         <h3 class="font-semibold text-marian-900">Kamera</h3>
                         <button type="button" class="text-sm font-medium text-indigo-600 hover:text-indigo-800"
                                 x-text="kameraAktif ? 'Matikan kamera' : 'Nyalakan kamera'" @click="kameraAktif ? matikanKamera() : nyalakanKamera()"></button>
                     </div>
                     <div id="pembaca-qr" class="overflow-hidden rounded-md bg-gray-900" x-show="kameraAktif"></div>
-                    <p class="text-sm text-marian-950/55" x-show="!kameraAktif && !pesanKamera">Kamera mati. Nyalakan untuk scan dengan kamera, atau pakai scanner USB / input manual di bawah.</p>
+                    <p class="text-sm text-marian-500" x-show="!kameraAktif && !pesanKamera">Kamera mati. Nyalakan untuk scan dengan kamera, atau pakai scanner USB / input manual di bawah.</p>
                     <p class="rounded-md bg-marian-50 p-3 text-sm text-marian-800" x-show="pesanKamera" x-text="pesanKamera"></p>
                 </div>
 
-                <div class="rounded-3xl bg-white p-4 border border-marian-950/15">
+                <div class="rounded-3xl bg-white p-4 shadow-lembut ring-1 ring-marian-100">
                     {{-- Indikator: hijau bila hasil scanner USB akan langsung terbaca --}}
                     <button type="button" @click="paksaFokus()"
                             :class="scannerSiap ? 'bg-marian-800 text-white ring-marian-800' : 'bg-marian-50 text-marian-800 ring-marian-300 animate-pulse'"
@@ -53,7 +53,7 @@
                                           maxlength="150" placeholder="PJM-… / PRJ-001" />
                             <x-primary-button>Proses</x-primary-button>
                         </div>
-                        <p class="mt-1 text-xs text-marian-950/55">
+                        <p class="mt-1 text-xs text-marian-500">
                             Scanner USB mengetik kode lalu menekan Enter/Tab secara otomatis. Bisa juga diketik manual lalu Enter.
                             Kode yang sama dalam 2,5 detik dianggap scan ganda dan diabaikan.
                         </p>
@@ -76,39 +76,39 @@
             {{-- Kanan: transaksi --}}
             <div class="lg:col-span-3">
                 {{-- Belum ada transaksi --}}
-                <div x-show="!transaksi && pilihan.length === 0" class="rounded-3xl bg-white p-6 border border-marian-950/15">
+                <div x-show="!transaksi && pilihan.length === 0" class="rounded-3xl bg-white p-6 shadow-lembut ring-1 ring-marian-100">
                     <h3 class="font-semibold text-marian-900">Langkah 1: buka transaksi</h3>
                     @if ($mode === 'serah')
-                        <p class="mt-2 text-sm text-marian-950/65">Scan <strong>QR kode peminjaman</strong> dari layar/email peminjam atau ketik kodenya (PJM-…). Ajuan yang muncul hanya yang berstatus <em>disetujui</em>.</p>
+                        <p class="mt-2 text-sm text-marian-600">Scan <strong>QR kode peminjaman</strong> dari layar/email peminjam atau ketik kodenya (PJM-…). Ajuan yang muncul hanya yang berstatus <em>disetujui</em>.</p>
                     @else
-                        <p class="mt-2 text-sm text-marian-950/65">Scan <strong>QR salah satu unit</strong> yang dikembalikan atau <strong>QR kode peminjaman</strong>.</p>
+                        <p class="mt-2 text-sm text-marian-600">Scan <strong>QR salah satu unit</strong> yang dikembalikan atau <strong>QR kode peminjaman</strong>.</p>
                     @endif
                 </div>
 
                 {{-- Pilih transaksi bila peminjam punya lebih dari satu --}}
-                <div x-show="!transaksi && pilihan.length > 0" class="rounded-3xl bg-white p-6 border border-marian-950/15">
+                <div x-show="!transaksi && pilihan.length > 0" class="rounded-3xl bg-white p-6 shadow-lembut ring-1 ring-marian-100">
                     <h3 class="font-semibold text-marian-900">Pilih transaksi</h3>
                     <div class="mt-3 space-y-2">
                         <template x-for="t in pilihan" :key="t.id">
                             <button type="button" @click="buka(t)" class="block w-full rounded-2xl border p-3 text-left text-sm hover:bg-marian-50">
                                 <span class="font-mono" x-text="t.kode"></span> · <span x-text="t.peminjam"></span>
-                                <span class="block text-marian-950/55" x-text="t.tanggal + ' — ' + t.detail.map(d => d.nama + ' ×' + d.jumlah).join(', ')"></span>
+                                <span class="block text-marian-500" x-text="t.tanggal + ' — ' + t.detail.map(d => d.nama + ' ×' + d.jumlah).join(', ')"></span>
                             </button>
                         </template>
                     </div>
-                    <button type="button" class="mt-3 text-sm text-marian-950/55 hover:text-marian-700" @click="reset()">Batal</button>
+                    <button type="button" class="mt-3 text-sm text-marian-500 hover:text-marian-700" @click="reset()">Batal</button>
                 </div>
 
                 {{-- Transaksi aktif --}}
                 <template x-if="transaksi">
-                    <div class="rounded-3xl bg-white p-6 border border-marian-950/15">
+                    <div class="rounded-3xl bg-white p-6 shadow-lembut ring-1 ring-marian-100">
                         <div class="flex flex-wrap items-start justify-between gap-2">
                             <div>
                                 <a :href="transaksi.url_detail" class="font-mono text-sm text-indigo-600 hover:underline" x-text="transaksi.kode"></a>
                                 <div class="text-lg font-semibold text-marian-900" x-text="transaksi.peminjam"></div>
-                                <div class="text-sm text-marian-950/55"><span x-text="transaksi.nomor_identitas"></span> · <span x-text="transaksi.tanggal"></span></div>
+                                <div class="text-sm text-marian-500"><span x-text="transaksi.nomor_identitas"></span> · <span x-text="transaksi.tanggal"></span></div>
                             </div>
-                            <button type="button" class="text-sm text-marian-950/55 hover:text-marian-700" @click="reset()">Ganti transaksi</button>
+                            <button type="button" class="text-sm text-marian-500 hover:text-marian-700" @click="reset()">Ganti transaksi</button>
                         </div>
 
                         <p x-show="transaksi.peringatan" class="mt-3 rounded-md bg-marian-50 p-3 text-sm text-marian-800" x-text="transaksi.peringatan"></p>
@@ -116,7 +116,7 @@
 
                         <h3 class="mt-5 text-sm font-semibold text-marian-900">
                             Langkah 2: scan QR setiap unit
-                            <span class="font-normal text-marian-950/55" x-text="mode === 'serah' ? '(harus sesuai jenis & jumlah ajuan)' : '(boleh sebagian)'"></span>
+                            <span class="font-normal text-marian-500" x-text="mode === 'serah' ? '(harus sesuai jenis & jumlah ajuan)' : '(boleh sebagian)'"></span>
                         </h3>
 
                         {{-- Progres per jenis barang (serah-terima) --}}
@@ -131,7 +131,7 @@
                         </ul>
 
                         {{-- Unit yang masih dipinjam (pengembalian) --}}
-                        <p class="mt-2 text-sm text-marian-950/65" x-show="mode === 'kembali'">
+                        <p class="mt-2 text-sm text-marian-600" x-show="mode === 'kembali'">
                             Belum kembali:
                             <template x-for="u in transaksi.belum_kembali" :key="u.unit_id">
                                 <span class="me-1 inline-block rounded px-1.5 font-mono text-xs"
@@ -140,12 +140,12 @@
                         </p>
 
                         {{-- Daftar hasil scan --}}
-                        <div class="mt-4 divide-y border" x-show="dipindai.length > 0">
+                        <div class="mt-4 divide-y rounded-2xl border" x-show="dipindai.length > 0">
                             <template x-for="(u, i) in dipindai" :key="u.unit_id">
                                 <div class="grid items-center gap-2 p-3 sm:grid-cols-12">
                                     <div class="sm:col-span-4">
                                         <span class="font-mono text-sm font-semibold" x-text="u.kode_unit"></span>
-                                        <span class="block text-xs text-marian-950/55" x-text="u.nama"></span>
+                                        <span class="block text-xs text-marian-500" x-text="u.nama"></span>
                                     </div>
                                     <template x-if="mode === 'kembali'">
                                         <select x-model="u.kondisi" class="rounded-2xl border-marian-200 text-sm shadow-sm sm:col-span-3" :aria-label="'Kondisi ' + u.kode_unit">
@@ -190,7 +190,7 @@
                             <x-primary-button x-bind:disabled="!bisaSimpan()" class="disabled:cursor-not-allowed disabled:opacity-50">
                                 <span x-text="mode === 'serah' ? 'Selesaikan serah-terima' : 'Simpan pengembalian (' + dipindai.length + ' unit)'"></span>
                             </x-primary-button>
-                            <p class="mt-1 text-xs text-marian-950/55" x-show="mode === 'serah' && !lengkap()">Tombol aktif setelah semua jenis barang lengkap.</p>
+                            <p class="mt-1 text-xs text-marian-500" x-show="mode === 'serah' && !lengkap()">Tombol aktif setelah semua jenis barang lengkap.</p>
                         </form>
                     </div>
                 </template>

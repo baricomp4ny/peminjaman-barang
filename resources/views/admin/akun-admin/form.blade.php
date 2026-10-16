@@ -3,7 +3,7 @@
 <x-app-layout>
     <x-admin.judul :judul="$edit ? 'Ubah Admin' : 'Tambah Admin'" :kembali="route('admin.akun-admin.index')" />
 
-    <div class="max-w-2xl rounded-3xl bg-white p-6 border border-marian-950/15">
+    <div class="max-w-2xl rounded-3xl bg-white p-6 shadow-lembut ring-1 ring-marian-100">
         <form method="POST" action="{{ $edit ? route('admin.akun-admin.update', $akun) : route('admin.akun-admin.store') }}" class="space-y-4">
             @csrf
             @if ($edit) @method('PUT') @endif
@@ -34,7 +34,7 @@
                 </div>
             </div>
 
-            <fieldset class="rounded-2xl border border-marian-950/10 p-4">
+            <fieldset class="rounded-2xl border border-marian-100 p-4">
                 <legend class="px-1 text-sm font-medium text-marian-700">{{ $edit ? 'Reset Password (kosongkan jika tidak diganti)' : 'Password *' }}</legend>
                 <div class="grid gap-4 sm:grid-cols-2">
                     <div>
@@ -47,12 +47,12 @@
                         <x-text-input id="password_confirmation" type="password" name="password_confirmation" class="mt-1 block w-full" autocomplete="new-password" :required="! $edit" />
                     </div>
                 </div>
-                <p class="mt-2 text-xs text-marian-950/55">Minimal 8 karakter.</p>
+                <p class="mt-2 text-xs text-marian-500">Minimal 8 karakter.</p>
             </fieldset>
 
             <div class="flex items-center gap-3">
                 <x-primary-button>Simpan</x-primary-button>
-                <a href="{{ route('admin.akun-admin.index') }}" class="text-sm text-marian-950/65 hover:text-marian-900">Batal</a>
+                <a href="{{ route('admin.akun-admin.index') }}" class="text-sm text-marian-600 hover:text-marian-900">Batal</a>
             </div>
         </form>
     </div>

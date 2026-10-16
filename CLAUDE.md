@@ -120,14 +120,11 @@ Responsif, menu aktif ditandai, pesan sukses/gagal jelas.
 - Pengaturan > Data Admin (AkunAdminController, {akunAdmin} hanya role admin): tidak bisa menonaktifkan/menghapus diri sendiri, minimal satu admin aktif, admin yang pernah memverifikasi tidak bisa dihapus.
 - Kartu QR peminjam diganti QR kode peminjaman.
 
-## Catatan desain tampilan (disetujui) — desain A "lab bersih / ilmiah"
-- Latar putih + grid kertas milimeter (`.kertas-grid` di resources/css/app.css: garis 8 px & 40 px). Panel putih bergaris tepi tipis (`.panel`), tanpa bayangan lembut besar dan tanpa gradasi.
-- Sudut tajam: skala `rounded-*` di tailwind.config.js dibatasi 0–4 px; `rounded-full` hanya untuk avatar/titik indikator.
-- Font: IBM Plex Sans (teks) + IBM Plex Mono (kode alat/peminjaman, angka, tanggal, label bagian `.label-bagian` mis. "01 / Katalog"). Dimuat dari bunny.net.
-- Warna: dasar putih & abu netral (`text-marian-950/55…/75`), Marian Blue (#263C92 = marian-800) hanya aksen: tombol utama, garis menu aktif, tautan. `indigo` dipetakan ke skala marian. Merah hanya untuk gagal/ditolak/hilang/terlambat.
-- Komponen: `x-kartu-alat` gaya label spesimen (kode mono, indikator batang sisa unit), `x-ilustrasi-lab` gambar teknik garis tipis (currentColor), badge kotak bergaris huruf mono, QR status gaya tiket.
-- Navbar publik & sidebar admin putih bergaris; menu aktif = garis biru (bawah di navbar, kiri di sidebar).
-- Responsif: grid `repeat(auto-fit|auto-fill, minmax(min(100%,Xrem),1fr))`, ukuran huruf `clamp()`; tanpa scroll horizontal di 360 px.
+## Catatan desain tampilan (disetujui)
+- Warna tunggal: gradasi Marian Blue, skala `marian-50 … marian-950` (#263C92 = marian-800) di tailwind.config.js; `indigo` dipetakan ke skala yang sama. Merah hanya untuk pesan gagal/ditolak/hilang.
+- Gaya halaman publik mengikuti referensi kartu membulat (rounded-4xl/5xl, shadow-lembut): navbar pil, hero gradasi + ilustrasi SVG kultur jaringan (ganti foto: taruh public/images/hero-lab.jpg), kartu fitur, kartu aturan, kategori bento, katalog `x-kartu-alat`, banner alur, footer gradasi.
+- Responsif & fleksibel: grid `repeat(auto-fit|auto-fill, minmax(min(100%,Xrem),1fr))` dan ukuran huruf `clamp()`; tanpa scroll horizontal di 360 px.
+- Komponen: `x-ikon-alat` (ikon garis per jenis alat/kategori), `x-ilustrasi-lab`, `x-kartu-alat`. Font: Plus Jakarta Sans (bunny.net).
 - Info lab di config/peminjaman.php: MITRA_NAMA, MITRA_SINGKAT, MITRA_ALAMAT, MITRA_JAM_LAYANAN.
 
 ## Catatan desain (clean code, disetujui)

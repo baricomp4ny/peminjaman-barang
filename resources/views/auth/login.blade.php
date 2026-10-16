@@ -1,6 +1,6 @@
 <x-guest-layout>
-    <h2 class="text-2xl font-semibold text-marian-900">Login Admin</h2>
-    <p class="mb-6 mt-1 text-sm text-marian-950/55">Halaman ini khusus admin/petugas lab. Peminjam tidak perlu login.</p>
+    <h2 class="text-2xl font-extrabold text-marian-900">Login Admin</h2>
+    <p class="mb-6 mt-1 text-sm text-marian-500">Halaman ini khusus admin/petugas lab. Peminjam tidak perlu login.</p>
 
     <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
@@ -31,13 +31,13 @@
         <div class="block mt-4">
             <label for="remember_me" class="inline-flex items-center">
                 <input id="remember_me" type="checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" name="remember">
-                <span class="ms-2 text-sm text-marian-950/65">Ingat saya</span>
+                <span class="ms-2 text-sm text-marian-600">Ingat saya</span>
             </label>
         </div>
 
         <div class="flex items-center justify-end mt-4">
             @if (Route::has('password.request'))
-                <a class="underline text-sm text-marian-950/65 hover:text-marian-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('password.request') }}">
+                <a class="underline text-sm text-marian-600 hover:text-marian-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('password.request') }}">
                     Lupa password?
                 </a>
             @endif
@@ -48,7 +48,7 @@
         </div>
     </form>
 
-    <div class="mt-8 border-t border-marian-950/10 pt-5 text-center text-sm text-marian-950/65">
+    <div class="mt-8 border-t border-marian-100 pt-5 text-center text-sm text-marian-600">
         Ingin meminjam alat? <a href="{{ route('peminjam.ajuan.create') }}" class="font-medium text-indigo-600 hover:underline">Ajukan peminjaman</a>
         · <a href="{{ route('peminjam.status.form') }}" class="font-medium text-indigo-600 hover:underline">Cek status</a>
     </div>

@@ -1,11 +1,11 @@
 @php $edit = $peminjam->exists; @endphp
 
 <x-app-layout>
-    <x-slot name="header"><span class="text-sm text-marian-950/55">Data Peminjam</span></x-slot>
+    <x-slot name="header"><span class="text-sm text-marian-500">Data Peminjam</span></x-slot>
 
     <x-admin.judul :judul="$edit ? 'Ubah Peminjam' : 'Tambah Peminjam'" :kembali="route('admin.peminjam.index')" />
 
-    <div class="max-w-2xl rounded-3xl bg-white p-6 border border-marian-950/15">
+    <div class="max-w-2xl rounded-3xl bg-white p-6 shadow-lembut ring-1 ring-marian-100">
         <form method="POST" action="{{ $edit ? route('admin.peminjam.update', $peminjam) : route('admin.peminjam.store') }}" class="space-y-4">
             @csrf
             @if ($edit) @method('PUT') @endif
@@ -49,7 +49,7 @@
 
             <div class="flex items-center gap-3">
                 <x-primary-button>Simpan</x-primary-button>
-                <a href="{{ route('admin.peminjam.index') }}" class="text-sm text-marian-950/65 hover:text-marian-900">Batal</a>
+                <a href="{{ route('admin.peminjam.index') }}" class="text-sm text-marian-600 hover:text-marian-900">Batal</a>
             </div>
         </form>
     </div>

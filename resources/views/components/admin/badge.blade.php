@@ -4,16 +4,16 @@
     // Terima Enum (status/kondisi) maupun string
     $nilai = $value instanceof \BackedEnum ? $value->value : (string) $value;
 
-    // Badge kotak bergaris ala label lab; biru = aktif/berjalan, merah hanya untuk ditolak/hilang
+    // Warna badge: gradasi biru lab; merah hanya untuk kondisi negatif (ditolak/hilang)
     $warna = match ($nilai) {
-        'tersedia', 'baik', 'aktif', 'selesai' => 'border-marian-800/40 bg-white text-marian-800',
-        'dipinjam' => 'border-marian-800 bg-marian-800 text-white',
-        'disetujui' => 'border-marian-600 bg-marian-600 text-white',
-        'menunggu' => 'border-dashed border-marian-800 bg-white text-marian-800',
-        'perbaikan', 'rusak' => 'border-marian-950/30 bg-marian-50 text-marian-950',
-        'hilang', 'ditolak' => 'border-red-300 bg-red-50 text-red-700',
-        default => 'border-marian-950/15 bg-white text-marian-950/55',
+        'tersedia', 'baik', 'aktif', 'selesai' => 'bg-marian-100 text-marian-800 ring-1 ring-marian-200',
+        'dipinjam' => 'bg-marian-800 text-white',
+        'disetujui' => 'bg-marian-600 text-white',
+        'menunggu' => 'bg-white text-marian-700 ring-1 ring-marian-300',
+        'perbaikan', 'rusak' => 'bg-marian-200 text-marian-900',
+        'hilang', 'ditolak' => 'bg-red-100 text-red-800',
+        default => 'bg-marian-50 text-marian-500 ring-1 ring-marian-100',
     };
 @endphp
 
-<span {{ $attributes->merge(['class' => "inline-flex border px-2 py-0.5 font-mono text-[11px] font-medium uppercase tracking-wider $warna"]) }}>{{ $nilai }}</span>
+<span {{ $attributes->merge(['class' => "inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize $warna"]) }}>{{ $nilai }}</span>
