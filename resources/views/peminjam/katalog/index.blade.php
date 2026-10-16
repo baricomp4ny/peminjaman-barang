@@ -48,7 +48,7 @@
     </section>
 
     {{-- ================= FITUR (tanpa kartu: ikon + teks) ================= --}}
-    <section class="mt-12 grid gap-x-6 gap-y-8 px-2 [grid-template-columns:repeat(auto-fit,minmax(min(100%,13rem),1fr))]">
+    <section class="mt-12 grid gap-x-6 gap-y-8 rounded-4xl bg-white px-6 py-8 shadow-lembut ring-1 ring-marian-100 [grid-template-columns:repeat(auto-fit,minmax(min(100%,13rem),1fr))]">
         @foreach ([
             ['Ajukan Online', 'Tanpa akun — cukup isi identitas & pilih alat.', 'M12 4v16m8-8H4'],
             ['Stok Real-time', 'Sisa unit dihitung sesuai tanggal pinjam Anda.', 'M4 19V9m6 10V5m6 14v-7m4 7H2'],
@@ -56,7 +56,7 @@
             ['Pengingat Email', 'Kabar persetujuan & pengingat H-1 pengembalian.', 'M4 6h16v12H4zM4 7l8 6 8-6'],
         ] as [$judul, $teks, $ikon])
             <div class="flex items-start gap-4">
-                <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-marian-100 to-marian-200 text-marian-800">
+                <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gold/25 text-marian-900 ring-1 ring-gold/60">
                     <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="{{ $ikon }}" /></svg>
                 </span>
                 <div>
@@ -68,25 +68,25 @@
     </section>
 
     {{-- ================= ATURAN + CEK STATUS (satu pita) ================= --}}
-    <section class="relative mt-12 overflow-hidden rounded-4xl bg-gradient-to-br from-marian-800 to-marian-600 p-6 text-white sm:p-8">
-        <div aria-hidden="true" class="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/10"></div>
+    <section class="relative mt-12 overflow-hidden rounded-4xl bg-gradient-to-br from-gold to-amber-300 p-6 text-marian-950 sm:p-8">
+        <div aria-hidden="true" class="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/25"></div>
         <div class="relative flex flex-wrap items-center justify-between gap-8">
             <div>
-                <span class="text-[11px] font-semibold uppercase tracking-wider text-marian-200">Aturan Peminjaman</span>
+                <span class="text-[11px] font-semibold uppercase tracking-wider text-marian-800">Aturan Peminjaman</span>
                 {{-- Angka aturan dipisah garis tipis, bukan kotak --}}
-                <dl class="mt-3 flex flex-wrap divide-x divide-white/20">
-                    <div class="pr-6"><dd class="text-3xl font-extrabold">{{ $aturan['lama'] }}</dd><dt class="text-xs text-marian-100">hari maksimal</dt></div>
-                    <div class="px-6"><dd class="text-3xl font-extrabold">{{ $aturan['unit'] }}</dd><dt class="text-xs text-marian-100">unit per ajuan</dt></div>
+                <dl class="mt-3 flex flex-wrap divide-x divide-marian-950/20">
+                    <div class="pr-6"><dd class="text-3xl font-extrabold text-marian-900">{{ $aturan['lama'] }}</dd><dt class="text-xs text-marian-800">hari maksimal</dt></div>
+                    <div class="px-6"><dd class="text-3xl font-extrabold text-marian-900">{{ $aturan['unit'] }}</dd><dt class="text-xs text-marian-800">unit per ajuan</dt></div>
                     <div class="pl-6">
-                        <dd class="text-3xl font-extrabold">{{ $aturan['denda'] > 0 ? rupiah($aturan['denda']) : 'Gratis' }}</dd>
-                        <dt class="text-xs text-marian-100">{{ $aturan['denda'] > 0 ? 'denda/unit/hari' : 'tanpa denda' }}</dt>
+                        <dd class="text-3xl font-extrabold text-marian-900">{{ $aturan['denda'] > 0 ? rupiah($aturan['denda']) : 'Gratis' }}</dd>
+                        <dt class="text-xs text-marian-800">{{ $aturan['denda'] > 0 ? 'denda/unit/hari' : 'tanpa denda' }}</dt>
                     </div>
                 </dl>
-                <p class="mt-4 max-w-xl text-xs text-marian-100">Alat hanya untuk kegiatan di laboratorium. Bawa kartu identitas (KTM) saat mengambil alat.</p>
+                <p class="mt-4 max-w-xl text-xs text-marian-900">Alat hanya untuk kegiatan di laboratorium. Bawa kartu identitas (KTM) saat mengambil alat.</p>
             </div>
             <div class="max-w-sm">
-                <p class="text-sm text-marian-100">Sudah mengajukan? Pantau status dan tampilkan QR pengambilan dengan <strong class="text-white">kode peminjaman</strong> + <strong class="text-white">NIM</strong>.</p>
-                <a href="{{ route('peminjam.status.form') }}" class="mt-4 inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-bold text-marian-900 transition hover:bg-marian-100">
+                <p class="text-sm text-marian-900">Sudah mengajukan? Pantau status dan tampilkan QR pengambilan dengan <strong>kode peminjaman</strong> + <strong>NIM</strong>.</p>
+                <a href="{{ route('peminjam.status.form') }}" class="mt-4 inline-flex items-center gap-2 rounded-full bg-marian-800 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-marian-900">
                     Cek Status
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
                 </a>
@@ -100,7 +100,7 @@
         $tautan = fn (array $ubah) => route('peminjam.katalog.index', array_filter(array_merge(request()->except('page'), $ubah), fn ($v) => $v !== null && $v !== '')).'#katalog';
         $label = 'block rounded-2xl px-3 py-2 text-sm transition';
     @endphp
-    <section id="katalog" class="mt-14 scroll-mt-28" x-data="{ filter: false }">
+    <section id="katalog" class="mt-14 scroll-mt-28 rounded-5xl bg-gradient-to-b from-marian-100 to-marian-50 p-4 sm:p-8" x-data="{ filter: false }">
         <div class="flex flex-wrap items-end justify-between gap-4">
             <div>
                 <h2 class="font-extrabold text-marian-900 [font-size:clamp(1.4rem,2.6vw,2rem)]">Katalog Alat</h2>
@@ -247,7 +247,7 @@
     </section>
 
     {{-- ================= ALUR ================= --}}
-    <section id="alur" class="mt-14 scroll-mt-28 overflow-hidden rounded-5xl bg-gradient-to-br from-marian-950 via-marian-800 to-marian-600 p-6 text-white sm:p-10">
+    <section id="alur" class="mt-14 scroll-mt-28 overflow-hidden rounded-5xl bg-gradient-to-br from-marian-950 to-marian-900 p-6 text-white sm:p-10">
         <div class="flex flex-wrap items-end justify-between gap-4">
             <div>
                 <span class="rounded-full bg-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider ring-1 ring-white/25">Cara Meminjam</span>
@@ -264,7 +264,7 @@
                 ['Kembalikan', 'Kembalikan tepat waktu. Terlambat dikenai denda per unit per hari.'],
             ] as $i => [$judul, $teks])
                 <li class="relative border-t border-white/25 pt-5">
-                    <span class="flex h-10 w-10 items-center justify-center rounded-full bg-white text-base font-extrabold text-marian-900">{{ $i + 1 }}</span>
+                    <span class="flex h-10 w-10 items-center justify-center rounded-full bg-magenta text-base font-extrabold text-white">{{ $i + 1 }}</span>
                     <h3 class="mt-3 font-bold">{{ $judul }}</h3>
                     <p class="mt-1 text-sm text-marian-100">{{ $teks }}</p>
                 </li>

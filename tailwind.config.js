@@ -35,6 +35,8 @@ export default {
                 indigo: marian,
                 // Aksen 5% dari palet lab: Vivid Magenta (#E01184), dipakai untuk outline kartu aktif
                 magenta: '#E01184',
+                // Aksen 15%: Gold (#FED80B), dipakai untuk pita aturan & ikon fitur
+                gold: '#FED80B',
             },
             fontFamily: {
                 sans: ['"Plus Jakarta Sans"', 'Figtree', ...defaultTheme.fontFamily.sans],
