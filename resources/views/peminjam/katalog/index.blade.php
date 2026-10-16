@@ -68,25 +68,25 @@
     </section>
 
     {{-- ================= ATURAN + CEK STATUS (satu pita) ================= --}}
-    <section class="relative mt-12 overflow-hidden rounded-4xl bg-gradient-to-br from-gold to-amber-300 p-6 text-marian-950 sm:p-8">
-        <div aria-hidden="true" class="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/25"></div>
+    <section class="relative mt-12 overflow-hidden rounded-4xl bg-gradient-to-br from-marian-800 to-marian-600 p-6 text-white sm:p-8">
+        <div aria-hidden="true" class="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/10"></div>
         <div class="relative flex flex-wrap items-center justify-between gap-8">
             <div>
-                <span class="text-[11px] font-semibold uppercase tracking-wider text-marian-800">Aturan Peminjaman</span>
+                <span class="text-[11px] font-semibold uppercase tracking-wider text-marian-200">Aturan Peminjaman</span>
                 {{-- Angka aturan dipisah garis tipis, bukan kotak --}}
-                <dl class="mt-3 flex flex-wrap divide-x divide-marian-950/20">
-                    <div class="pr-6"><dd class="text-3xl font-extrabold text-marian-900">{{ $aturan['lama'] }}</dd><dt class="text-xs text-marian-800">hari maksimal</dt></div>
-                    <div class="px-6"><dd class="text-3xl font-extrabold text-marian-900">{{ $aturan['unit'] }}</dd><dt class="text-xs text-marian-800">unit per ajuan</dt></div>
+                <dl class="mt-3 flex flex-wrap divide-x divide-white/20">
+                    <div class="pr-6"><dd class="text-3xl font-extrabold">{{ $aturan['lama'] }}</dd><dt class="text-xs text-marian-100">hari maksimal</dt></div>
+                    <div class="px-6"><dd class="text-3xl font-extrabold">{{ $aturan['unit'] }}</dd><dt class="text-xs text-marian-100">unit per ajuan</dt></div>
                     <div class="pl-6">
-                        <dd class="text-3xl font-extrabold text-marian-900">{{ $aturan['denda'] > 0 ? rupiah($aturan['denda']) : 'Gratis' }}</dd>
-                        <dt class="text-xs text-marian-800">{{ $aturan['denda'] > 0 ? 'denda/unit/hari' : 'tanpa denda' }}</dt>
+                        <dd class="text-3xl font-extrabold">{{ $aturan['denda'] > 0 ? rupiah($aturan['denda']) : 'Gratis' }}</dd>
+                        <dt class="text-xs text-marian-100">{{ $aturan['denda'] > 0 ? 'denda/unit/hari' : 'tanpa denda' }}</dt>
                     </div>
                 </dl>
-                <p class="mt-4 max-w-xl text-xs text-marian-900">Alat hanya untuk kegiatan di laboratorium. Bawa kartu identitas (KTM) saat mengambil alat.</p>
+                <p class="mt-4 max-w-xl text-xs text-marian-100">Alat hanya untuk kegiatan di laboratorium. Bawa kartu identitas (KTM) saat mengambil alat.</p>
             </div>
             <div class="max-w-sm">
-                <p class="text-sm text-marian-900">Sudah mengajukan? Pantau status dan tampilkan QR pengambilan dengan <strong>kode peminjaman</strong> + <strong>NIM</strong>.</p>
-                <a href="{{ route('peminjam.status.form') }}" class="mt-4 inline-flex items-center gap-2 rounded-full bg-marian-800 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-marian-900">
+                <p class="text-sm text-marian-100">Sudah mengajukan? Pantau status dan tampilkan QR pengambilan dengan <strong class="text-white">kode peminjaman</strong> + <strong class="text-white">NIM</strong>.</p>
+                <a href="{{ route('peminjam.status.form') }}" class="mt-4 inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-bold text-marian-900 transition hover:bg-marian-100">
                     Cek Status
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
                 </a>
