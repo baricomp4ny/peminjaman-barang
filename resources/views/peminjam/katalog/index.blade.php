@@ -213,17 +213,10 @@
 
             {{-- ---------- GRID ALAT ---------- --}}
             <div>
-                {{-- Bilah atas: jumlah hasil + urutan --}}
+                {{-- Bilah atas: keterangan tanggal sisa unit + urutan --}}
                 <div class="flex flex-wrap items-center justify-between gap-3">
                     <p class="text-sm text-marian-600">
-                        @if ($barang->total())
-                            Menampilkan {{ $barang->firstItem() }}–{{ $barang->lastItem() }} dari {{ $barang->total() }} alat
-                        @else
-                            Tidak ada alat yang cocok
-                        @endif
-                        <span class="block text-xs text-marian-500 sm:inline">
-                            · sisa unit {{ $rentang['dipilih'] ? $rentang['mulai']->translatedFormat('d M').' – '.$rentang['selesai']->translatedFormat('d M Y') : 'hari ini' }}
-                        </span>
+                        Sisa unit {{ $rentang['dipilih'] ? $rentang['mulai']->translatedFormat('d M').' – '.$rentang['selesai']->translatedFormat('d M Y') : 'hari ini' }}
                     </p>
                     <form method="GET" action="{{ route('peminjam.katalog.index') }}#katalog">
                         @foreach (request()->except(['urut', 'page']) as $nama => $nilai)
@@ -248,7 +241,7 @@
                     @endforelse
                 </div>
 
-                <div class="mt-8">{{ $barang->links() }}</div>
+                <div class="mt-8">{{ $barang->links('pagination.tanpa-ringkasan') }}</div>
             </div>
         </div>
     </section>

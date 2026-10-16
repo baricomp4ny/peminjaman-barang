@@ -88,7 +88,8 @@ class KatalogFilterTest extends TestCase
         foreach (range(1, 8) as $i) {
             $this->buatBarang('X'.chr(64 + $i).'X', 1, 'Alat X'.$i);
         }
-        $this->get('/')->assertSee('Menampilkan 1–9 dari 11 alat');
+        $this->assertCount(9, $this->get('/')->viewData('barang'));
+        $this->get('/')->assertDontSee('Menampilkan');
         $this->assertCount(2, $this->get('/?page=2')->viewData('barang'));
     }
 }
