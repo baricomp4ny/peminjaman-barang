@@ -33,6 +33,8 @@ export default {
             colors: {
                 marian,
                 indigo: marian,
+                // Aksen 5% dari palet lab: Vivid Magenta (#E01184), dipakai untuk outline kartu aktif
+                magenta: '#E01184',
             },
             fontFamily: {
                 sans: ['"Plus Jakarta Sans"', 'Figtree', ...defaultTheme.fontFamily.sans],

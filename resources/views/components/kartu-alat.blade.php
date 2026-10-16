@@ -1,7 +1,7 @@
 @props(['barang', 'sisa' => null])
 
 {{-- Kartu alat ala etalase toko: gambar dalam bingkai, nama, lalu baris bawah berisi kode & sisa unit --}}
-<article class="group flex flex-col rounded-4xl bg-white p-3 shadow-lembut ring-1 ring-marian-100 transition hover:-translate-y-1 hover:ring-marian-300">
+<article class="group flex flex-col rounded-4xl bg-white p-3 shadow-lembut ring-1 ring-marian-100 transition hover:-translate-y-1 hover:ring-2 hover:ring-magenta focus-within:ring-2 focus-within:ring-magenta active:ring-2 active:ring-magenta">
     <a href="{{ route('peminjam.katalog.show', $barang) }}" class="relative block overflow-hidden rounded-3xl bg-gradient-to-br from-marian-50 to-marian-100">
         @if ($barang->foto)
             <img src="{{ Storage::url($barang->foto) }}" alt="{{ $barang->nama }}" loading="lazy" class="aspect-square w-full object-cover transition duration-300 group-hover:scale-105">
