@@ -228,7 +228,7 @@
                     </form>
                 </div>
 
-                <div class="mt-5 grid gap-5 [grid-template-columns:repeat(auto-fill,minmax(min(100%,14rem),1fr))]">
+                <div class="mt-4 grid grid-cols-2 gap-3 sm:mt-5 sm:gap-5 sm:[grid-template-columns:repeat(auto-fill,minmax(14rem,1fr))]">
                     @forelse ($barang as $b)
                         <x-kartu-alat :barang="$b" :sisa="$stok[$b->id]['sisa'] ?? 0" />
                     @empty
