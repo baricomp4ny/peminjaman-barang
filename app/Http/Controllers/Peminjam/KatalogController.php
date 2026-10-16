@@ -2,39 +2,77 @@
 
 namespace App\Http\Controllers\Peminjam;
 
+use App\Enums\StatusPeminjaman;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Peminjam\KatalogRequest;
 use App\Models\Barang;
 use App\Models\Kategori;
+use App\Models\Lokasi;
 use App\Models\Pengaturan;
 use App\Services\KetersediaanService;
-use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\View\View;
 
 /** Beranda publik = katalog alat (tanpa login). */
 class KatalogController extends Controller
 {
-    public function index(Request $request, KetersediaanService $ketersediaan): View
-    {
-        $barang = Barang::query()
-            ->with('kategori')
-            ->when($request->filled('q'), fn ($q) => $q->where('nama', 'like', '%'.$request->q.'%'))
-            ->when($request->filled('kategori_id'), fn ($q) => $q->where('kategori_id', $request->kategori_id))
-            ->orderBy('nama')
-            ->paginate(12)
-            ->withQueryString();
+    private const PER_HALAMAN = 9;
 
-        // Sisa unit hari ini untuk SEMUA jenis alat (dipakai di kartu & statistik hero)
-        $stokSemua = $ketersediaan->hitung(Barang::pluck('id')->all(), today(), today());
+    public function index(KatalogRequest $request, KetersediaanService $ketersediaan): View
+    {
+        $mulai = $request->mulai();
+        $selesai = $request->selesai();
+
+        $cocok = Barang::query()
+            ->with('kategori')
+            ->when($request->filled('q'), fn ($q) => $q->where(fn ($w) => $w
+                ->where('nama', 'like', '%'.$request->q.'%')
+                ->orWhere('kode', 'like', '%'.$request->q.'%')))
+            ->when($request->filled('kategori_id'), fn ($q) => $q->where('kategori_id', $request->kategori_id))
+            ->when($request->filled('lokasi_id'), fn ($q) => $q->whereHas('unit', fn ($u) => $u->where('lokasi_id', $request->lokasi_id)))
+            ->orderBy('nama')
+            ->get();
+
+        // Sisa unit pada rentang tanggal yang dipilih (default hari ini)
+        $stok = $ketersediaan->hitung($cocok->pluck('id')->all(), $mulai, $selesai);
+
+        // Filter "hanya tersedia" & urutan "sisa" butuh angka sisa, jadi dikerjakan di koleksi.
+        // Jumlah jenis alat lab kecil (puluhan), sehingga aman tanpa paginasi di database.
+        $cocok = $cocok
+            ->when($request->boolean('tersedia'), fn ($c) => $c->filter(fn ($b) => ($stok[$b->id]['sisa'] ?? 0) > 0))
+            ->pipe(fn ($c) => match ($request->urutan()) {
+                'nama_desc' => $c->sortByDesc('nama'),
+                'sisa' => $c->sortByDesc(fn ($b) => $stok[$b->id]['sisa'] ?? 0),
+                default => $c,
+            })
+            ->values();
+
+        $halaman = LengthAwarePaginator::resolveCurrentPage();
+        $barang = (new LengthAwarePaginator($cocok->forPage($halaman, self::PER_HALAMAN), $cocok->count(), self::PER_HALAMAN, $halaman, [
+            'path' => $request->url(),
+            'query' => $request->query(),
+        ]))->fragment('katalog');
+
+        // Statistik hero selalu untuk hari ini & semua alat
+        $stokHariIni = $ketersediaan->hitung(Barang::pluck('id')->all(), today(), today());
 
         return view('peminjam.katalog.index', [
             'barang' => $barang,
-            'stok' => $stokSemua,
-            // Kategori + jumlah jenis alat untuk tab filter katalog
+            'stok' => $stok,
+            'rentang' => ['mulai' => $mulai, 'selesai' => $selesai, 'dipilih' => $request->filled('mulai')],
             'kategori' => Kategori::withCount('barang')->orderBy('nama')->get(),
+            'lokasi' => Lokasi::orderBy('nama')->get(),
+            'urutan' => KatalogRequest::URUTAN,
+            // Alat yang paling sering dipinjam (jumlah unit dari pinjaman yang sudah diambil)
+            'populer' => Barang::query()
+                ->withSum(['peminjamanDetail as total_dipinjam' => fn ($q) => $q->whereHas('peminjaman', fn ($p) => $p->whereIn('status', [StatusPeminjaman::Dipinjam, StatusPeminjaman::Selesai]))], 'jumlah')
+                ->having('total_dipinjam', '>', 0)
+                ->orderByDesc('total_dipinjam')
+                ->limit(3)
+                ->get(),
             'statistik' => [
-                'jenis' => count($stokSemua),
-                'tersedia' => collect($stokSemua)->sum('sisa'),
-                'unit' => collect($stokSemua)->sum('kapasitas'),
+                'jenis' => count($stokHariIni),
+                'tersedia' => collect($stokHariIni)->sum('sisa'),
             ],
             'aturan' => [
                 'lama' => Pengaturan::angka(Pengaturan::LAMA_PINJAM_MAKS),
@@ -42,7 +80,7 @@ class KatalogController extends Controller
                 'denda' => Pengaturan::angka(Pengaturan::DENDA_PER_HARI),
             ],
             'adaFoto' => file_exists(public_path('images/hero-lab.jpg')),
-            'sedangCari' => $request->hasAny(['q', 'kategori_id']),
+            'adaFilter' => $request->hasAny(['q', 'kategori_id', 'lokasi_id', 'mulai', 'tersedia']),
         ]);
     }
 

@@ -538,7 +538,7 @@ php artisan schedule:work                                 # menjalankan jadwal s
 
 ## 7. Tes Otomatis (Feature Test)
 
-Jalankan: `php artisan test` (database terpisah `peminjaman_barang_test`). Hasil terakhir (refactor ULID + Enum): **185 tes lulus (991 assertion)**.
+Jalankan: `php artisan test` (database terpisah `peminjaman_barang_test`). Hasil terakhir (refactor ULID + Enum): **189 tes lulus (1021 assertion)**.
 
 | Kelas tes | Jumlah | Cakupan |
 |---|---|---|
@@ -558,6 +558,7 @@ Jalankan: `php artisan test` (database terpisah `peminjaman_barang_test`). Hasil
 | **PersetujuanAjuanTest** (Sprint 5) | 9 | Atomik, overbooking, terlambat, persetujuan ganda, admin nonaktif, alasan spasi |
 | **PencocokanScanTest** (Sprint 5) | 15 | Normalisasi kode scanner, panjang, alur multi-barang, race condition, kode PMJ lama ditolak |
 | **PerhitunganDendaTest** (Sprint 5) | 13 | Kalender (lintas bulan/tahun/kabisat), unit hilang, perkiraan, tarif berubah, laporan |
+| **KatalogFilterTest** (baru) | 4 | Katalog etalase: cari nama/kode, filter kategori & lokasi, cek tanggal + hanya tersedia, urutan & paginasi 9 alat |
 | ExampleTest (Feature + Unit) | 2 | Halaman awal = katalog publik |
 
 ---
@@ -582,7 +583,7 @@ Jalankan: `php artisan test` (database terpisah `peminjaman_barang_test`). Hasil
 | Lulus / Gagal / Tertunda | ____ / ____ / ____ |
 | Persentase lulus | ____ % |
 | Kasus prioritas Tinggi (★) lulus | ____ / 80 |
-| Feature Test otomatis | 185 lulus / 0 gagal |
+| Feature Test otomatis | 189 lulus / 0 gagal |
 | Cacat ditemukan (Kritis/Tinggi/Sedang/Rendah) | ____ |
 | Cacat masih terbuka | ____ |
 
