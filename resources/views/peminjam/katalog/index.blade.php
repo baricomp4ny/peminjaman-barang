@@ -241,7 +241,7 @@
                     @endforelse
                 </div>
 
-                <div class="mt-8">{{ $barang->links('pagination.tanpa-ringkasan') }}</div>
+                <div class="mt-8">{{ $barang->links() }}</div>
             </div>
         </div>
     </section>

@@ -1,4 +1,4 @@
-{{-- Paginasi Tailwind bawaan tanpa teks "Menampilkan x sampai y dari n data" (dipakai di katalog) --}}
+{{-- Paginasi Tailwind bawaan tanpa teks "Menampilkan x sampai y dari n data" (default semua halaman, lihat AppServiceProvider) --}}
 @if ($paginator->hasPages())
     <nav role="navigation" aria-label="{{ __('Pagination Navigation') }}" class="flex items-center justify-between">
         <div class="flex justify-between flex-1 sm:hidden">
