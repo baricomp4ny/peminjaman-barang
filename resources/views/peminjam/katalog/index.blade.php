@@ -213,11 +213,8 @@
 
             {{-- ---------- GRID ALAT ---------- --}}
             <div>
-                {{-- Bilah atas: keterangan tanggal sisa unit + urutan --}}
-                <div class="flex flex-wrap items-center justify-between gap-3">
-                    <p class="text-sm text-marian-600">
-                        Sisa unit {{ $rentang['dipilih'] ? $rentang['mulai']->translatedFormat('d M').' – '.$rentang['selesai']->translatedFormat('d M Y') : 'hari ini' }}
-                    </p>
+                {{-- Bilah atas: urutan --}}
+                <div class="flex justify-end">
                     <form method="GET" action="{{ route('peminjam.katalog.index') }}#katalog">
                         @foreach (request()->except(['urut', 'page']) as $nama => $nilai)
                             <input type="hidden" name="{{ $nama }}" value="{{ $nilai }}">

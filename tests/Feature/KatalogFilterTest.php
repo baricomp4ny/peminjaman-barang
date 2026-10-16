@@ -65,7 +65,6 @@ class KatalogFilterTest extends TestCase
 
         $respon = $this->get('/?mulai=2026-10-12&selesai=2026-10-12');
         $this->assertSame(0, $respon->viewData('stok')[$mkr->id]['sisa']);
-        $respon->assertSee('12 Okt – 12 Okt 2026');
 
         $this->assertSame(['pH Meter Digital'], $this->namaDi('/?mulai=2026-10-12&selesai=2026-10-13&tersedia=1'));
 
