@@ -39,12 +39,12 @@
                 <div class="grid gap-4 sm:grid-cols-2">
                     <div>
                         <x-input-label for="password" value="Password" />
-                        <x-text-input id="password" type="password" name="password" class="mt-1 block w-full" autocomplete="new-password" :required="! $edit" />
+                        <x-password-input id="password" name="password" class="mt-1 block w-full" autocomplete="new-password" :required="! $edit" />
                         <x-input-error :messages="$errors->get('password')" class="mt-2" />
                     </div>
                     <div>
                         <x-input-label for="password_confirmation" value="Konfirmasi Password" />
-                        <x-text-input id="password_confirmation" type="password" name="password_confirmation" class="mt-1 block w-full" autocomplete="new-password" :required="! $edit" />
+                        <x-password-input id="password_confirmation" name="password_confirmation" class="mt-1 block w-full" autocomplete="new-password" :required="! $edit" />
                     </div>
                 </div>
                 <p class="mt-2 text-xs text-marian-500">Minimal 8 karakter.</p>
