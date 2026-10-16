@@ -106,15 +106,18 @@
                 <h2 class="font-extrabold text-marian-900 [font-size:clamp(1.4rem,2.6vw,2rem)]">Katalog Alat</h2>
                 <p class="text-sm text-marian-600">Pilih tanggal di filter untuk melihat sisa unit pada rentang pinjam Anda.</p>
             </div>
-            <button type="button" @click="filter = ! filter" class="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-marian-800 shadow-lembut ring-1 ring-marian-100 lg:hidden" :aria-expanded="filter">
-                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4" /></svg>
-                Filter
-            </button>
         </div>
 
-        <div class="mt-6 grid items-start gap-6 lg:[grid-template-columns:17rem_minmax(0,1fr)]">
+        <div class="mt-6 grid items-start gap-4 md:gap-6 md:[grid-template-columns:14rem_minmax(0,1fr)] lg:[grid-template-columns:16rem_minmax(0,1fr)]">
             {{-- ---------- SIDEBAR FILTER ---------- --}}
-            <aside class="hidden space-y-6 rounded-4xl bg-white p-5 shadow-lembut ring-1 ring-marian-100 lg:sticky lg:top-28 lg:block" :class="filter && '!block'">
+            <div x-show="filter" x-transition.opacity @click="filter = false" class="fixed inset-0 z-40 bg-marian-950/40 md:hidden" style="display: none;"></div>
+            <aside class="hidden space-y-6 rounded-4xl bg-white p-4 lg:p-5 shadow-lembut ring-1 ring-marian-100 md:sticky md:top-28 md:block" :class="filter && '!fixed inset-y-0 left-0 z-50 !block w-[85%] max-w-xs overflow-y-auto !rounded-none !rounded-r-4xl'">
+                <div class="flex items-center justify-between md:hidden">
+                    <span class="text-base font-extrabold text-marian-900">Filter</span>
+                    <button type="button" @click="filter = false" class="flex h-9 w-9 items-center justify-center rounded-full text-marian-700 hover:bg-marian-50" aria-label="Tutup filter">
+                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
+                    </button>
+                </div>
                 <form method="GET" action="{{ route('peminjam.katalog.index') }}#katalog" class="space-y-6">
                     @foreach (['kategori_id', 'lokasi_id', 'urut'] as $tetap)
                         @if (request($tetap))<input type="hidden" name="{{ $tetap }}" value="{{ request($tetap) }}">@endif
@@ -213,8 +216,12 @@
 
             {{-- ---------- GRID ALAT ---------- --}}
             <div>
-                {{-- Bilah atas: urutan --}}
-                <div class="flex justify-end">
+                {{-- Bilah atas: tombol Filter (khusus HP) + urutan dalam satu baris --}}
+                <div class="flex items-center justify-between gap-3 md:justify-end">
+                    <button type="button" @click="filter = ! filter" class="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-semibold text-marian-800 shadow-lembut ring-1 ring-marian-100 md:hidden" :aria-expanded="filter">
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4" /></svg>
+                        Filter
+                    </button>
                     <form method="GET" action="{{ route('peminjam.katalog.index') }}#katalog">
                         @foreach (request()->except(['urut', 'page']) as $nama => $nilai)
                             <input type="hidden" name="{{ $nama }}" value="{{ $nilai }}">
@@ -228,7 +235,7 @@
                     </form>
                 </div>
 
-                <div class="mt-4 grid grid-cols-2 gap-3 sm:mt-5 sm:gap-5 sm:[grid-template-columns:repeat(auto-fill,minmax(14rem,1fr))]">
+                <div class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 xl:gap-5">
                     @forelse ($barang as $b)
                         <x-kartu-alat :barang="$b" :sisa="$stok[$b->id]['sisa'] ?? 0" />
                     @empty
