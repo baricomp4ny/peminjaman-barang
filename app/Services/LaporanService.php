@@ -94,17 +94,25 @@ class LaporanService
 
     private function inventaris(): array
     {
-        $data = UnitBarang::with(['barang.kategori', 'lokasi'])->orderBy('kode_unit')->get();
+        $data = UnitBarang::with(['barang.kategori', 'lokasi', 'pengembalianTerakhir'])->orderBy('kode_unit')->get();
+
+        // Rekap per tahun pembelian (tanggal_perolehan), unit tanpa tanggal masuk "Tanpa tahun"
+        $perTahun = $data->groupBy(fn ($u) => $u->tanggal_perolehan?->format('Y') ?? 'Tanpa tahun')
+            ->sortKeys()
+            ->mapWithKeys(fn ($unit, $tahun) => ['Tahun '.$tahun => $unit->count().' unit ('.$unit->countBy(fn ($u) => $u->kondisi->label())->map(fn ($n, $k) => $n.' '.strtolower($k))->join(', ').')']);
 
         return [
-            'kolom' => ['No', 'Kode Unit', 'Barang', 'Kategori', 'Lokasi', 'Kondisi', 'Status', 'Tgl Perolehan'],
+            'kolom' => ['No', 'Kode Unit', 'Barang', 'Kategori', 'Lokasi', 'Kondisi', 'Keterangan Kondisi', 'Status', 'Tahun Pembelian', 'Tgl Perolehan'],
             'baris' => $data->values()->map(fn ($u, $i) => [
                 $i + 1, $u->kode_unit, $u->barang->nama, $u->barang->kategori->nama, $u->lokasi->nama,
-                $u->kondisi->label(), $u->status->label(), $u->tanggal_perolehan?->format('d/m/Y') ?? '-',
+                $u->kondisi->label(), $u->keteranganKondisi(), $u->status->label(),
+                $u->tanggal_perolehan?->format('Y') ?? '-', $u->tanggal_perolehan?->format('d/m/Y') ?? '-',
             ])->all(),
             'ringkasan' => array_merge(
                 ['Total unit' => $data->count()],
-                $data->countBy(fn ($r) => $r->status->value)->mapWithKeys(fn ($n, $s) => ['Status '.$s => $n])->all()
+                $data->countBy(fn ($r) => $r->kondisi->label())->mapWithKeys(fn ($n, $k) => ['Kondisi '.strtolower($k) => $n])->all(),
+                $data->countBy(fn ($r) => $r->status->value)->mapWithKeys(fn ($n, $s) => ['Status '.$s => $n])->all(),
+                $perTahun->all(),
             ),
         ];
     }

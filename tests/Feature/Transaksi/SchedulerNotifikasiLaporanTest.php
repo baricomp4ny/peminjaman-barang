@@ -4,11 +4,14 @@ namespace Tests\Feature\Transaksi;
 
 use App\Models\Barang;
 use App\Models\Peminjaman;
+use App\Models\PeminjamanUnit;
 use App\Models\Pengaturan;
+use App\Models\UnitBarang;
 use App\Models\User;
 use App\Notifications\AjuanBaru;
 use App\Notifications\AjuanKedaluwarsa;
 use App\Notifications\PengingatPengembalian;
+use App\Services\LaporanService;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
@@ -149,6 +152,29 @@ class SchedulerNotifikasiLaporanTest extends TestCase
 
         // Pinjaman terlambat muncul di laporan keterlambatan
         $this->get('/admin/laporan/keterlambatan')->assertSee('PRJ-001')->assertSee('Belum kembali');
+    }
+
+    public function test_laporan_inventaris_berisi_keterangan_kondisi_dan_tahun_pembelian(): void
+    {
+        $b = $this->buatBarang('PRJ', 2);
+        UnitBarang::where('kode_unit', 'PRJ-001')->update(['tanggal_perolehan' => '2023-04-01']);
+        UnitBarang::where('kode_unit', 'PRJ-002')->update(['kondisi' => 'rusak', 'status' => 'perbaikan', 'tanggal_perolehan' => '2025-02-01']);
+        $p = $this->buatPeminjaman($this->peminjam, 'selesai', '2026-10-01', '2026-10-02', [$b->id => 1]);
+        PeminjamanUnit::create([
+            'peminjaman_id' => $p->id, 'unit_barang_id' => UnitBarang::where('kode_unit', 'PRJ-002')->value('id'),
+            'dikembalikan_pada' => '2026-10-02 10:00', 'kondisi_kembali' => 'rusak', 'catatan' => 'Lensa retak',
+        ]);
+
+        $laporan = app(LaporanService::class)->buat('inventaris', now(), now());
+
+        $this->assertContains('Keterangan Kondisi', $laporan['kolom']);
+        $this->assertContains('Tahun Pembelian', $laporan['kolom']);
+        [$baik, $rusak] = $laporan['baris'];
+        $this->assertSame(['Baik, siap dipinjam', '2023'], [$baik[6], $baik[8]]);
+        $this->assertSame('Rusak, dalam perbaikan — Lensa retak (kembali 02/10/2026)', $rusak[6]);
+        $this->assertSame('2025', $rusak[8]);
+        $this->assertSame(1, $laporan['ringkasan']['Kondisi rusak']);
+        $this->assertSame('1 unit (1 rusak)', $laporan['ringkasan']['Tahun 2025']);
     }
 
     public function test_validasi_filter_laporan(): void
