@@ -4,21 +4,20 @@
         Katalog Alat
     </a>
 
-    <div class="mt-4 grid gap-6 [grid-template-columns:repeat(auto-fit,minmax(min(100%,22rem),1fr))]">
-        {{-- Gambar / ikon --}}
-        <div class="relative overflow-hidden rounded-5xl bg-gradient-to-br from-marian-900 via-marian-700 to-marian-500 p-6">
+    {{-- Satu panel: gambar di kiri, info di kanan (angka tanpa kotak terpisah) --}}
+    <div class="mt-4 grid overflow-hidden rounded-5xl bg-white shadow-lembut ring-1 ring-marian-100 [grid-template-columns:repeat(auto-fit,minmax(min(100%,22rem),1fr))]">
+        <div class="relative bg-gradient-to-br from-marian-900 via-marian-700 to-marian-500 p-6">
             <div aria-hidden="true" class="absolute -right-16 -top-16 h-56 w-56 rounded-full bg-white/10"></div>
             @if ($barang->foto)
-                <img src="{{ Storage::url($barang->foto) }}" alt="{{ $barang->nama }}" class="relative aspect-[4/3] w-full rounded-4xl object-cover">
+                <img src="{{ Storage::url($barang->foto) }}" alt="{{ $barang->nama }}" class="relative aspect-[4/3] h-full w-full rounded-4xl object-cover">
             @else
-                <div class="relative flex aspect-[4/3] w-full items-center justify-center rounded-4xl bg-white/10 text-white ring-1 ring-white/20">
+                <div class="relative flex aspect-[4/3] h-full w-full items-center justify-center text-white">
                     <x-ikon-alat :nama="$barang->nama" class="h-32 w-32" />
                 </div>
             @endif
         </div>
 
-        {{-- Info --}}
-        <div class="flex flex-col rounded-5xl bg-white p-6 shadow-lembut ring-1 ring-marian-100 sm:p-8">
+        <div class="flex flex-col p-6 sm:p-8">
             <div class="flex flex-wrap items-center gap-2">
                 <span class="rounded-full bg-marian-50 px-3 py-1 text-xs font-semibold text-marian-700 ring-1 ring-marian-200">{{ $barang->kategori->nama }}</span>
                 <span class="rounded-full bg-marian-50 px-3 py-1 font-mono text-xs font-semibold text-marian-700 ring-1 ring-marian-200">{{ $barang->kode }}</span>
@@ -26,14 +25,14 @@
             <h1 class="mt-3 font-extrabold text-marian-900 [font-size:clamp(1.6rem,3vw,2.4rem)]">{{ $barang->nama }}</h1>
             <p class="mt-2 text-sm leading-relaxed text-marian-700">{{ $barang->deskripsi ?: 'Belum ada deskripsi.' }}</p>
 
-            <dl class="mt-6 grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(min(100%,9rem),1fr))]">
-                <div class="rounded-3xl bg-gradient-to-br from-marian-800 to-marian-600 p-4 text-white">
-                    <dt class="text-xs text-marian-100">Tersedia hari ini</dt>
-                    <dd class="mt-1 text-3xl font-extrabold">{{ $stok['sisa'] }}<span class="text-base font-semibold text-marian-200"> / {{ $stok['kapasitas'] }}</span></dd>
+            <dl class="mt-6 flex flex-wrap gap-x-8 gap-y-3 border-t border-marian-100 pt-5">
+                <div>
+                    <dt class="text-xs text-marian-600">Tersedia hari ini</dt>
+                    <dd class="mt-1 text-3xl font-extrabold text-marian-800">{{ $stok['sisa'] }}<span class="text-base font-semibold text-marian-400"> / {{ $stok['kapasitas'] }}</span></dd>
                 </div>
-                <div class="rounded-3xl bg-marian-50 p-4 ring-1 ring-marian-100">
+                <div>
                     <dt class="text-xs text-marian-600">Lama pinjam maks.</dt>
-                    <dd class="mt-1 text-3xl font-extrabold text-marian-900">{{ $maksHari }}<span class="text-base font-semibold text-marian-500"> hari</span></dd>
+                    <dd class="mt-1 text-3xl font-extrabold text-marian-900">{{ $maksHari }}<span class="text-base font-semibold text-marian-400"> hari</span></dd>
                 </div>
             </dl>
 

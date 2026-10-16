@@ -156,7 +156,7 @@
         </form>
 
         {{-- Ringkasan (menempel saat digulir di layar lebar) --}}
-        <aside class="space-y-4 lg:sticky lg:top-28">
+        <aside class="lg:sticky lg:top-28">
             <div class="rounded-5xl bg-gradient-to-br from-marian-900 to-marian-600 p-6 text-white shadow-lembut">
                 <h2 class="text-sm font-bold uppercase tracking-wider text-marian-100">Ringkasan</h2>
                 <dl class="mt-4 space-y-3 text-sm">
@@ -172,10 +172,9 @@
                     </template>
                     <li x-show="!items.some(b => b.barang_id)" class="text-marian-200">Belum ada alat dipilih.</li>
                 </ul>
-            </div>
-            <div class="rounded-4xl bg-white p-5 text-sm text-marian-700 shadow-lembut ring-1 ring-marian-100">
-                <div class="font-bold text-marian-900">Saat mengambil alat</div>
-                <ul class="mt-2 list-inside list-disc space-y-1 text-xs">
+                {{-- Info pengambilan digabung ke kartu ringkasan (satu kartu saja) --}}
+                <div class="mt-4 border-t border-white/15 pt-4 text-sm font-bold text-marian-100">Saat mengambil alat</div>
+                <ul class="mt-2 list-inside list-disc space-y-1 text-xs text-marian-100">
                     <li>Tunjukkan QR kode peminjaman (layar atau email).</li>
                     <li>Bawa kartu identitas asli (KTM/KTP).</li>
                     <li>Alat dipakai di lingkungan laboratorium.</li>

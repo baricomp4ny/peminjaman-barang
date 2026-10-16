@@ -29,11 +29,8 @@ class KatalogController extends Controller
         return view('peminjam.katalog.index', [
             'barang' => $barang,
             'stok' => $stokSemua,
-            // Kategori + beberapa nama alat untuk kartu "bento"
-            'kategori' => Kategori::with(['barang' => fn ($q) => $q->orderBy('nama')->select('id', 'kategori_id', 'nama')])
-                ->withCount('barang')
-                ->orderBy('nama')
-                ->get(),
+            // Kategori + jumlah jenis alat untuk tab filter katalog
+            'kategori' => Kategori::withCount('barang')->orderBy('nama')->get(),
             'statistik' => [
                 'jenis' => count($stokSemua),
                 'tersedia' => collect($stokSemua)->sum('sisa'),

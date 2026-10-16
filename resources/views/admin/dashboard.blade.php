@@ -3,8 +3,8 @@
         <h1 class="text-lg font-semibold text-marian-900">Dashboard</h1>
     </x-slot>
 
-    {{-- Kartu ringkasan, masing-masing menuju halaman terkait --}}
-    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+    {{-- Strip ringkasan: satu kartu dibagi sekat garis, tiap angka menuju halaman terkait --}}
+    <div class="grid grid-cols-2 divide-x divide-y divide-marian-100 overflow-hidden rounded-3xl bg-white shadow-lembut ring-1 ring-marian-100 sm:grid-cols-3 sm:divide-y-0 lg:grid-cols-5">
         @foreach ([
             ['Ajuan menunggu', $kartu['menunggu'], route('admin.ajuan.index'), 'text-marian-600'],
             ['Siap diambil', $kartu['siapAmbil'], route('admin.peminjaman.index', ['tab' => 'disetujui']), 'text-indigo-600'],
@@ -12,7 +12,7 @@
             ['Terlambat', $kartu['terlambat'], route('admin.peminjaman.index', ['tab' => 'terlambat']), 'text-red-600'],
             ['Denda bulan ini', rupiah($kartu['dendaBulanIni']), route('admin.laporan.show', 'denda'), 'text-marian-900'],
         ] as [$label, $nilai, $url, $warna])
-            <a href="{{ $url }}" class="rounded-3xl bg-white p-4 shadow-lembut ring-1 ring-marian-100 hover:ring-2 hover:ring-indigo-200">
+            <a href="{{ $url }}" class="p-4 transition hover:bg-marian-50">
                 <div class="text-sm text-marian-500">{{ $label }}</div>
                 <div class="mt-1 text-2xl font-semibold {{ $warna }}">{{ $nilai }}</div>
             </a>

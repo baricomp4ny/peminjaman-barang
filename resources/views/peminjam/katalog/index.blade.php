@@ -49,90 +49,50 @@
         <div aria-hidden="true" class="absolute -bottom-6 right-10 hidden h-20 w-20 rounded-full bg-marian-50 ring-8 ring-marian-50 sm:block lg:right-24 lg:h-28 lg:w-28"></div>
     </section>
 
-    {{-- ================= FITUR ================= --}}
-    <section class="mt-12 grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(min(100%,13rem),1fr))]">
+    {{-- ================= FITUR (tanpa kartu: ikon + teks) ================= --}}
+    <section class="mt-12 grid gap-x-6 gap-y-8 px-2 [grid-template-columns:repeat(auto-fit,minmax(min(100%,13rem),1fr))]">
         @foreach ([
             ['Ajukan Online', 'Tanpa akun — cukup isi identitas & pilih alat.', 'M12 4v16m8-8H4'],
             ['Stok Real-time', 'Sisa unit dihitung sesuai tanggal pinjam Anda.', 'M4 19V9m6 10V5m6 14v-7m4 7H2'],
             ['Ambil dengan QR', 'Tunjukkan QR kode peminjaman ke petugas.', 'M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h2v2h-2zM18 18h2v2h-2zM14 18h2'],
             ['Pengingat Email', 'Kabar persetujuan & pengingat H-1 pengembalian.', 'M4 6h16v12H4zM4 7l8 6 8-6'],
         ] as [$judul, $teks, $ikon])
-            <div class="flex flex-col items-center rounded-4xl bg-white px-5 py-6 text-center shadow-lembut ring-1 ring-marian-100">
-                <span class="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-marian-100 to-marian-200 text-marian-800">
-                    <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="{{ $ikon }}" /></svg>
+            <div class="flex items-start gap-4">
+                <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-marian-100 to-marian-200 text-marian-800">
+                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="{{ $ikon }}" /></svg>
                 </span>
-                <h3 class="mt-3 text-sm font-bold text-marian-900">{{ $judul }}</h3>
-                <p class="mt-1 text-xs leading-relaxed text-marian-600">{{ $teks }}</p>
+                <div>
+                    <h3 class="text-sm font-bold text-marian-900">{{ $judul }}</h3>
+                    <p class="mt-1 text-xs leading-relaxed text-marian-600">{{ $teks }}</p>
+                </div>
             </div>
         @endforeach
     </section>
 
-    {{-- ================= ATURAN + AJAKAN (baris dua kartu) ================= --}}
-    <section class="mt-6 grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(min(100%,20rem),1fr))]">
-        <div class="relative overflow-hidden rounded-4xl bg-gradient-to-br from-marian-800 to-marian-600 p-6 text-white sm:p-8">
-            <div aria-hidden="true" class="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/10"></div>
-            <span class="rounded-full bg-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider">Aturan Peminjaman</span>
-            <ul class="mt-5 grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(min(100%,8rem),1fr))]">
-                <li class="rounded-3xl bg-white/10 p-4 ring-1 ring-white/15"><div class="text-3xl font-extrabold">{{ $aturan['lama'] }}</div><div class="text-xs text-marian-100">hari maksimal</div></li>
-                <li class="rounded-3xl bg-white/10 p-4 ring-1 ring-white/15"><div class="text-3xl font-extrabold">{{ $aturan['unit'] }}</div><div class="text-xs text-marian-100">unit per ajuan</div></li>
-                <li class="rounded-3xl bg-white/10 p-4 ring-1 ring-white/15">
-                    <div class="text-2xl font-extrabold">{{ $aturan['denda'] > 0 ? rupiah($aturan['denda']) : 'Gratis' }}</div>
-                    <div class="text-xs text-marian-100">{{ $aturan['denda'] > 0 ? 'denda/unit/hari' : 'tanpa denda' }}</div>
-                </li>
-            </ul>
-            <p class="mt-4 text-xs text-marian-100">Alat hanya untuk kegiatan di laboratorium. Bawa kartu identitas (KTM) saat mengambil alat.</p>
-        </div>
-
-        <div class="flex flex-col justify-center rounded-4xl bg-white p-6 shadow-lembut ring-1 ring-marian-100 sm:p-8">
-            <span class="w-fit rounded-full bg-marian-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-marian-700 ring-1 ring-marian-200">Sudah mengajukan?</span>
-            <p class="mt-4 text-sm leading-relaxed text-marian-700">
-                Pantau status ajuan, lihat batas waktu pengambilan, dan tampilkan QR pengambilan dengan memasukkan <strong>kode peminjaman</strong> dan <strong>NIM</strong> Anda.
-            </p>
-            <div class="mt-5 flex flex-wrap items-center gap-4">
-                <a href="{{ route('peminjam.status.form') }}" class="inline-flex items-center gap-2 rounded-full bg-marian-800 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-marian-900">
+    {{-- ================= ATURAN + CEK STATUS (satu pita) ================= --}}
+    <section class="relative mt-12 overflow-hidden rounded-4xl bg-gradient-to-br from-marian-800 to-marian-600 p-6 text-white sm:p-8">
+        <div aria-hidden="true" class="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/10"></div>
+        <div class="relative flex flex-wrap items-center justify-between gap-8">
+            <div>
+                <span class="text-[11px] font-semibold uppercase tracking-wider text-marian-200">Aturan Peminjaman</span>
+                {{-- Angka aturan dipisah garis tipis, bukan kotak --}}
+                <dl class="mt-3 flex flex-wrap divide-x divide-white/20">
+                    <div class="pr-6"><dd class="text-3xl font-extrabold">{{ $aturan['lama'] }}</dd><dt class="text-xs text-marian-100">hari maksimal</dt></div>
+                    <div class="px-6"><dd class="text-3xl font-extrabold">{{ $aturan['unit'] }}</dd><dt class="text-xs text-marian-100">unit per ajuan</dt></div>
+                    <div class="pl-6">
+                        <dd class="text-3xl font-extrabold">{{ $aturan['denda'] > 0 ? rupiah($aturan['denda']) : 'Gratis' }}</dd>
+                        <dt class="text-xs text-marian-100">{{ $aturan['denda'] > 0 ? 'denda/unit/hari' : 'tanpa denda' }}</dt>
+                    </div>
+                </dl>
+                <p class="mt-4 max-w-xl text-xs text-marian-100">Alat hanya untuk kegiatan di laboratorium. Bawa kartu identitas (KTM) saat mengambil alat.</p>
+            </div>
+            <div class="max-w-sm">
+                <p class="text-sm text-marian-100">Sudah mengajukan? Pantau status dan tampilkan QR pengambilan dengan <strong class="text-white">kode peminjaman</strong> + <strong class="text-white">NIM</strong>.</p>
+                <a href="{{ route('peminjam.status.form') }}" class="mt-4 inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-bold text-marian-900 transition hover:bg-marian-100">
                     Cek Status
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
                 </a>
-                <a href="{{ route('peminjam.ajuan.create') }}" class="text-sm font-semibold text-marian-700 underline decoration-marian-300 underline-offset-4 hover:text-marian-900">Belum? Ajukan sekarang</a>
             </div>
-        </div>
-    </section>
-
-    {{-- ================= KATEGORI (bento) ================= --}}
-    <section class="mt-14">
-        <div class="flex flex-wrap items-end justify-between gap-3">
-            <div>
-                <h2 class="font-extrabold text-marian-900 [font-size:clamp(1.4rem,2.6vw,2rem)]">Kategori Alat</h2>
-                <p class="text-sm text-marian-600">Pilih kategori untuk melihat alat yang tersedia.</p>
-            </div>
-        </div>
-
-        <div class="mt-5 grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(min(100%,12.5rem),1fr))]">
-            @foreach ($kategori as $i => $k)
-                <a href="{{ route('peminjam.katalog.index', ['kategori_id' => $k->id]) }}#katalog"
-                   class="group relative flex min-h-[13rem] flex-col overflow-hidden rounded-4xl p-6 shadow-lembut ring-1 transition hover:-translate-y-1
-                          {{ $i % 3 === 1 ? 'bg-marian-100 ring-marian-200' : 'bg-white ring-marian-100' }}">
-                    <span class="w-fit rounded-full bg-marian-800 px-3 py-1 text-[11px] font-semibold text-white">{{ $k->barang_count }} jenis</span>
-                    <h3 class="mt-3 max-w-[85%] text-lg font-extrabold leading-snug text-marian-900">{{ $k->nama }}</h3>
-                    <ul class="mt-2 space-y-0.5 text-xs text-marian-600">
-                        @foreach ($k->barang->take(4) as $b)
-                            <li>{{ $b->nama }}</li>
-                        @endforeach
-                    </ul>
-                    <span class="mt-auto inline-flex items-center gap-1 pt-4 text-xs font-bold text-marian-800">
-                        Lihat semua <svg class="h-4 w-4 transition group-hover:translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
-                    </span>
-                    <x-ikon-alat :nama="$k->nama" class="absolute -bottom-3 -right-3 h-28 w-28 text-marian-200 transition group-hover:text-marian-300" />
-                </a>
-            @endforeach
-
-            {{-- Kartu ajakan bergradasi --}}
-            <a href="#alur" class="relative flex min-h-[13rem] flex-col items-center justify-center overflow-hidden rounded-4xl bg-gradient-to-br from-marian-900 to-marian-600 p-6 text-center text-white shadow-lembut transition hover:-translate-y-1">
-                <span class="rounded-full bg-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider ring-1 ring-white/25">Panduan</span>
-                <span class="mt-3 text-2xl font-extrabold">Cara Meminjam</span>
-                <span class="mt-1 text-xs text-marian-100">4 langkah dari ajuan sampai pengembalian</span>
-                <span aria-hidden="true" class="absolute -bottom-12 -left-12 h-32 w-32 rounded-full bg-white/10"></span>
-            </a>
         </div>
     </section>
 
@@ -160,7 +120,7 @@
             @foreach ($kategori as $k)
                 @php $aktif = (string) request('kategori_id') === (string) $k->id; @endphp
                 <a href="{{ route('peminjam.katalog.index', array_filter(['kategori_id' => $k->id, 'q' => request('q')])) }}#katalog"
-                   class="shrink-0 rounded-full px-4 py-2 text-sm font-semibold transition {{ $aktif ? 'bg-marian-800 text-white' : 'bg-white text-marian-700 ring-1 ring-marian-100 hover:bg-marian-50' }}">{{ $k->nama }}</a>
+                   class="shrink-0 rounded-full px-4 py-2 text-sm font-semibold transition {{ $aktif ? 'bg-marian-800 text-white' : 'bg-white text-marian-700 ring-1 ring-marian-100 hover:bg-marian-50' }}">{{ $k->nama }} <span class="opacity-60">{{ $k->barang_count }}</span></a>
             @endforeach
         </div>
 
@@ -187,14 +147,14 @@
             <a href="{{ route('peminjam.ajuan.create') }}" class="rounded-full bg-white px-5 py-2.5 text-sm font-bold text-marian-900 hover:bg-marian-100">Mulai ajukan</a>
         </div>
 
-        <ol class="mt-8 grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(min(100%,13rem),1fr))]">
+        <ol class="mt-8 grid gap-6 [grid-template-columns:repeat(auto-fit,minmax(min(100%,13rem),1fr))]">
             @foreach ([
                 ['Ajukan', 'Isi identitas, pilih alat & tanggal. Kode PJM dikirim ke email.'],
                 ['Diverifikasi', 'Petugas mengecek identitas, stok, dan aturan. Kabar dikirim lewat email.'],
                 ['Ambil dengan QR', 'Tunjukkan QR kode peminjaman + KTM. Petugas memindai setiap unit.'],
                 ['Kembalikan', 'Kembalikan tepat waktu. Terlambat dikenai denda per unit per hari.'],
             ] as $i => [$judul, $teks])
-                <li class="relative rounded-4xl bg-white/10 p-5 ring-1 ring-white/15 backdrop-blur">
+                <li class="relative border-t border-white/25 pt-5">
                     <span class="flex h-10 w-10 items-center justify-center rounded-full bg-white text-base font-extrabold text-marian-900">{{ $i + 1 }}</span>
                     <h3 class="mt-3 font-bold">{{ $judul }}</h3>
                     <p class="mt-1 text-sm text-marian-100">{{ $teks }}</p>

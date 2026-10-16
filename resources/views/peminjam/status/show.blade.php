@@ -22,28 +22,29 @@
         </div>
     </section>
 
-    <div class="mt-6 grid items-start gap-6 lg:[grid-template-columns:minmax(0,1fr)_20rem]">
-        <div class="space-y-4">
+    @if ($perkiraanDenda > 0)
+        <div class="mt-6 rounded-4xl border border-red-200 bg-red-50 p-5 text-sm text-red-800">
+            Pinjaman ini terlambat {{ $p->hariTerlambatBerjalan() }} hari. Perkiraan denda sampai hari ini:
+            <strong>{{ rupiah($perkiraanDenda) }}</strong>. Segera kembalikan alat.
+        </div>
+    @endif
+
+    {{-- Satu panel: keterangan + rincian di kiri, QR pengambilan di kanan --}}
+    <div class="mt-6 grid overflow-hidden rounded-5xl bg-white shadow-lembut ring-1 ring-marian-100 lg:[grid-template-columns:minmax(0,1fr)_20rem]">
+        <div class="p-6 sm:p-8">
             @if ($p->status === StatusPeminjaman::Disetujui)
-                <div class="rounded-4xl bg-marian-100 p-5 text-sm text-marian-900 ring-1 ring-marian-200">
+                <p class="border-l-4 border-marian-600 pl-4 text-sm text-marian-900">
                     Ajuan <strong>disetujui</strong>. Ambil alat ke petugas mulai <strong>{{ $p->tanggal_pinjam->translatedFormat('d F Y') }}</strong>
                     paling lambat <strong>{{ $batasAmbil->translatedFormat('d F Y') }}</strong>. Tunjukkan QR dan bawa kartu identitas asli.
                     Lewat dari batas itu ajuan otomatis kedaluwarsa.
-                </div>
+                </p>
             @elseif ($p->status === StatusPeminjaman::Menunggu)
-                <div class="rounded-4xl bg-white p-5 text-sm text-marian-800 shadow-lembut ring-1 ring-marian-100">
+                <p class="border-l-4 border-marian-300 pl-4 text-sm text-marian-800">
                     Ajuan sedang <strong>menunggu verifikasi</strong> petugas. Kabar persetujuan dikirim ke {{ $emailSamar }}.
-                </div>
+                </p>
             @endif
 
-            @if ($perkiraanDenda > 0)
-                <div class="rounded-4xl border border-red-200 bg-red-50 p-5 text-sm text-red-800">
-                    Pinjaman ini terlambat {{ $p->hariTerlambatBerjalan() }} hari. Perkiraan denda sampai hari ini:
-                    <strong>{{ rupiah($perkiraanDenda) }}</strong>. Segera kembalikan alat.
-                </div>
-            @endif
-
-            <x-detail-peminjaman :peminjaman="$p">
+            <x-detail-peminjaman :peminjaman="$p" polos class="mt-6">
                 @if ($p->bisaDibatalkan())
                     <form method="POST" action="{{ route('peminjam.status.batal', $p->kode_peminjaman) }}" class="no-print mt-6 border-t border-marian-100 pt-4"
                           onsubmit="return confirm('Batalkan ajuan {{ $p->kode_peminjaman }}?');">
@@ -56,12 +57,14 @@
         </div>
 
         {{-- QR kode peminjaman: dipindai petugas saat serah-terima --}}
-        <aside class="rounded-5xl bg-white p-6 text-center shadow-lembut ring-1 ring-marian-100 lg:sticky lg:top-28">
-            <div class="text-sm font-bold uppercase tracking-wider text-marian-700">QR Pengambilan</div>
-            <div class="mx-auto mt-4 w-52 rounded-3xl bg-white p-3 ring-1 ring-marian-100 [&>svg]:h-auto [&>svg]:w-full">{!! $qr !!}</div>
-            <div class="mt-3 font-mono text-lg font-extrabold tracking-wide text-marian-900">{{ $p->kode_peminjaman }}</div>
-            <div class="text-sm text-marian-600">{{ $p->peminjam->name }}</div>
-            <p class="mt-3 text-xs text-marian-500">Simpan kode ini atau screenshot QR untuk ditunjukkan ke petugas.</p>
+        <aside class="border-t border-marian-100 bg-marian-50/60 p-6 text-center lg:border-l lg:border-t-0">
+            <div class="lg:sticky lg:top-28">
+                <div class="text-sm font-bold uppercase tracking-wider text-marian-700">QR Pengambilan</div>
+                <div class="mx-auto mt-4 w-52 rounded-3xl bg-white p-3 ring-1 ring-marian-100 [&>svg]:h-auto [&>svg]:w-full">{!! $qr !!}</div>
+                <div class="mt-3 font-mono text-lg font-extrabold tracking-wide text-marian-900">{{ $p->kode_peminjaman }}</div>
+                <div class="text-sm text-marian-600">{{ $p->peminjam->name }}</div>
+                <p class="mt-3 text-xs text-marian-500">Simpan kode ini atau screenshot QR untuk ditunjukkan ke petugas.</p>
+            </div>
         </aside>
     </div>
 </x-app-layout>

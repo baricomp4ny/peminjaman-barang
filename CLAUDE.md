@@ -123,6 +123,7 @@ Responsif, menu aktif ditandai, pesan sukses/gagal jelas.
 ## Catatan desain tampilan (disetujui)
 - Warna tunggal: gradasi Marian Blue, skala `marian-50 … marian-950` (#263C92 = marian-800) di tailwind.config.js; `indigo` dipetakan ke skala yang sama. Merah hanya untuk pesan gagal/ditolak/hilang.
 - Gaya halaman publik mengikuti referensi kartu membulat (rounded-4xl/5xl, shadow-lembut): navbar pil, hero gradasi + ilustrasi SVG kultur jaringan (ganti foto: taruh public/images/hero-lab.jpg), kartu fitur, kartu aturan, kategori bento, katalog `x-kartu-alat`, banner alur, footer gradasi.
+- Card dikurangi (disetujui): fitur beranda = ikon + teks tanpa kotak; aturan + cek status = satu pita gradasi; kartu kategori bento dihapus (kategori = tab filter katalog + jumlah jenis); langkah alur tanpa kotak; detail alat & halaman status = satu panel (`x-detail-peminjaman polos`); ringkasan form ajuan satu kartu; dashboard admin = satu strip statistik bersekat. Kartu alat katalog tetap.
 - Responsif & fleksibel: grid `repeat(auto-fit|auto-fill, minmax(min(100%,Xrem),1fr))` dan ukuran huruf `clamp()`; tanpa scroll horizontal di 360 px.
 - Komponen: `x-ikon-alat` (ikon garis per jenis alat/kategori), `x-ilustrasi-lab`, `x-kartu-alat`. Font: Plus Jakarta Sans (bunny.net).
 - Info lab di config/peminjaman.php: MITRA_NAMA, MITRA_SINGKAT, MITRA_ALAMAT, MITRA_JAM_LAYANAN.

@@ -179,7 +179,7 @@ class SchedulerNotifikasiLaporanTest extends TestCase
 
         // Halaman publik peminjam (tanpa login)
         auth()->logout();
-        $this->get('/')->assertOk()->assertSee('Mikroskop Stereo')->assertSee('Kategori Alat');
+        $this->get('/')->assertOk()->assertSee('Mikroskop Stereo')->assertSee('Katalog Alat')->assertSee('Alat Ukur &amp; Analisis', false);
         $this->get('/katalog/'.Barang::value('id'))->assertOk();
         $this->get('/ajuan')->assertOk();
         foreach ($andi->peminjaman as $p) {

@@ -1,4 +1,4 @@
-@props(['peminjaman', 'admin' => false])
+@props(['peminjaman', 'admin' => false, 'polos' => false])
 
 {{-- Ringkasan satu peminjaman; dipakai di halaman admin dan peminjam --}}
 @php
@@ -6,7 +6,7 @@
     $terlambat = $p->isTerlambat();
 @endphp
 
-<div class="rounded-4xl bg-white p-6 shadow-lembut ring-1 ring-marian-100">
+<div {{ $attributes->class(['rounded-4xl bg-white p-6 shadow-lembut ring-1 ring-marian-100' => ! $polos]) }}>
     <div class="flex flex-wrap items-start justify-between gap-3">
         <div>
             <div class="font-mono text-sm text-marian-500">{{ $p->kode_peminjaman }}</div>
