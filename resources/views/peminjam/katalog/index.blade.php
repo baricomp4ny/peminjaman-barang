@@ -1,7 +1,7 @@
 <x-app-layout>
     {{-- ================= HERO ================= --}}
     <section class="relative">
-        {{-- "Tab" putih di kiri atas & lekukan bulat di kanan bawah meniru gaya panel referensi --}}
+        {{-- Panel hero bergradasi --}}
         <div class="relative overflow-hidden rounded-5xl bg-gradient-to-br from-marian-950 via-marian-800 to-marian-500 px-6 pb-14 pt-10 text-white sm:px-10 lg:px-14 lg:pt-14">
             <div aria-hidden="true" class="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-white/10"></div>
             <div aria-hidden="true" class="pointer-events-none absolute -bottom-32 left-1/3 h-80 w-80 rounded-full bg-marian-400/20 blur-2xl"></div>
@@ -45,8 +45,6 @@
                 </div>
             </div>
         </div>
-        {{-- lekukan bulat kanan bawah --}}
-        <div aria-hidden="true" class="absolute -bottom-6 right-10 hidden h-20 w-20 rounded-full bg-marian-50 ring-8 ring-marian-50 sm:block lg:right-24 lg:h-28 lg:w-28"></div>
     </section>
 
     {{-- ================= FITUR (tanpa kartu: ikon + teks) ================= --}}
