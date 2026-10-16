@@ -11,7 +11,7 @@
                    :kembali="$edit ? route('admin.barang.show', $barang) : route('admin.barang.index')" />
 
     <div class="max-w-2xl rounded-3xl bg-white p-6 shadow-lembut ring-1 ring-marian-100">
-        <form method="POST" enctype="multipart/form-data"
+        <form method="POST" enctype="multipart/form-data" x-data="potongFoto" @submit="kirim($event)"
               action="{{ $edit ? route('admin.barang.update', $barang) : route('admin.barang.store') }}" class="space-y-4">
             @csrf
             @if ($edit) @method('PUT') @endif
@@ -65,8 +65,32 @@
                         </label>
                     </div>
                 @endif
-                <input id="foto" type="file" name="foto" accept="image/jpeg,image/png,image/webp"
+                <input id="foto" x-ref="input" @change="pilih($event)" type="file" name="foto" accept="image/jpeg,image/png,image/webp"
                        class="mt-2 block w-full text-sm text-marian-600 file:mr-4 file:rounded-md file:border-0 file:bg-indigo-50 file:px-4 file:py-2 file:text-indigo-700 hover:file:bg-indigo-100">
+
+                {{-- Alat potong foto: muncul setelah file dipilih. Hasil potongan yang diunggah. --}}
+                <div x-show="cropper" x-cloak class="mt-3 rounded-2xl border border-marian-100 bg-marian-50 p-3" style="display: none;">
+                    <div class="h-72 overflow-hidden rounded-xl bg-white sm:h-80">
+                        <img x-ref="gambar" alt="Pratinjau foto" class="block max-w-full">
+                    </div>
+                    <div class="mt-3 flex flex-wrap items-center gap-2 text-sm">
+                        <span class="text-marian-600">Bentuk:</span>
+                        @foreach (['1' => 'Persegi (kartu katalog)', '4/3' => '4:3', 'NaN' => 'Bebas'] as $nilai => $teks)
+                            <button type="button" @click="aturRasio({{ $nilai }})"
+                                    :class="(rasio === {{ $nilai }} || (isNaN(rasio) && isNaN({{ $nilai }}))) ? 'bg-marian-800 text-white' : 'bg-white text-marian-700 ring-1 ring-marian-200'"
+                                    class="rounded-full px-3 py-1 font-semibold">{{ $teks }}</button>
+                        @endforeach
+                    </div>
+                    <div class="mt-2 flex flex-wrap items-center gap-2 text-sm">
+                        <span class="text-marian-600">Atur:</span>
+                        <button type="button" @click="perbesar(0.1)" class="rounded-full bg-white px-3 py-1 font-semibold text-marian-700 ring-1 ring-marian-200" title="Perbesar">＋ Zoom</button>
+                        <button type="button" @click="perbesar(-0.1)" class="rounded-full bg-white px-3 py-1 font-semibold text-marian-700 ring-1 ring-marian-200" title="Perkecil">－ Zoom</button>
+                        <button type="button" @click="putar(-90)" class="rounded-full bg-white px-3 py-1 font-semibold text-marian-700 ring-1 ring-marian-200">⟲ Putar</button>
+                        <button type="button" @click="putar(90)" class="rounded-full bg-white px-3 py-1 font-semibold text-marian-700 ring-1 ring-marian-200">⟳ Putar</button>
+                        <button type="button" @click="ulang()" class="rounded-full px-3 py-1 font-semibold text-marian-600 hover:text-marian-900">Ulang</button>
+                    </div>
+                    <p class="mt-2 text-xs text-marian-500">Geser kotak untuk memilih bagian foto, tarik sudutnya untuk mengubah ukuran, gulir mouse untuk zoom. Bagian di dalam kotak yang disimpan saat klik Simpan.</p>
+                </div>
                 <x-input-error :messages="$errors->get('foto')" class="mt-2" />
             </div>
 
