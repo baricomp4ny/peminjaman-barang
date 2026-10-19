@@ -47,6 +47,8 @@ class AjuanRequest extends FormRequest
             'tujuan' => ['required', 'string', 'min:5', 'max:500'],
             // Wajib menyetujui syarat peminjaman (teks syarat diatur admin)
             'setuju_syarat' => ['accepted'],
+            // Surat permohonan wajib: PDF/DOC/DOCX maks 4 MB
+            'surat_peminjaman' => ['required', 'file', 'mimes:pdf,doc,docx', 'max:4096'],
             'tanggal_pinjam' => ['required', 'date', 'after_or_equal:today'],
             'tanggal_rencana_kembali' => ['required', 'date', 'after_or_equal:tanggal_pinjam'],
             'items' => ['required', 'array', 'min:1'],
@@ -137,6 +139,7 @@ class AjuanRequest extends FormRequest
             'no_hp' => 'no. HP',
             'unit' => 'unit/prodi',
             'tujuan' => 'tujuan peminjaman',
+            'surat_peminjaman' => 'surat peminjaman',
             'tanggal_pinjam' => 'tanggal pinjam',
             'tanggal_rencana_kembali' => 'tanggal rencana kembali',
             'items' => 'daftar barang',
@@ -152,6 +155,9 @@ class AjuanRequest extends FormRequest
             'no_hp.regex' => 'No. HP hanya boleh berisi angka, spasi, + atau - (8–20 karakter).',
             'website.prohibited' => 'Ajuan tidak dapat diproses.',
             'setuju_syarat.accepted' => 'Centang persetujuan syarat peminjaman untuk mengirim ajuan.',
+            'surat_peminjaman.required' => 'Unggah surat peminjaman (PDF, DOC, atau DOCX).',
+            'surat_peminjaman.mimes' => 'Surat peminjaman harus berformat PDF, DOC, atau DOCX.',
+            'surat_peminjaman.max' => 'Ukuran surat peminjaman maksimal 4 MB.',
             'tanggal_pinjam.after_or_equal' => 'Tanggal pinjam tidak boleh sebelum hari ini.',
             'tanggal_rencana_kembali.after_or_equal' => 'Tanggal rencana kembali tidak boleh sebelum tanggal pinjam.',
             'items.required' => 'Pilih minimal satu barang.',

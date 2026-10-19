@@ -11,6 +11,7 @@ use App\Notifications\AjuanDisetujui;
 use App\Notifications\AjuanDitolak;
 use App\Notifications\AjuanTerkirim;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Notification;
 use Tests\Concerns\DataPeminjaman;
 use Tests\TestCase;
@@ -43,6 +44,7 @@ class AjuanVerifikasiTest extends TestCase
             'unit' => 'Teknik Informatika',
             'tujuan' => 'Presentasi seminar',
             'setuju_syarat' => '1',
+            'surat_peminjaman' => UploadedFile::fake()->create('surat.pdf', 120, 'application/pdf'),
             'tanggal_pinjam' => '2026-10-11',
             'tanggal_rencana_kembali' => '2026-10-13',
             'items' => [['barang_id' => $this->barang->id, 'jumlah' => 1]],

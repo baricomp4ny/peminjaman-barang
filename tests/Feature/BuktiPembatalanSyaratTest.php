@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Notifications\AjuanDisetujui;
 use App\Notifications\AjuanTerkirim;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Notification;
 use Tests\Concerns\DataPeminjaman;
@@ -121,6 +122,7 @@ class BuktiPembatalanSyaratTest extends TestCase
             'tujuan' => 'Praktikum kultur jaringan', 'tanggal_pinjam' => '2026-10-16', 'tanggal_rencana_kembali' => '2026-10-17',
             'items' => [['barang_id' => $this->barang->id, 'jumlah' => 1]],
             'setuju_syarat' => '1',
+            'surat_peminjaman' => UploadedFile::fake()->create('surat.pdf', 120, 'application/pdf'),
         ], $ubah);
     }
 
@@ -145,13 +147,13 @@ class BuktiPembatalanSyaratTest extends TestCase
         $this->actingAs($this->admin)->get('/admin/pengaturan/aturan')->assertOk()->assertSee('Syarat peminjaman');
 
         $this->put('/admin/pengaturan/aturan', [
-            'lama_pinjam_maks' => 7, 'unit_maks_per_ajuan' => 3, 'lama_penangguhan_hari' => 7, 'batas_ambil_hari' => 1,
+            'lama_pinjam_maks' => 7, 'unit_maks_per_ajuan' => 3, 'lama_penangguhan_hari' => 7, 'batas_ambil_hari' => 1, 'estimasi_peninjauan_hari' => 2,
             'syarat_peminjaman' => '',
         ])->assertSessionHasErrors('syarat_peminjaman');
 
         $panjang = str_repeat('Syarat panjang. ', 150); // > 255 karakter: butuh kolom TEXT
         $this->put('/admin/pengaturan/aturan', [
-            'lama_pinjam_maks' => 7, 'unit_maks_per_ajuan' => 3, 'lama_penangguhan_hari' => 7, 'batas_ambil_hari' => 1,
+            'lama_pinjam_maks' => 7, 'unit_maks_per_ajuan' => 3, 'lama_penangguhan_hari' => 7, 'batas_ambil_hari' => 1, 'estimasi_peninjauan_hari' => 2,
             'syarat_peminjaman' => $panjang,
         ])->assertSessionHasNoErrors();
         $this->assertSame(trim($panjang), Pengaturan::teks(Pengaturan::SYARAT_PEMINJAMAN));

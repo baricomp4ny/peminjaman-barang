@@ -630,3 +630,15 @@ Catatan: kasus uji bertema denda di bagian sebelumnya (mis. PerhitunganDendaTest
 
 Hasil terakhir: **194 tes lulus**.
 
+## 12. Template & upload surat peminjaman (19 Okt 2026)
+
+| ID | Skenario | Langkah / Data uji | Hasil yang diharapkan | J | Tes otomatis | Hasil aktual | Status |
+|---|---|---|---|---|---|---|---|
+| SR-01 ★ | Info & template | Buka Ajukan Peminjaman → Buka Template Surat | Kotak info + estimasi tampil; file DOCX terunduh | P | SuratPeminjamanTest | | |
+| SR-02 ★ | Surat wajib | Kirim tanpa file | "Unggah surat peminjaman (PDF, DOC, atau DOCX)." | N | SuratPeminjamanTest | | |
+| SR-03 | Format / ukuran salah | JPG; PDF 5 MB | Ditolak dengan pesan format / maks 4 MB | N/B | SuratPeminjamanTest | | |
+| SR-04 ★ | Surat privat | Kirim ajuan valid, buka /admin/peminjaman/{id}/surat tanpa login & sebagai admin | Tamu → login; admin bisa membuka; file tidak ada di folder publik | P/N | SuratPeminjamanTest | | |
+| SR-05 | Admin ganti template & estimasi | Aturan Peminjaman → unggah PDF, estimasi 5 | Template baru terunduh di form ajuan; .exe ditolak | P/N | SuratPeminjamanTest | | |
+
+Hasil terakhir: **200 tes lulus**.
+

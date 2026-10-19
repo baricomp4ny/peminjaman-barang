@@ -64,6 +64,7 @@ class PeminjamanService
                 'kode_peminjaman' => $this->kode->berikutnya(),
                 'user_id' => $peminjam->id,
                 'tujuan' => $data['tujuan'],
+                'surat_peminjaman' => $data['surat_peminjaman'] ?? null,
                 'tanggal_pinjam' => $data['tanggal_pinjam'],
                 'tanggal_rencana_kembali' => $data['tanggal_rencana_kembali'],
                 'status' => StatusPeminjaman::Menunggu,

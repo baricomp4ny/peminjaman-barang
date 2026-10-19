@@ -17,8 +17,10 @@ use App\Services\KetersediaanService;
 use App\Services\PeminjamanService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /** Peminjaman yang sudah disetujui (siap diambil) dan yang sedang dipinjam. */
 class PeminjamanController extends Controller
@@ -74,6 +76,16 @@ class PeminjamanController extends Controller
             'Content-Type' => 'application/pdf',
             'Content-Disposition' => 'inline; filename="'.$bukti->namaFile($peminjaman).'"',
         ]);
+    }
+
+    /** Buka surat permohonan yang diunggah peminjam (disk privat, khusus admin). */
+    public function surat(Peminjaman $peminjaman): StreamedResponse
+    {
+        abort_unless($peminjaman->surat_peminjaman && Storage::disk('local')->exists($peminjaman->surat_peminjaman), 404, 'Surat peminjaman tidak ditemukan.');
+
+        $nama = 'surat-'.$peminjaman->kode_peminjaman.'.'.pathinfo($peminjaman->surat_peminjaman, PATHINFO_EXTENSION);
+
+        return Storage::disk('local')->response($peminjaman->surat_peminjaman, $nama);
     }
 
     public function serahForm(Peminjaman $peminjaman, PeminjamanService $service): View|RedirectResponse

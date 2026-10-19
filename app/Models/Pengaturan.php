@@ -20,12 +20,19 @@ class Pengaturan extends Model
 
     public const BATAS_AMBIL_HARI = 'batas_ambil_hari';
 
+    /** Estimasi lama peninjauan ajuan (hari kerja), ditampilkan di form ajuan. */
+    public const ESTIMASI_PENINJAUAN_HARI = 'estimasi_peninjauan_hari';
+
+    /** Path file template surat yang diunggah admin (disk public); kosong = template bawaan. */
+    public const TEMPLATE_SURAT = 'template_surat';
+
     /** Nilai bawaan bila belum ada di database. */
     public const DEFAULT = [
         self::LAMA_PINJAM_MAKS => 7,
         self::UNIT_MAKS_PER_AJUAN => 3,
         self::LAMA_PENANGGUHAN_HARI => 7,
         self::BATAS_AMBIL_HARI => 1,
+        self::ESTIMASI_PENINJAUAN_HARI => 2,
     ];
 
     /** Syarat peminjaman (teks) yang wajib disetujui di form ajuan. */

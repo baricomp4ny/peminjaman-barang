@@ -131,6 +131,7 @@ class PeminjamPengaturanTest extends TestCase
             'unit_maks_per_ajuan' => 5,
             'lama_penangguhan_hari' => 0,
             'batas_ambil_hari' => 2,
+            'estimasi_peninjauan_hari' => 2,
             'syarat_peminjaman' => '1. Gunakan alat dengan hati-hati.
 2. Kembalikan tepat waktu.',
         ])->assertSessionHasNoErrors()->assertSessionHas('success');

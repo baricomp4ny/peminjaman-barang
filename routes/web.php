@@ -20,6 +20,7 @@ Route::name('peminjam.')->group(function () {
     Route::get('/ketersediaan', Peminjam\KetersediaanController::class)->middleware('throttle:60,1')->name('ketersediaan');
 
     Route::get('/ajuan', [Peminjam\AjuanController::class, 'create'])->name('ajuan.create');
+    Route::get('/ajuan/template-surat', [Peminjam\AjuanController::class, 'templateSurat'])->name('ajuan.template');
     // Dibatasi supaya form publik tidak dibanjiri kiriman
     Route::post('/ajuan', [Peminjam\AjuanController::class, 'store'])->middleware('throttle:10,1')->name('ajuan.store');
 
@@ -67,6 +68,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/peminjaman', [Admin\PeminjamanController::class, 'index'])->name('peminjaman.index');
     Route::get('/peminjaman/{peminjaman}', [Admin\PeminjamanController::class, 'show'])->name('peminjaman.show');
     Route::get('/peminjaman/{peminjaman}/bukti', [Admin\PeminjamanController::class, 'bukti'])->name('peminjaman.bukti');
+    Route::get('/peminjaman/{peminjaman}/surat', [Admin\PeminjamanController::class, 'surat'])->name('peminjaman.surat');
     Route::get('/peminjaman/{peminjaman}/serah', [Admin\PeminjamanController::class, 'serahForm'])->name('peminjaman.serah');
     Route::post('/peminjaman/{peminjaman}/serah', [Admin\PeminjamanController::class, 'serahkan'])->name('peminjaman.serahkan');
 

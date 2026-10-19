@@ -5,6 +5,9 @@
     <x-slot name="header"><span class="text-sm text-marian-500">Transaksi</span></x-slot>
 
     <x-admin.judul :judul="'Peminjaman '.$p->kode_peminjaman" :kembali="url()->previous() !== url()->current() ? url()->previous() : route('admin.riwayat.index')">
+        @if ($p->surat_peminjaman)
+            <x-link-button variant="secondary" :href="route('admin.peminjaman.surat', $p)" target="_blank">Lihat Surat Peminjaman</x-link-button>
+        @endif
         <x-link-button variant="secondary" :href="route('admin.peminjaman.bukti', $p)" target="_blank">Cetak Bukti (PDF)</x-link-button>
         @if ($p->status === StatusPeminjaman::Disetujui)
             <x-link-button variant="secondary" :href="route('admin.peminjaman.serah', $p)">Serah-terima (form)</x-link-button>
@@ -38,6 +41,10 @@
                         <li class="flex items-start gap-2">
                             @if (! $punyaTerlambat) <span class="text-marian-600">✔</span> Tidak punya pinjaman terlambat
                             @else <span class="text-red-600">✖</span> Masih punya pinjaman terlambat @endif
+                        </li>
+                        <li class="flex items-start gap-2">
+                            @if ($p->surat_peminjaman) <span class="text-marian-600">✔</span> Surat peminjaman terlampir — <a href="{{ route('admin.peminjaman.surat', $p) }}" target="_blank" class="font-semibold text-indigo-600 underline">buka surat</a>
+                            @else <span class="text-red-600">✖</span> Belum ada surat peminjaman @endif
                         </li>
                         <li class="flex items-start gap-2">
                             @if ($jumlahTerlambat === 0) <span class="text-marian-600">✔</span> Belum pernah terlambat

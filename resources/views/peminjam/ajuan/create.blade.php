@@ -18,11 +18,32 @@
         </div>
     </section>
 
+    {{-- Info surat peminjaman + estimasi peninjauan --}}
+    <div class="mt-6 grid gap-4 lg:[grid-template-columns:minmax(0,1fr)_20rem]">
+        <div class="flex flex-wrap items-center justify-between gap-4 rounded-3xl bg-marian-50 p-5 ring-1 ring-marian-200">
+            <div class="flex min-w-0 items-start gap-3">
+                <svg class="h-6 w-6 shrink-0 text-marian-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" /><path d="M14 3v5h5M9 13h6M9 17h6M9 9h1" /></svg>
+                <div>
+                    <p class="font-bold text-marian-900">Surat peminjaman wajib disiapkan sebelum dikirim.</p>
+                    <p class="mt-1 text-sm text-marian-700">Gunakan satu surat yang mencantumkan seluruh alat yang dipinjam dan tanggal peminjaman.</p>
+                </div>
+            </div>
+            <a href="{{ route('peminjam.ajuan.template') }}" class="inline-flex items-center gap-2 rounded-2xl bg-white px-4 py-2.5 text-sm font-bold text-marian-900 shadow-sm ring-1 ring-marian-200 transition hover:bg-marian-100">
+                Buka Template Surat
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" /></svg>
+            </a>
+        </div>
+        <div class="flex items-center gap-3 rounded-3xl bg-marian-50 p-5 ring-1 ring-marian-200">
+            <svg class="h-6 w-6 shrink-0 text-marian-800" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
+            <p class="font-bold text-marian-900">Estimasi peninjauan maksimal {{ $estimasiHari }} hari kerja.</p>
+        </div>
+    </div>
+
     <div class="mt-6 grid items-start gap-6 lg:[grid-template-columns:minmax(0,1fr)_20rem]"
          x-data="formAjuan(@js($barisAwal), @js(old('tanggal_pinjam', now()->toDateString())), @js(old('tanggal_rencana_kembali', now()->addDay()->toDateString())), {{ $maksUnit }}, @js($namaBarang))"
          x-init="cekStok()">
 
-        <form method="POST" action="{{ route('peminjam.ajuan.store') }}" class="space-y-6 rounded-5xl bg-white p-5 shadow-lembut ring-1 ring-marian-100 sm:p-8">
+        <form method="POST" action="{{ route('peminjam.ajuan.store') }}" enctype="multipart/form-data" class="space-y-6 rounded-5xl bg-white p-5 shadow-lembut ring-1 ring-marian-100 sm:p-8">
             @csrf
 
             {{-- 1. Identitas (tanpa login). NIM dipakai untuk mencocokkan riwayat peminjaman. --}}
@@ -158,6 +179,28 @@
                     Saya menyetujui syarat peminjaman dan bertanggung jawab atas barang yang dipinjam
                 </label>
                 <x-input-error :messages="$errors->get('setuju_syarat')" class="mt-2" />
+            </fieldset>
+
+            {{-- 6. Upload surat peminjaman (wajib) --}}
+            <fieldset class="border-t border-marian-100 pt-6" x-data="{ namaFile: '' }">
+                <legend class="flex items-center gap-3 text-base font-extrabold text-marian-900">
+                    <span class="flex h-8 w-8 items-center justify-center rounded-full bg-marian-800 text-sm text-white">6</span> Surat Peminjaman *
+                </legend>
+                <label for="surat_peminjaman"
+                       class="mt-4 flex cursor-pointer items-center gap-4 rounded-3xl border-2 border-dashed border-marian-200 bg-marian-50/60 p-5 transition hover:border-marian-400 hover:bg-marian-50"
+                       :class="namaFile && '!border-marian-500 !bg-marian-50'">
+                    <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white text-marian-700 shadow-sm">
+                        <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 18a4 4 0 0 1-.5-8A6 6 0 0 1 18 9a4 4 0 0 1 0 9" /><path d="M12 12v8M9 15l3-3 3 3" /></svg>
+                    </span>
+                    <span class="min-w-0">
+                        <span class="block truncate font-bold text-marian-900" x-text="namaFile || 'Pilih file surat'">Pilih file surat</span>
+                        <span class="block text-sm text-marian-600" x-text="namaFile ? 'Klik untuk mengganti file' : 'PDF, DOC, atau DOCX · maksimal 4 MB'">PDF, DOC, atau DOCX · maksimal 4 MB</span>
+                    </span>
+                </label>
+                <input id="surat_peminjaman" type="file" name="surat_peminjaman" accept=".pdf,.doc,.docx" required class="sr-only"
+                       @change="namaFile = $event.target.files[0]?.name || ''">
+                <x-input-error :messages="$errors->get('surat_peminjaman')" class="mt-2" />
+                <p class="mt-2 text-xs text-marian-500">Belum punya surat? <a href="{{ route('peminjam.ajuan.template') }}" class="font-semibold text-marian-800 underline">Unduh template surat</a>, isi, tanda tangani, lalu unggah di sini.</p>
             </fieldset>
 
             <div class="flex flex-wrap items-center gap-3 border-t border-marian-100 pt-6">

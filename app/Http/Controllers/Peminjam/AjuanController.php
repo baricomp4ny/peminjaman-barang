@@ -11,7 +11,9 @@ use App\Services\IdentitasPeminjamService;
 use App\Services\PeminjamanService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 /** Form ajuan publik: peminjam tidak perlu login. */
 class AjuanController extends Controller
@@ -24,15 +26,32 @@ class AjuanController extends Controller
             'maksHari' => Pengaturan::angka(Pengaturan::LAMA_PINJAM_MAKS),
             'maksUnit' => Pengaturan::angka(Pengaturan::UNIT_MAKS_PER_AJUAN),
             'syarat' => Pengaturan::teks(Pengaturan::SYARAT_PEMINJAMAN),
+            'estimasiHari' => Pengaturan::angka(Pengaturan::ESTIMASI_PENINJAUAN_HARI),
         ]);
+    }
+
+    /** Unduh template surat: unggahan admin bila ada, selain itu template bawaan. */
+    public function templateSurat(): BinaryFileResponse
+    {
+        $path = Pengaturan::teks(Pengaturan::TEMPLATE_SURAT);
+        $file = $path && Storage::disk('public')->exists($path)
+            ? Storage::disk('public')->path($path)
+            : resource_path('template/template-surat-peminjaman-alat.docx');
+
+        return response()->download($file, 'Template Surat Permohonan Peminjaman Alat.'.pathinfo($file, PATHINFO_EXTENSION));
     }
 
     public function store(AjuanRequest $request, IdentitasPeminjamService $identitas, PeminjamanService $service): RedirectResponse
     {
+        // Surat disimpan di disk privat (berisi data pribadi), hanya admin yang bisa membuka
+        $surat = $request->file('surat_peminjaman')->store('surat', 'local');
+
         try {
             $peminjam = $identitas->cariAtauBuat($request->identitas());
-            $peminjaman = $service->ajukan($peminjam, $request->ajuan());
+            $peminjaman = $service->ajukan($peminjam, $request->ajuan() + ['surat_peminjaman' => $surat]);
         } catch (PeminjamanException $e) {
+            Storage::disk('local')->delete($surat);
+
             return back()->withInput()->with('error', $e->getMessage());
         }
 

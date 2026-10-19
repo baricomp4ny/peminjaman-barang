@@ -11,6 +11,7 @@ use App\Notifications\PengingatTerlambat;
 use App\Services\KeterlambatanService;
 use App\Services\LaporanService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
 use Tests\Concerns\DataPeminjaman;
 use Tests\TestCase;
@@ -55,7 +56,7 @@ class KeterlambatanPenangguhanTest extends TestCase
     {
         return $this->post('/ajuan', [
             'name' => $this->peminjam->name, 'nomor_identitas' => 'J0301209999', 'email' => 'rina@contoh.test', 'no_hp' => '081234567890',
-            'tujuan' => 'Praktikum kultur jaringan', 'setuju_syarat' => '1', 'tanggal_pinjam' => '2026-10-20', 'tanggal_rencana_kembali' => '2026-10-21',
+            'tujuan' => 'Praktikum kultur jaringan', 'setuju_syarat' => '1', 'surat_peminjaman' => UploadedFile::fake()->create('surat.pdf', 120, 'application/pdf'), 'tanggal_pinjam' => '2026-10-20', 'tanggal_rencana_kembali' => '2026-10-21',
             'items' => [['barang_id' => $this->barangId(), 'jumlah' => 1]],
         ]);
     }

@@ -52,7 +52,7 @@ Semua primary key ULID (tanpa auto increment), foreign key `foreignUlid`.
 - lokasi: nama, keterangan
 - barang: kategori_id, kode (prefix kode unit, unik, misal PRJ — ditambahkan Sprint 2), nama, deskripsi, foto
 - unit_barang: barang_id, lokasi_id, kode_unit (unik, isi QR, otomatis, contoh PRJ-001), kondisi (baik, rusak, hilang), status (tersedia, dipinjam, perbaikan, hilang), tanggal_perolehan
-- peminjaman: kode_peminjaman (unik), user_id, tujuan, tanggal_pinjam, tanggal_rencana_kembali, status (menunggu, disetujui, ditolak, dipinjam, selesai, dibatalkan, kedaluwarsa), alasan_penolakan, diverifikasi_oleh, diverifikasi_pada, diserahkan_pada
+- peminjaman: kode_peminjaman (unik), user_id, tujuan, surat_peminjaman (path file surat, disk privat), tanggal_pinjam, tanggal_rencana_kembali, status (menunggu, disetujui, ditolak, dipinjam, selesai, dibatalkan, kedaluwarsa), alasan_penolakan, diverifikasi_oleh, diverifikasi_pada, diserahkan_pada
 - peminjaman_detail: peminjaman_id, barang_id, jumlah
 - peminjaman_unit: peminjaman_id, unit_barang_id, dikembalikan_pada, kondisi_kembali, hari_terlambat, denda, catatan
 - pengaturan: key, value
@@ -154,4 +154,10 @@ Responsif, menu aktif ditandai, pesan sukses/gagal jelas.
 - Bukti peminjaman PDF: BuktiPeminjamanService (dompdf, A4, font subset ±25 KB), view resources/views/pdf/bukti-peminjaman.blade.php berisi kop lab, kode PJM + QR (SVG data URI), identitas peminjam, daftar barang & unit diserahkan, tanggal pinjam/rencana kembali, kolom tanda tangan peminjam & petugas. Route admin.peminjaman.bukti (tombol "Cetak Bukti (PDF)" di detail transaksi) dan dilampirkan di email AjuanDisetujui.
 - Pembatalan dari email: StatusController::tautanBatal() = URL::temporarySignedRoute('peminjam.status.batal.konfirmasi', berlaku s/d tanggal rencana kembali). GET (middleware signed) = halaman konfirmasi peminjam/status/batal.blade.php; POST ke URL yang sama (tanda tangan ikut) atau lewat akses sesi. Tautan ada di email AjuanTerkirim & AjuanDisetujui. Tetap hanya status menunggu / disetujui yang belum diambil (StatusPeminjaman::bisaDibatalkan); status dibatalkan sudah ada sejak Sprint 1.
 - Syarat peminjaman: migration 2026_10_19_000002 mengubah pengaturan.value menjadi TEXT. Pengaturan::SYARAT_PEMINJAMAN + Pengaturan::teks(), default di TEKS_DEFAULT, diubah admin di Aturan Peminjaman (textarea, 10–3000 karakter). Form ajuan menampilkan syarat + checkbox wajib `setuju_syarat` (rule accepted).
+
+## Catatan desain (surat peminjaman, disetujui)
+- Migration 2026_10_19_000003: kolom peminjaman.surat_peminjaman (string nullable). File surat wajib di form ajuan (bagian 6, paling akhir): required|file|mimes:pdf,doc,docx|max:4096; disimpan di disk local (privat) folder surat/, dihapus lagi bila ajuan gagal diproses. Admin membuka lewat admin.peminjaman.surat (tombol "Lihat Surat Peminjaman" + checklist di panel verifikasi).
+- Kotak info di atas form ajuan: "Surat peminjaman wajib disiapkan…" + tombol "Buka Template Surat" (route publik peminjam.ajuan.template) dan "Estimasi peninjauan maksimal N hari kerja".
+- Template bawaan: resources/template/template-surat-peminjaman-alat.docx (diadaptasi dari format surat permohonan SV IPB). Admin bisa menggantinya di Aturan Peminjaman (upload DOCX/DOC/PDF → disk public template/, path di pengaturan template_surat). Pengaturan baru: estimasi_peninjauan_hari (default 2).
+- Tes: Storage::fake('local') di tests/TestCase.php supaya unggahan tes tidak ditulis ke storage asli.
 
