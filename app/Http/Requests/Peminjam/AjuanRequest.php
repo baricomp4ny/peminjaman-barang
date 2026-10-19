@@ -5,6 +5,7 @@ namespace App\Http\Requests\Peminjam;
 use App\Models\Barang;
 use App\Models\Pengaturan;
 use App\Services\IdentitasPeminjamService;
+use App\Services\KeterlambatanService;
 use App\Services\KetersediaanService;
 use App\Services\PeminjamanService;
 use Illuminate\Foundation\Http\FormRequest;
@@ -73,6 +74,12 @@ class AjuanRequest extends FormRequest
                 $peminjam = $identitas->cari($this->input('nomor_identitas'));
                 if ($peminjam && app(PeminjamanService::class)->punyaPinjamanTerlambat($peminjam)) {
                     $validator->errors()->add('nomor_identitas', 'Anda masih memiliki pinjaman yang terlambat. Kembalikan dulu sebelum mengajukan lagi.');
+
+                    return;
+                }
+                // Masa penangguhan setelah mengembalikan terlambat
+                if ($peminjam && $pesan = app(KeterlambatanService::class)->pesanPenangguhan($peminjam)) {
+                    $validator->errors()->add('nomor_identitas', $pesan);
 
                     return;
                 }

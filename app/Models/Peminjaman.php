@@ -46,7 +46,7 @@ class Peminjaman extends Model
         return $this->hasMany(PeminjamanDetail::class);
     }
 
-    /** Unit yang diserahkan (berisi data pengembalian & denda). */
+    /** Unit yang diserahkan (berisi data pengembalian & keterlambatan). */
     public function peminjamanUnit(): HasMany
     {
         return $this->hasMany(PeminjamanUnit::class);
@@ -87,11 +87,6 @@ class Peminjaman extends Model
         }
 
         return max(0, (int) $this->tanggal_rencana_kembali->diffInDays(today(), false));
-    }
-
-    public function totalDenda(): int
-    {
-        return (int) $this->peminjamanUnit()->sum('denda');
     }
 
     public function bisaDibatalkan(): bool

@@ -108,7 +108,7 @@ class AkunAdminTest extends TestCase
     {
         $this->actingAs($this->admin)->get('/admin/pengaturan')->assertRedirect('/admin/pengaturan/aturan');
         $this->get('/admin/pengaturan/aturan')->assertOk()
-            ->assertSee('Pengelolaan data admin, aturan peminjaman, dan ketentuan denda')
-            ->assertSee('Data Admin')->assertSee('Aturan &amp; Denda', false);
+            ->assertSee('Pengelolaan data admin dan aturan peminjaman')
+            ->assertSee('Data Admin')->assertSee('Aturan Peminjaman')->assertDontSee('Denda');
     }
 }

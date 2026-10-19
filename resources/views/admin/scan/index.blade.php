@@ -112,7 +112,7 @@
                         </div>
 
                         <p x-show="transaksi.peringatan" class="mt-3 rounded-md bg-marian-50 p-3 text-sm text-marian-800" x-text="transaksi.peringatan"></p>
-                        <p x-show="transaksi.terlambat > 0" class="mt-3 rounded-md bg-red-50 p-3 text-sm text-red-800" x-text="'Terlambat ' + transaksi.terlambat + ' hari — denda dihitung otomatis saat disimpan.'"></p>
+                        <p x-show="transaksi.terlambat > 0" class="mt-3 rounded-md bg-red-50 p-3 text-sm text-red-800" x-text="'Terlambat ' + transaksi.terlambat + ' hari — keterlambatan dicatat otomatis saat disimpan.'"></p>
 
                         <h3 class="mt-5 text-sm font-semibold text-marian-900">
                             Langkah 2: scan QR setiap unit

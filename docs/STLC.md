@@ -597,3 +597,20 @@ Jalankan: `php artisan test` (database terpisah `peminjaman_barang_test`). Hasil
 | Penguji 2 | | | |
 | Penguji 3 | | | |
 | Perwakilan mitra | | | |
+
+---
+
+## 10. Perubahan: denda dihapus → penangguhan (19 Okt 2026)
+
+| ID | Skenario | Langkah / Data uji | Hasil yang diharapkan | J | Tes otomatis | Hasil aktual | Status |
+|---|---|---|---|---|---|---|---|
+| PN-01 ★ | Kembali terlambat → ditangguhkan | Kembali terlambat 12 Okt, penangguhan 7 hari, ajukan 15 Okt | Ditolak di kolom NIM: "…dapat dilakukan mulai 19 Okt 2026." | N | KeterlambatanPenangguhanTest | | |
+| PN-02 | Penangguhan berakhir | Ajukan 19 Okt | Diterima | P | KeterlambatanPenangguhanTest | | |
+| PN-03 | Penangguhan 0 hari | Aturan Peminjaman → 0 | Tidak ada penangguhan | B | KeterlambatanPenangguhanTest | | |
+| PN-04 | Kembali tepat waktu | Kembali di hari rencana | Tidak ditangguhkan | P | KeterlambatanPenangguhanTest | | |
+| PN-05 | Jumlah terlambat | Data Peminjam & panel verifikasi | "2×" / "Riwayat terlambat 2×" + info penangguhan | P | KeterlambatanPenangguhanTest | | |
+| PN-06 ★ | Pengingat H-1, hari H, terlambat | `peminjaman:pengingat --tanggal=…` berturut-turut | 3 jenis email, terlambat 1×/hari, tanpa kata denda | P | KeterlambatanPenangguhanTest | | |
+| PN-07 ★ | Laporan Statistik Pemakaian | Laporan → Statistik, rentang 1–10 Okt | Urut paling sering; alat 0× = "Tidak pernah dipinjam"; PDF/Excel | P | KeterlambatanPenangguhanTest | | |
+| PN-08 | Denda hilang | Dashboard, detail transaksi, pengembalian, email, /admin/laporan/denda | Tidak ada nominal/kolom denda; laporan denda 404 | P | SerahPengembalianTest, KeterlambatanPenangguhanTest | | |
+
+Catatan: kasus uji bertema denda di bagian sebelumnya (mis. PerhitunganDendaTest, LP denda) tidak berlaku lagi. Hasil terakhir: **186 tes lulus**.

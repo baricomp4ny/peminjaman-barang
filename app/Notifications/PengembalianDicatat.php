@@ -5,6 +5,7 @@ namespace App\Notifications;
 use App\Enums\StatusPeminjaman;
 use App\Models\Peminjaman;
 use App\Models\PeminjamanUnit;
+use App\Models\Pengaturan;
 use Illuminate\Support\Collection;
 
 class PengembalianDicatat extends NotifikasiPeminjaman
@@ -23,10 +24,13 @@ class PengembalianDicatat extends NotifikasiPeminjaman
     public function pesan(): string
     {
         $kode = $this->unit->map(fn ($u) => $u->unitBarang->kode_unit)->join(', ');
-        $denda = (int) $this->unit->sum('denda');
-        $teksDenda = $denda > 0 ? ' Denda keterlambatan: '.rupiah($denda).'.' : '';
+        $lama = Pengaturan::angka(Pengaturan::LAMA_PENANGGUHAN_HARI);
+        // Kembali terlambat → beri tahu masa penangguhan pengajuan
+        $penangguhan = $this->unit->max('hari_terlambat') > 0 && $lama > 0
+            ? " Karena terlambat, pengajuan baru dapat dilakukan mulai {$this->unit->max('dikembalikan_pada')->copy()->startOfDay()->addDays($lama)->translatedFormat('d F Y')}."
+            : '';
 
-        return "Pengembalian unit {$kode} untuk {$this->peminjaman->kode_peminjaman} sudah dicatat.{$teksDenda}";
+        return "Pengembalian unit {$kode} untuk {$this->peminjaman->kode_peminjaman} sudah dicatat.{$penangguhan}";
     }
 
     protected function rincian(): array

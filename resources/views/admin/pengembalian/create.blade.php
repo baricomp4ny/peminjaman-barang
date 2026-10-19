@@ -14,8 +14,8 @@
             <div><dt class="text-marian-500">Rencana kembali</dt><dd class="font-medium">{{ $p->tanggal_rencana_kembali->translatedFormat('d M Y') }}</dd></div>
             <div>
                 <dt class="text-marian-500">Jika kembali hari ini</dt>
-                <dd class="font-medium {{ $dendaHariIni['hari'] > 0 ? 'text-red-600' : 'text-marian-700' }}">
-                    {{ $dendaHariIni['hari'] > 0 ? "Terlambat {$dendaHariIni['hari']} hari · ".rupiah($dendaHariIni['denda']).'/unit' : 'Tepat waktu' }}
+                <dd class="font-medium {{ $terlambatHariIni > 0 ? 'text-red-600' : 'text-marian-700' }}">
+                    {{ $terlambatHariIni > 0 ? "Terlambat {$terlambatHariIni} hari" : 'Tepat waktu' }}
                 </dd>
             </div>
         </dl>

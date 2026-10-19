@@ -78,6 +78,17 @@ class User extends Authenticatable
         return $query->where('status', StatusAkun::Aktif);
     }
 
+    /**
+     * Tambah kolom jumlah_terlambat: banyaknya peminjaman yang pernah terlambat
+     * (ada unit kembali terlambat) atau yang saat ini sedang terlambat.
+     */
+    public function scopeWithJumlahTerlambat(Builder $query): Builder
+    {
+        return $query->withCount(['peminjaman as jumlah_terlambat' => fn (Builder $q) => $q->where(fn (Builder $w) => $w
+            ->whereHas('peminjamanUnit', fn (Builder $u) => $u->where('hari_terlambat', '>', 0))
+            ->orWhere(fn (Builder $o) => $o->terlambat()))]);
+    }
+
     // ---------- Helper ----------
 
     public function isAdmin(): bool

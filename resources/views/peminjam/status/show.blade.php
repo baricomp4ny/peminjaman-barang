@@ -22,10 +22,10 @@
         </div>
     </section>
 
-    @if ($perkiraanDenda > 0)
+    @if ($p->isTerlambat())
         <div class="mt-6 rounded-4xl border border-red-200 bg-red-50 p-5 text-sm text-red-800">
-            Pinjaman ini terlambat {{ $p->hariTerlambatBerjalan() }} hari. Perkiraan denda sampai hari ini:
-            <strong>{{ rupiah($perkiraanDenda) }}</strong>. Segera kembalikan alat.
+            Pinjaman ini terlambat <strong>{{ $p->hariTerlambatBerjalan() }} hari</strong>. Segera kembalikan alat.
+            Setelah pengembalian terlambat, pengajuan baru ditangguhkan sementara.
         </div>
     @endif
 

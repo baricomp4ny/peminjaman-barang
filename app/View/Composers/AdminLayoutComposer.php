@@ -18,7 +18,7 @@ class AdminLayoutComposer
         'pengembalian' => 'Pengembalian',
         'inventaris' => 'Inventaris',
         'keterlambatan' => 'Keterlambatan',
-        'denda' => 'Denda',
+        'statistik' => 'Statistik Pemakaian',
     ];
 
     public function __construct(private Request $request) {}
@@ -69,7 +69,7 @@ class AdminLayoutComposer
             ['label' => 'Scan Barcode', 'route' => 'admin.scan.index', 'aktif' => 'admin.scan.*', 'pola' => ['admin.scan.*'],
                 'deskripsi' => 'Pemindaian barcode untuk mencatat penyerahan dan pengembalian barang'],
             ['grup' => 'Laporan', 'pola' => ['admin.laporan.*'],
-                'deskripsi' => 'Rekapitulasi transaksi, pengembalian, inventaris, keterlambatan, dan denda',
+                'deskripsi' => 'Rekapitulasi transaksi, pengembalian, inventaris, keterlambatan, dan statistik pemakaian',
                 'items' => collect(self::LAPORAN)->map(fn ($label, $jenis) => [
                     'label' => $label,
                     'route' => 'admin.laporan.show',
@@ -78,10 +78,10 @@ class AdminLayoutComposer
                     'aktif' => $this->request->routeIs('admin.laporan.show') && $this->request->route('jenis') === $jenis,
                 ])->values()->all()],
             ['grup' => 'Pengaturan', 'pola' => ['admin.pengaturan.*', 'admin.akun-admin.*'],
-                'deskripsi' => 'Pengelolaan data admin, aturan peminjaman, dan ketentuan denda',
+                'deskripsi' => 'Pengelolaan data admin dan aturan peminjaman',
                 'items' => [
                     ['label' => 'Data Admin', 'route' => 'admin.akun-admin.index', 'aktif' => 'admin.akun-admin.*'],
-                    ['label' => 'Aturan & Denda', 'route' => 'admin.pengaturan.edit', 'aktif' => 'admin.pengaturan.*'],
+                    ['label' => 'Aturan Peminjaman', 'route' => 'admin.pengaturan.edit', 'aktif' => 'admin.pengaturan.*'],
                 ]],
         ];
     }

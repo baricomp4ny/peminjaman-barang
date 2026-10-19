@@ -17,7 +17,7 @@ class PengaturanRequest extends FormRequest
         return [
             Pengaturan::LAMA_PINJAM_MAKS => ['required', 'integer', 'min:1', 'max:90'],
             Pengaturan::UNIT_MAKS_PER_AJUAN => ['required', 'integer', 'min:1', 'max:20'],
-            Pengaturan::DENDA_PER_HARI => ['required', 'integer', 'min:0', 'max:1000000'],
+            Pengaturan::LAMA_PENANGGUHAN_HARI => ['required', 'integer', 'min:0', 'max:90'],
             Pengaturan::BATAS_AMBIL_HARI => ['required', 'integer', 'min:1', 'max:14'],
         ];
     }
@@ -27,7 +27,7 @@ class PengaturanRequest extends FormRequest
         return [
             Pengaturan::LAMA_PINJAM_MAKS => 'lama pinjam maksimal',
             Pengaturan::UNIT_MAKS_PER_AJUAN => 'maksimal unit per ajuan',
-            Pengaturan::DENDA_PER_HARI => 'denda per unit per hari',
+            Pengaturan::LAMA_PENANGGUHAN_HARI => 'lama penangguhan setelah terlambat',
             Pengaturan::BATAS_AMBIL_HARI => 'batas waktu pengambilan',
         ];
     }

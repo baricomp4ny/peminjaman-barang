@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * Unit fisik yang diserahkan pada suatu peminjaman, beserta data pengembalian & denda.
+ * Unit fisik yang diserahkan pada suatu peminjaman, beserta data pengembalian & keterlambatan.
  * Waktu serah-terima memakai peminjaman.diserahkan_pada.
  */
 class PeminjamanUnit extends Model
@@ -19,14 +19,13 @@ class PeminjamanUnit extends Model
 
     protected $fillable = [
         'peminjaman_id', 'unit_barang_id', 'dikembalikan_pada',
-        'kondisi_kembali', 'hari_terlambat', 'denda', 'catatan',
+        'kondisi_kembali', 'hari_terlambat', 'catatan',
     ];
 
     protected $casts = [
         'dikembalikan_pada' => 'datetime',
         'kondisi_kembali' => KondisiUnit::class,
         'hari_terlambat' => 'integer',
-        'denda' => 'integer',
     ];
 
     public function peminjaman(): BelongsTo

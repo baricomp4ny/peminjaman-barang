@@ -78,8 +78,8 @@
                     <div class="pr-6"><dd class="text-3xl font-extrabold">{{ $aturan['lama'] }}</dd><dt class="text-xs text-marian-100">hari maksimal</dt></div>
                     <div class="px-6"><dd class="text-3xl font-extrabold">{{ $aturan['unit'] }}</dd><dt class="text-xs text-marian-100">unit per ajuan</dt></div>
                     <div class="pl-6">
-                        <dd class="text-3xl font-extrabold">{{ $aturan['denda'] > 0 ? rupiah($aturan['denda']) : 'Gratis' }}</dd>
-                        <dt class="text-xs text-marian-100">{{ $aturan['denda'] > 0 ? 'denda/unit/hari' : 'tanpa denda' }}</dt>
+                        <dd class="text-3xl font-extrabold">{{ $aturan['penangguhan'] > 0 ? $aturan['penangguhan'] : '—' }}</dd>
+                        <dt class="text-xs text-marian-100">{{ $aturan['penangguhan'] > 0 ? 'hari penangguhan bila terlambat' : 'tanpa penangguhan' }}</dt>
                     </div>
                 </dl>
                 <p class="mt-4 max-w-xl text-xs text-marian-100">Alat hanya untuk kegiatan di laboratorium. Bawa kartu identitas (KTM) saat mengambil alat.</p>
@@ -254,7 +254,7 @@
                 ['Ajukan', 'Isi identitas, pilih alat & tanggal. Kode PJM dikirim ke email.'],
                 ['Diverifikasi', 'Petugas mengecek identitas, stok, dan aturan. Kabar dikirim lewat email.'],
                 ['Ambil dengan QR', 'Tunjukkan QR kode peminjaman + KTM. Petugas memindai setiap unit.'],
-                ['Kembalikan', 'Kembalikan tepat waktu. Terlambat dikenai denda per unit per hari.'],
+                ['Kembalikan', 'Kembalikan tepat waktu. Terlambat mengembalikan = tidak bisa mengajukan sementara.'],
             ] as $i => [$judul, $teks])
                 <li class="relative border-t border-white/25 pt-5">
                     <span class="flex h-10 w-10 items-center justify-center rounded-full bg-magenta text-base font-extrabold text-white">{{ $i + 1 }}</span>

@@ -36,12 +36,12 @@ Login hanya untuk admin. Semua route /admin dilindungi middleware role:admin. Me
 3. Disetujui, atau ditolak dengan alasan wajib. Peminjam mendapat notifikasi lewat email.
 4. Serah-terima: admin scan QR kode peminjaman (dari layar/email peminjam), cocokkan kartu identitas asli, lalu scan QR setiap unit. Sistem cek jenis unit sesuai ajuan, status unit tersedia, jumlah tidak melebihi yang disetujui. Setelah lengkap → status Dipinjam, unit → dipinjam.
 5. Pengembalian: admin scan QR unit, pilih kondisi (baik/rusak/hilang), catat tanggal kembali. Boleh sebagian.
-6. Sistem memperbarui status unit, riwayat, keterlambatan, denda, dan laporan.
+6. Sistem memperbarui status unit, riwayat, keterlambatan, penangguhan, dan laporan.
 Cabang: ajuan disetujui tapi tidak diambil dalam [1] hari → kedaluwarsa (scheduler); peminjam boleh membatalkan sebelum diambil; unit rusak/hilang tidak bisa dipinjam.
 
 ## Aturan bisnis (disimpan di tabel pengaturan, bisa diubah admin)
 - Lama pinjam maksimal [7] hari; maksimal [3] unit per ajuan
-- Denda Rp[1.000] per unit per hari (0 = tanpa denda)
+- Tanpa denda. Peminjam yang mengembalikan terlambat ditangguhkan (tidak bisa mengajukan) selama [7] hari sejak tanggal pengembalian terlambat (0 = tanpa penangguhan)
 - Peminjam yang punya pinjaman terlambat tidak boleh mengajukan baru
 - Cek ketersediaan WAJIB menghitung ajuan berstatus disetujui/dipinjam yang rentang tanggalnya bertabrakan (mulai_A <= selesai_B dan selesai_A >= mulai_B), bukan hanya stok hari ini. Cek ulang di dalam DB::transaction saat admin menyetujui.
 
@@ -66,8 +66,8 @@ Admin (sidebar, urutan & deskripsi sebagai subjudul halaman):
 - Data Peminjam — Pengelolaan identitas dan riwayat peminjaman setiap peminjam
 - Transaksi (Ajuan Peminjaman + badge, Peminjaman Aktif, Pengembalian, Riwayat Transaksi) — Pengelolaan pengajuan, peminjaman aktif, pengembalian, dan riwayat transaksi
 - Scan Barcode — Pemindaian barcode untuk mencatat penyerahan dan pengembalian barang
-- Laporan (Transaksi, Pengembalian, Inventaris, Keterlambatan, Denda — PDF/Excel, filter tanggal) — Rekapitulasi transaksi, pengembalian, inventaris, keterlambatan, dan denda
-- Pengaturan (Data Admin, Aturan & Denda) — Pengelolaan data admin, aturan peminjaman, dan ketentuan denda
+- Laporan (Transaksi, Pengembalian, Inventaris, Keterlambatan, Statistik Pemakaian — PDF/Excel, filter tanggal) — Rekapitulasi transaksi, pengembalian, inventaris, keterlambatan, dan statistik pemakaian
+- Pengaturan (Data Admin, Aturan Peminjaman) — Pengelolaan data admin dan aturan peminjaman
 - avatar: profil, ganti password, logout
 Peminjam (navbar publik): Katalog Barang, Ajukan Peminjaman, Cek Status; tautan Login Admin.
 Teknologi label tetap QR Code (dibaca scanner 2D & kamera); di menu disebut "barcode".
@@ -75,7 +75,7 @@ Responsif, menu aktif ditandai, pesan sukses/gagal jelas.
 
 ## Arsitektur
 - Controller per peran: app/Http/Controllers/Admin, app/Http/Controllers/Peminjam
-- Service: KetersediaanService, PeminjamanService (ajukan, setujui, tolak, serahkan, kembalikan — semua dalam DB::transaction), DendaService
+- Service: KetersediaanService, PeminjamanService (ajukan, setujui, tolak, serahkan, kembalikan — semua dalam DB::transaction), KeterlambatanService
 - Validasi di Form Request; otorisasi dengan middleware/Policy; eager loading untuk hindari N+1
 - Input scanner USB: auto-focus, proses otomatis saat Enter, cegah scan ganda, tampilkan pesan jika kode tidak dikenal
 
@@ -89,15 +89,15 @@ Responsif, menu aktif ditandai, pesan sukses/gagal jelas.
 ## Catatan desain (disetujui di Sprint 1)
 - Registrasi publik selalu role `peminjam`. Middleware `role` → 403 jika role tidak cocok; akun `nonaktif` otomatis logout.
 - Prefix route: `/admin` (name `admin.`), `/peminjam` (name `peminjam.`). `/dashboard` redirect sesuai role.
-- Kunci pengaturan: lama_pinjam_maks, unit_maks_per_ajuan, denda_per_hari, batas_ambil_hari.
+- Kunci pengaturan: lama_pinjam_maks, unit_maks_per_ajuan, lama_penangguhan_hari (pengganti denda_per_hari), batas_ambil_hari.
 - Tabel `notifications` ditambahkan di Sprint 3.
 
 ## Catatan desain (disetujui di Sprint 3)
 - Lama pinjam = tanggal rencana kembali − tanggal pinjam (tgl 1 → tgl 8 = 7 hari).
 - Ketersediaan (KetersediaanService): kapasitas = unit kondisi baik berstatus tersedia/dipinjam; terpakai = jumlah ajuan "disetujui" yang bertabrakan + unit BELUM kembali dari pinjaman "dipinjam" yang bertabrakan. Diubah di Sprint 5 (disetujui): pinjaman yang sudah terlambat memblokir SEMUA tanggal ke depan sampai unitnya kembali.
-- Batas ambil = min(tanggal pinjam + batas_ambil_hari, rencana kembali); lewat itu → kedaluwarsa (peminjaman:kedaluwarsa 00:05). Pengingat H-1: peminjaman:pengingat 07:00, tidak dobel. Keduanya punya opsi --tanggal untuk uji manual.
+- Batas ambil = min(tanggal pinjam + batas_ambil_hari, rencana kembali); lewat itu → kedaluwarsa (peminjaman:kedaluwarsa 00:05). Pengingat: peminjaman:pengingat 07:00 mengirim H-1, hari jatuh tempo, dan setiap hari selama terlambat; tidak dobel (H-1 & hari H sekali per peminjaman, terlambat sekali per tanggal). Keduanya punya opsi --tanggal untuk uji manual.
 - Serah-terima Sprint 3 lewat form pilih/ketik kode unit; Sprint 4 (scan QR) memanggil PeminjamanService::cekUnitUntukSerah() dan serahkan() yang sama.
-- Denda disimpan per unit saat pengembalian dicatat (tarif saat itu); perubahan tarif tidak mengubah denda lama.
+- (Dihapus) Denda: kolom peminjaman_unit.denda di-drop lewat migration 2026_10_19_000001; hari_terlambat tetap disimpan per unit.
 - Nama mitra untuk kop laporan/email: MITRA_NAMA di .env (config/peminjaman.php).
 
 ## Catatan desain (disetujui di Sprint 4)
@@ -140,3 +140,11 @@ Responsif, menu aktif ditandai, pesan sukses/gagal jelas.
 - Helper global `rupiah()` di app/helpers.php (autoload files composer).
 - Kode mati dihapus: Sanctum + routes/api.php, verifikasi email & konfirmasi password Breeze, failed_jobs/personal_access_tokens.
 - Format kode: Laravel Pint (`vendor\bin\pint`).
+
+## Catatan desain (denda dihapus, disetujui)
+- Fitur denda tidak dipakai. Migration baru 2026_10_19_000001_hapus_denda_tambah_penangguhan: drop peminjaman_unit.denda, hapus pengaturan denda_per_hari, tambah lama_penangguhan_hari (default 7). Migration lama tidak diubah.
+- KeterlambatanService (pengganti DendaService): hariTerlambat(), penangguhanBerakhir(User) = tanggal kembali terlambat terakhir (startOfDay) + N hari; pesanPenangguhan() dipakai AjuanRequest (error di kolom NIM) & PeminjamanService::ajukan().
+- Jumlah keterlambatan per peminjam: scope User::withJumlahTerlambat() (peminjaman yang punya unit hari_terlambat > 0 atau sedang terlambat) → Data Peminjam (index & detail) dan panel verifikasi ajuan.
+- Pengingat email: PengingatPengembalian (H-1), PengingatJatuhTempo (hari H), PengingatTerlambat (tiap hari, data.tanggal untuk cegah dobel). Email tidak menyebut denda; PengembalianDicatat menyebut tanggal boleh mengajukan lagi bila terlambat.
+- Laporan "statistik" (Statistik Pemakaian) menggantikan "denda": per jenis alat, jumlah transaksi & unit dipinjam berdasarkan tanggal serah-terima, urut terbanyak; alat tanpa pemakaian tetap tampil; ringkasan paling sering/jarang. /admin/laporan/denda → 404.
+- Dashboard: kartu "Denda bulan ini" diganti "Kembali terlambat (bulan ini)". Beranda: pita aturan menampilkan lama penangguhan.

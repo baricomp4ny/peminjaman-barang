@@ -71,7 +71,7 @@ class KatalogController extends Controller
             'aturan' => [
                 'lama' => Pengaturan::angka(Pengaturan::LAMA_PINJAM_MAKS),
                 'unit' => Pengaturan::angka(Pengaturan::UNIT_MAKS_PER_AJUAN),
-                'denda' => Pengaturan::angka(Pengaturan::DENDA_PER_HARI),
+                'penangguhan' => Pengaturan::angka(Pengaturan::LAMA_PENANGGUHAN_HARI),
             ],
             'adaFoto' => file_exists(public_path('images/hero-lab.jpg')),
             'adaFilter' => $request->hasAny(['q', 'kategori_id', 'lokasi_id', 'mulai', 'tersedia']),

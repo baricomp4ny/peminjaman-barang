@@ -67,9 +67,9 @@ class PeminjamanSeeder extends Seeder
             ]);
         $this->serahkan($p, ['PHM-001']);
 
-        // 6. Selesai: satu unit kembali terlambat 1 hari (denda), satu unit kembali rusak
-        $mulai = $hariIni->copy()->subDays(14);
-        $rencana = $hariIni->copy()->subDays(11);
+        // 6. Selesai: satu unit kembali terlambat 2 hari (Andi jadi masa penangguhan), satu unit kembali rusak
+        $mulai = $hariIni->copy()->subDays(6);
+        $rencana = $hariIni->copy()->subDays(4);
         $p = $this->buat($andi, 'Inisiasi eksplan krisan untuk penelitian dosen', $mulai, $rencana,
             StatusPeminjaman::Selesai, ['Mikroskop Stereo' => 1, 'Bead Sterilizer' => 1], [
                 'diverifikasi_oleh' => $admin->id,
@@ -77,8 +77,8 @@ class PeminjamanSeeder extends Seeder
                 'diserahkan_pada' => $mulai->copy()->setTime(8, 0),
             ]);
         $this->serahkan($p, ['MKR-004', 'STR-003']);
-        $this->kembalikan($p, 'MKR-004', $rencana->copy()->addDay()->setTime(10, 0), KondisiUnit::Baik, 1, 1000);
-        $this->kembalikan($p, 'STR-003', $rencana->copy()->setTime(15, 0), KondisiUnit::Rusak, 0, 0, 'Elemen pemanas tidak panas saat dicoba.');
+        $this->kembalikan($p, 'MKR-004', $rencana->copy()->addDays(2)->setTime(10, 0), KondisiUnit::Baik, 2);
+        $this->kembalikan($p, 'STR-003', $rencana->copy()->setTime(15, 0), KondisiUnit::Rusak, 0, 'Elemen pemanas tidak panas saat dicoba.');
 
         // 7. Dibatalkan peminjam sebelum diambil
         $this->buat($budi, 'Persiapan praktikum aklimatisasi', $hariIni->copy()->addDays(3), $hariIni->copy()->addDays(3),
@@ -131,7 +131,7 @@ class PeminjamanSeeder extends Seeder
     }
 
     /** Catat pengembalian satu unit dan perbarui status/kondisi unit. */
-    private function kembalikan(Peminjaman $peminjaman, string $kode, Carbon $waktu, KondisiUnit $kondisi, int $hariTerlambat, int $denda, ?string $catatan = null): void
+    private function kembalikan(Peminjaman $peminjaman, string $kode, Carbon $waktu, KondisiUnit $kondisi, int $hariTerlambat, ?string $catatan = null): void
     {
         $unit = UnitBarang::where('kode_unit', $kode)->firstOrFail();
 
@@ -139,7 +139,6 @@ class PeminjamanSeeder extends Seeder
             'dikembalikan_pada' => $waktu,
             'kondisi_kembali' => $kondisi,
             'hari_terlambat' => $hariTerlambat,
-            'denda' => $denda,
             'catatan' => $catatan,
         ]);
 

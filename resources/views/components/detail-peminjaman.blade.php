@@ -83,7 +83,6 @@
                         <th class="px-3 py-2">Dikembalikan</th>
                         <th class="px-3 py-2">Kondisi</th>
                         <th class="px-3 py-2 text-right">Terlambat</th>
-                        <th class="px-3 py-2 text-right">Denda</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y">
@@ -94,21 +93,12 @@
                             <td class="whitespace-nowrap px-3 py-2">{{ $u->dikembalikan_pada?->translatedFormat('d M Y H:i') ?? 'Belum' }}</td>
                             <td class="px-3 py-2">@if ($u->kondisi_kembali)<x-admin.badge :value="$u->kondisi_kembali" />@else — @endif</td>
                             <td class="px-3 py-2 text-right">{{ $u->hari_terlambat ? $u->hari_terlambat.' hari' : '—' }}</td>
-                            <td class="whitespace-nowrap px-3 py-2 text-right">{{ $u->denda ? rupiah($u->denda) : '—' }}</td>
                         </tr>
                         @if ($u->catatan)
-                            <tr><td colspan="6" class="px-3 pb-2 text-xs text-marian-500">Catatan: {{ $u->catatan }}</td></tr>
+                            <tr><td colspan="5" class="px-3 pb-2 text-xs text-marian-500">Catatan: {{ $u->catatan }}</td></tr>
                         @endif
                     @endforeach
                 </tbody>
-                @if ($p->peminjamanUnit->sum('denda') > 0)
-                    <tfoot class="bg-marian-50 font-semibold">
-                        <tr>
-                            <td colspan="5" class="px-3 py-2 text-right">Total denda</td>
-                            <td class="whitespace-nowrap px-3 py-2 text-right">{{ rupiah($p->peminjamanUnit->sum('denda')) }}</td>
-                        </tr>
-                    </tfoot>
-                @endif
             </table>
         </div>
     @endif

@@ -29,7 +29,7 @@
                         <th class="px-4 py-3">Barang</th>
                         <th class="px-4 py-3">Tanggal pinjam</th>
                         <th class="px-4 py-3">Status</th>
-                        <th class="px-4 py-3 text-right">Denda</th>
+                        <th class="px-4 py-3 text-right">Terlambat</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-marian-50">
@@ -44,8 +44,8 @@
                                 @if ($r->isTerlambat()) <span class="ms-1 rounded-full bg-red-600 px-2 py-0.5 text-xs font-semibold text-white">Terlambat</span> @endif
                             </td>
                             <td class="whitespace-nowrap px-4 py-3 text-right">
-                                @php $d = $r->peminjamanUnit->sum('denda'); @endphp
-                                {{ $d ? rupiah($d) : '—' }}
+                                @php $h = $r->peminjamanUnit->max('hari_terlambat'); @endphp
+                                {{ $h ? $h.' hari' : '—' }}
                             </td>
                         </tr>
                     @empty

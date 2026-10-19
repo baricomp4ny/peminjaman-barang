@@ -38,6 +38,13 @@
                             @if (! $punyaTerlambat) <span class="text-marian-600">✔</span> Tidak punya pinjaman terlambat
                             @else <span class="text-red-600">✖</span> Masih punya pinjaman terlambat @endif
                         </li>
+                        <li class="flex items-start gap-2">
+                            @if ($jumlahTerlambat === 0) <span class="text-marian-600">✔</span> Belum pernah terlambat
+                            @else <span class="text-red-600">!</span> Riwayat terlambat {{ $jumlahTerlambat }}× @endif
+                        </li>
+                        @if ($penangguhan)
+                            <li class="flex items-start gap-2"><span class="text-red-600">✖</span> {{ $penangguhan }}</li>
+                        @endif
                     </ul>
 
                     <h4 class="mt-4 text-sm font-semibold text-marian-700">Ketersediaan pada rentang tanggal</h4>
@@ -87,10 +94,9 @@
                     Siap diambil mulai <strong>{{ $p->tanggal_pinjam->translatedFormat('d M Y') }}</strong>
                     sampai <strong>{{ $batasAmbil->translatedFormat('d M Y') }}</strong>. Setelah itu otomatis kedaluwarsa.
                 </div>
-            @elseif ($perkiraanDenda > 0)
+            @elseif ($p->isTerlambat())
                 <div class="rounded-lg bg-red-50 p-5 text-sm text-red-800 shadow-lembut ring-1 ring-marian-100">
-                    Terlambat {{ $p->hariTerlambatBerjalan() }} hari. Perkiraan denda bila dikembalikan hari ini:
-                    <strong>{{ rupiah($perkiraanDenda) }}</strong>.
+                    Terlambat <strong>{{ $p->hariTerlambatBerjalan() }} hari</strong>. Peminjam akan ditangguhkan setelah alat dikembalikan.
                 </div>
             @endif
         </div>

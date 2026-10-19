@@ -6,7 +6,6 @@ use App\Exceptions\PeminjamanException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Peminjam\CekStatusRequest;
 use App\Models\Peminjaman;
-use App\Services\DendaService;
 use App\Services\IdentitasPeminjamService;
 use App\Services\PeminjamanService;
 use App\Services\QrService;
@@ -59,7 +58,7 @@ class StatusController extends Controller
         return redirect()->route('peminjam.status.show', $p->kode_peminjaman);
     }
 
-    public function show(Request $request, string $kode, PeminjamanService $service, DendaService $denda, QrService $qr, IdentitasPeminjamService $identitas): View|RedirectResponse
+    public function show(Request $request, string $kode, PeminjamanService $service, QrService $qr, IdentitasPeminjamService $identitas): View|RedirectResponse
     {
         $p = Peminjaman::where('kode_peminjaman', strtoupper($kode))->first();
 
@@ -77,7 +76,6 @@ class StatusController extends Controller
         return view('peminjam.status.show', [
             'peminjaman' => $p,
             'batasAmbil' => $service->batasAmbil($p),
-            'perkiraanDenda' => $p->isTerlambat() ? $denda->perkiraan($p) : 0,
             // QR berisi kode peminjaman; ditunjukkan ke petugas saat mengambil barang
             'qr' => $qr->svg($p->kode_peminjaman, 200),
             'emailSamar' => $identitas->samarkan($p->peminjam->email),

@@ -7,6 +7,7 @@ use App\Enums\StatusAkun;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\PeminjamRequest;
 use App\Models\User;
+use App\Services\KeterlambatanService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -18,6 +19,7 @@ class PeminjamController extends Controller
     {
         $peminjam = User::peminjam()
             ->withCount('peminjaman')
+            ->withJumlahTerlambat()
             ->when($request->filled('q'), fn ($q) => $q->where(function ($q) use ($request) {
                 $q->where('name', 'like', '%'.$request->q.'%')
                     ->orWhere('email', 'like', '%'.$request->q.'%')
@@ -52,7 +54,7 @@ class PeminjamController extends Controller
             ->with('success', "Peminjam \"{$peminjam->name}\" berhasil ditambahkan.");
     }
 
-    public function show(User $peminjam): View
+    public function show(User $peminjam, KeterlambatanService $keterlambatan): View
     {
         $riwayat = $peminjam->peminjaman()
             ->with('detail.barang')
@@ -60,7 +62,12 @@ class PeminjamController extends Controller
             ->limit(10)
             ->get();
 
-        return view('admin.peminjam.show', compact('peminjam', 'riwayat'));
+        return view('admin.peminjam.show', [
+            'peminjam' => $peminjam,
+            'riwayat' => $riwayat,
+            'jumlahTerlambat' => User::whereKey($peminjam->id)->withJumlahTerlambat()->value('jumlah_terlambat') ?? 0,
+            'penangguhanBerakhir' => $keterlambatan->penangguhanBerakhir($peminjam),
+        ]);
     }
 
     public function edit(User $peminjam): View

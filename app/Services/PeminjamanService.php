@@ -20,7 +20,9 @@ use App\Notifications\AjuanDitolak;
 use App\Notifications\AjuanKedaluwarsa;
 use App\Notifications\AjuanTerkirim;
 use App\Notifications\PengembalianDicatat;
+use App\Notifications\PengingatJatuhTempo;
 use App\Notifications\PengingatPengembalian;
+use App\Notifications\PengingatTerlambat;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -35,7 +37,7 @@ class PeminjamanService
 {
     public function __construct(
         private KetersediaanService $ketersediaan,
-        private DendaService $denda,
+        private KeterlambatanService $keterlambatan,
         private KodePeminjamanService $kode,
     ) {}
 
@@ -51,6 +53,10 @@ class PeminjamanService
         // Aturan dicek lagi di sini (selain di Form Request) agar service aman dipanggil dari mana pun
         if ($this->punyaPinjamanTerlambat($peminjam)) {
             throw new PeminjamanException('Anda masih memiliki pinjaman yang terlambat. Kembalikan dulu sebelum mengajukan lagi.');
+        }
+        // Penangguhan setelah mengembalikan terlambat
+        if ($pesan = $this->keterlambatan->pesanPenangguhan($peminjam)) {
+            throw new PeminjamanException($pesan);
         }
 
         $peminjaman = DB::transaction(function () use ($peminjam, $data) {
@@ -299,8 +305,6 @@ class PeminjamanService
                 ->get()
                 ->keyBy('unit_barang_id');
 
-            // Tarif diambil SEKARANG lalu disimpan; perubahan tarif nanti tidak mengubah denda ini
-            $tarif = $this->denda->tarif();
             $hasil = collect();
 
             foreach ($unit as $unitId => $data) {
@@ -312,12 +316,10 @@ class PeminjamanService
                     throw new PeminjamanException("Unit {$row->unitBarang->kode_unit} sudah dikembalikan sebelumnya.");
                 }
 
-                $denda = $this->denda->hitung($p->tanggal_rencana_kembali, $waktuKembali, $tarif);
                 $row->update([
                     'dikembalikan_pada' => $waktuKembali,
                     'kondisi_kembali' => $data['kondisi'],
-                    'hari_terlambat' => $denda['hari'],
-                    'denda' => $denda['denda'],
+                    'hari_terlambat' => $this->keterlambatan->hariTerlambat($p->tanggal_rencana_kembali, $waktuKembali),
                     'catatan' => $data['catatan'] ?? null,
                 ]);
 
@@ -379,26 +381,37 @@ class PeminjamanService
         return $jumlah;
     }
 
-    /** Kirim pengingat H-1 untuk pinjaman yang jatuh tempo besok. Aman dijalankan berulang. */
+    /**
+     * Kirim pengingat pengembalian. Aman dijalankan berulang (tidak dobel):
+     *  - H-1      : jatuh tempo besok (sekali per peminjaman)
+     *  - Hari H   : jatuh tempo hari ini (sekali per peminjaman)
+     *  - Terlambat: setiap hari setelah jatuh tempo (sekali per tanggal)
+     *
+     * @return int jumlah email yang dikirim
+     */
     public function kirimPengingat(?CarbonInterface $hariIni = null): int
     {
-        $besok = Carbon::parse($hariIni ?? today())->addDay()->toDateString();
+        $hariIni = Carbon::parse($hariIni ?? today())->startOfDay();
         $jumlah = 0;
 
         Peminjaman::with('peminjam')
             ->where('status', StatusPeminjaman::Dipinjam)
-            ->whereDate('tanggal_rencana_kembali', $besok)
+            ->whereDate('tanggal_rencana_kembali', '<=', $hariIni->copy()->addDay()->toDateString())
             ->whereHas('peminjamanUnit', fn ($q) => $q->whereNull('dikembalikan_pada'))
             ->get()
-            ->each(function (Peminjaman $p) use (&$jumlah) {
-                // Cegah pengingat dobel bila perintah dijalankan lebih dari sekali
-                $sudah = $p->peminjam->notifications()
-                    ->where('type', PengingatPengembalian::class)
-                    ->where('data->peminjaman_id', $p->id)
-                    ->exists();
+            ->each(function (Peminjaman $p) use ($hariIni, &$jumlah) {
+                $selisih = (int) $hariIni->diffInDays($p->tanggal_rencana_kembali->copy()->startOfDay(), false);
+                $riwayat = $p->peminjam->notifications()->where('data->peminjaman_id', $p->id);
 
-                if (! $sudah) {
-                    $p->peminjam->notify(new PengingatPengembalian($p));
+                $notifikasi = match (true) {
+                    $selisih === 1 => (clone $riwayat)->where('type', PengingatPengembalian::class)->exists() ? null : new PengingatPengembalian($p),
+                    $selisih === 0 => (clone $riwayat)->where('type', PengingatJatuhTempo::class)->exists() ? null : new PengingatJatuhTempo($p),
+                    default => (clone $riwayat)->where('type', PengingatTerlambat::class)->where('data->tanggal', $hariIni->toDateString())->exists()
+                        ? null : new PengingatTerlambat($p, $hariIni, -$selisih),
+                };
+
+                if ($notifikasi) {
+                    $p->peminjam->notify($notifikasi);
                     $jumlah++;
                 }
             });

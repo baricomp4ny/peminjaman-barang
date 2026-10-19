@@ -15,7 +15,8 @@ class Pengaturan extends Model
 
     public const UNIT_MAKS_PER_AJUAN = 'unit_maks_per_ajuan';
 
-    public const DENDA_PER_HARI = 'denda_per_hari';
+    /** Lama penangguhan pengajuan (hari) setelah mengembalikan terlambat; 0 = tanpa penangguhan. */
+    public const LAMA_PENANGGUHAN_HARI = 'lama_penangguhan_hari';
 
     public const BATAS_AMBIL_HARI = 'batas_ambil_hari';
 
@@ -23,7 +24,7 @@ class Pengaturan extends Model
     public const DEFAULT = [
         self::LAMA_PINJAM_MAKS => 7,
         self::UNIT_MAKS_PER_AJUAN => 3,
-        self::DENDA_PER_HARI => 1000,
+        self::LAMA_PENANGGUHAN_HARI => 7,
         self::BATAS_AMBIL_HARI => 1,
     ];
 
@@ -40,7 +41,7 @@ class Pengaturan extends Model
         static::deleted(fn () => Cache::forget(self::CACHE_KEY));
     }
 
-    /** Nilai pengaturan sebagai angka, contoh: Pengaturan::angka(Pengaturan::DENDA_PER_HARI). */
+    /** Nilai pengaturan sebagai angka, contoh: Pengaturan::angka(Pengaturan::LAMA_PINJAM_MAKS). */
     public static function angka(string $key): int
     {
         $semua = Cache::rememberForever(self::CACHE_KEY, fn () => static::query()->pluck('value', 'key')->all());

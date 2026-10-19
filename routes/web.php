@@ -76,10 +76,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     // Laporan
     Route::get('/laporan', [Admin\LaporanController::class, 'index'])->name('laporan.index');
     Route::get('/laporan/{jenis}', [Admin\LaporanController::class, 'show'])
-        ->whereIn('jenis', ['peminjaman', 'pengembalian', 'inventaris', 'keterlambatan', 'denda'])
+        ->whereIn('jenis', ['peminjaman', 'pengembalian', 'inventaris', 'keterlambatan', 'statistik'])
         ->name('laporan.show');
 
-    // Pengaturan: data admin + aturan peminjaman & denda
+    // Pengaturan: data admin + aturan peminjaman
     Route::redirect('/pengaturan', '/admin/pengaturan/aturan');
     Route::get('/pengaturan/aturan', [Admin\PengaturanController::class, 'edit'])->name('pengaturan.edit');
     Route::put('/pengaturan/aturan', [Admin\PengaturanController::class, 'update'])->name('pengaturan.update');

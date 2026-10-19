@@ -6,7 +6,7 @@
             <span class="rounded-full bg-white/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider ring-1 ring-white/25">Tanpa login</span>
             <h1 class="mt-4 font-extrabold [font-size:clamp(1.6rem,3.4vw,2.5rem)]">Cek Status Ajuan</h1>
             <p class="mt-2 max-w-md text-sm text-marian-100">
-                Lihat apakah ajuan sudah disetujui, batas waktu pengambilan, QR pengambilan, dan perkiraan denda bila terlambat.
+                Lihat apakah ajuan sudah disetujui, batas waktu pengambilan, QR pengambilan, dan keterlambatan pengembalian.
             </p>
             <div class="mx-auto mt-6 max-w-xs"><x-ilustrasi-lab /></div>
         </section>

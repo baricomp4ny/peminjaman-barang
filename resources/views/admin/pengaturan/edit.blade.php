@@ -5,7 +5,7 @@
     $kolom = [
         [Pengaturan::LAMA_PINJAM_MAKS, 'Lama pinjam maksimal', 'hari', 1, 90, 'Rentang tanggal pinjam sampai rencana kembali tidak boleh melebihi nilai ini.'],
         [Pengaturan::UNIT_MAKS_PER_AJUAN, 'Maksimal unit per ajuan', 'unit', 1, 20, 'Total jumlah semua barang dalam satu ajuan.'],
-        [Pengaturan::DENDA_PER_HARI, 'Denda keterlambatan', 'Rp / unit / hari', 0, 1000000, 'Isi 0 jika tidak memakai denda.'],
+        [Pengaturan::LAMA_PENANGGUHAN_HARI, 'Lama penangguhan setelah terlambat', 'hari', 0, 90, 'Peminjam yang mengembalikan terlambat tidak bisa mengajukan selama sekian hari sejak tanggal pengembalian. Isi 0 jika tanpa penangguhan.'],
         [Pengaturan::BATAS_AMBIL_HARI, 'Batas waktu pengambilan', 'hari', 1, 14, 'Ajuan disetujui yang tidak diambil setelah tanggal pinjam + nilai ini menjadi kedaluwarsa.'],
     ];
 @endphp

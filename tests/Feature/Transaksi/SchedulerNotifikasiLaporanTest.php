@@ -138,7 +138,7 @@ class SchedulerNotifikasiLaporanTest extends TestCase
         $p = $this->buatPeminjaman($this->peminjam, 'disetujui', '2026-10-02', '2026-10-05', [$b->id => 1]);
         $this->serahkanUnit($p, ['PRJ-001']);
 
-        foreach (['peminjaman', 'pengembalian', 'inventaris', 'keterlambatan', 'denda'] as $jenis) {
+        foreach (['peminjaman', 'pengembalian', 'inventaris', 'keterlambatan', 'statistik'] as $jenis) {
             $this->actingAs($admin)->get("/admin/laporan/{$jenis}?dari=2026-10-01&sampai=2026-10-10")->assertOk();
 
             $pdf = $this->get("/admin/laporan/{$jenis}?dari=2026-10-01&sampai=2026-10-10&format=pdf");

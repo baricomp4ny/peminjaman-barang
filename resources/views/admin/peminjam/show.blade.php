@@ -13,6 +13,16 @@
                 <div><dt class="text-marian-500">Unit / Prodi</dt><dd>{{ $peminjam->unit ?? '—' }}</dd></div>
                 <div><dt class="text-marian-500">Email</dt><dd>{{ $peminjam->email }}</dd></div>
                 <div><dt class="text-marian-500">No. HP</dt><dd>{{ $peminjam->no_hp ?? '—' }}</dd></div>
+                <div>
+                    <dt class="text-marian-500">Riwayat keterlambatan</dt>
+                    <dd class="{{ $jumlahTerlambat > 0 ? 'font-semibold text-red-600' : '' }}">{{ $jumlahTerlambat > 0 ? $jumlahTerlambat.'× terlambat' : 'Belum pernah terlambat' }}</dd>
+                </div>
+                @if ($penangguhanBerakhir)
+                    <div>
+                        <dt class="text-marian-500">Penangguhan</dt>
+                        <dd class="font-semibold text-red-600">Tidak bisa mengajukan sampai {{ $penangguhanBerakhir->copy()->subDay()->translatedFormat('d M Y') }}</dd>
+                    </div>
+                @endif
                 <div><dt class="text-marian-500">Terdaftar</dt><dd>{{ $peminjam->created_at->translatedFormat('d F Y') }}</dd></div>
             </dl>
         </div>

@@ -129,12 +129,12 @@ class PeminjamPengaturanTest extends TestCase
         $this->put('/admin/pengaturan/aturan', [
             'lama_pinjam_maks' => 14,
             'unit_maks_per_ajuan' => 5,
-            'denda_per_hari' => 0,
+            'lama_penangguhan_hari' => 0,
             'batas_ambil_hari' => 2,
         ])->assertSessionHasNoErrors()->assertSessionHas('success');
 
         $this->assertEquals(14, Pengaturan::angka(Pengaturan::LAMA_PINJAM_MAKS));
-        $this->assertEquals(0, Pengaturan::angka(Pengaturan::DENDA_PER_HARI));
+        $this->assertEquals(0, Pengaturan::angka(Pengaturan::LAMA_PENANGGUHAN_HARI));
     }
 
     public function test_validasi_pengaturan_input_salah(): void
@@ -142,9 +142,9 @@ class PeminjamPengaturanTest extends TestCase
         $this->actingAs($this->admin)->put('/admin/pengaturan/aturan', [
             'lama_pinjam_maks' => 0,
             'unit_maks_per_ajuan' => 'tiga',
-            'denda_per_hari' => -500,
+            'lama_penangguhan_hari' => -1,
             'batas_ambil_hari' => '',
-        ])->assertSessionHasErrors(['lama_pinjam_maks', 'unit_maks_per_ajuan', 'denda_per_hari', 'batas_ambil_hari']);
+        ])->assertSessionHasErrors(['lama_pinjam_maks', 'unit_maks_per_ajuan', 'lama_penangguhan_hari', 'batas_ambil_hari']);
 
         // Nilai lama (default) tidak berubah
         $this->assertEquals(7, Pengaturan::angka(Pengaturan::LAMA_PINJAM_MAKS));

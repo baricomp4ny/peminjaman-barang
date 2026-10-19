@@ -10,7 +10,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\SerahTerimaRequest;
 use App\Models\Peminjaman;
 use App\Models\UnitBarang;
-use App\Services\DendaService;
+use App\Models\User;
+use App\Services\KeterlambatanService;
 use App\Services\KetersediaanService;
 use App\Services\PeminjamanService;
 use Illuminate\Http\RedirectResponse;
@@ -44,7 +45,7 @@ class PeminjamanController extends Controller
     }
 
     /** Detail semua status; tombol aksi menyesuaikan status. */
-    public function show(Peminjaman $peminjaman, KetersediaanService $ketersediaan, PeminjamanService $service, DendaService $denda): View
+    public function show(Peminjaman $peminjaman, KetersediaanService $ketersediaan, PeminjamanService $service, KeterlambatanService $keterlambatan): View
     {
         $peminjaman->load(['peminjam', 'verifikator', 'detail.barang', 'peminjamanUnit.unitBarang.barang']);
 
@@ -58,7 +59,9 @@ class PeminjamanController extends Controller
             'stok' => $stok,
             'batasAmbil' => $service->batasAmbil($peminjaman),
             'punyaTerlambat' => $service->punyaPinjamanTerlambat($peminjaman->peminjam),
-            'perkiraanDenda' => $peminjaman->isTerlambat() ? $denda->perkiraan($peminjaman) : 0,
+            // Panel verifikasi: riwayat keterlambatan & penangguhan peminjam
+            'jumlahTerlambat' => User::whereKey($peminjaman->user_id)->withJumlahTerlambat()->value('jumlah_terlambat') ?? 0,
+            'penangguhan' => $keterlambatan->pesanPenangguhan($peminjaman->peminjam),
         ]);
     }
 

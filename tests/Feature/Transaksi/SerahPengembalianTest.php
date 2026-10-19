@@ -7,14 +7,14 @@ use App\Enums\StatusUnit;
 use App\Models\Barang;
 use App\Models\Peminjaman;
 use App\Models\PeminjamanUnit;
-use App\Models\Pengaturan;
 use App\Models\UnitBarang;
 use App\Models\User;
 use App\Notifications\PengembalianDicatat;
-use App\Services\DendaService;
+use App\Services\KeterlambatanService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Schema;
 use Tests\Concerns\DataPeminjaman;
 use Tests\TestCase;
 
@@ -122,7 +122,7 @@ class SerahPengembalianTest extends TestCase
         $this->assertSame('menunggu', $p->fresh()->status->value);
     }
 
-    // ---------- Pengembalian & denda ----------
+    // ---------- Pengembalian & keterlambatan ----------
 
     private function pinjamanBerjalan(string $mulai, string $rencana, array $kode): Peminjaman
     {
@@ -143,7 +143,7 @@ class SerahPengembalianTest extends TestCase
         return $this->actingAs($this->admin)->post("/admin/pengembalian/{$p->id}", ['tanggal_kembali' => $tanggal, 'unit' => $data]);
     }
 
-    public function test_pengembalian_tepat_waktu_tanpa_denda_dan_selesai(): void
+    public function test_pengembalian_tepat_waktu_dan_selesai(): void
     {
         $p = $this->pinjamanBerjalan('2026-10-08', '2026-10-10', ['PRJ-001']);
 
@@ -153,21 +153,20 @@ class SerahPengembalianTest extends TestCase
         $this->assertSame('selesai', $p->fresh()->status->value);
         $row = PeminjamanUnit::first();
         $this->assertSame(0, $row->hari_terlambat);
-        $this->assertSame(0, $row->denda);
         $this->assertSame(StatusUnit::Tersedia, UnitBarang::where('kode_unit', 'PRJ-001')->value('status'));
         Notification::assertSentTo($this->peminjam, PengembalianDicatat::class);
     }
 
-    public function test_denda_dihitung_per_unit_per_hari(): void
+    public function test_hari_terlambat_dicatat_per_unit_tanpa_denda(): void
     {
-        // Rencana 7 Okt, kembali 10 Okt = 3 hari × Rp1.000 × 2 unit
+        // Rencana 7 Okt, kembali 10 Okt = terlambat 3 hari
         $p = $this->pinjamanBerjalan('2026-10-05', '2026-10-07', ['PRJ-001', 'PRJ-002']);
 
         $this->kembalikan($p, ['PRJ-001' => 'baik', 'PRJ-002' => 'baik'])
-            ->assertSessionHas('success', fn ($m) => str_contains($m, 'Rp6.000'));
+            ->assertSessionHas('success', fn ($m) => str_contains($m, 'Terlambat 3 hari') && ! str_contains($m, 'Rp'));
 
         $this->assertSame([3, 3], PeminjamanUnit::pluck('hari_terlambat')->all());
-        $this->assertSame(6000, (int) PeminjamanUnit::sum('denda'));
+        $this->assertFalse(Schema::hasColumn('peminjaman_unit', 'denda'));
     }
 
     public function test_pengembalian_sebagian_lalu_sisanya(): void
@@ -195,28 +194,6 @@ class SerahPengembalianTest extends TestCase
         $this->assertSame(StatusUnit::Perbaikan, $unit['PRJ-002']);
         $this->assertSame(StatusUnit::Hilang, $unit['PRJ-003']);
         $this->assertSame(KondisiUnit::Rusak, UnitBarang::where('kode_unit', 'PRJ-002')->value('kondisi'));
-    }
-
-    public function test_perubahan_tarif_tidak_mengubah_denda_yang_sudah_tercatat(): void
-    {
-        $p = $this->pinjamanBerjalan('2026-10-05', '2026-10-08', ['PRJ-001']);
-        $this->kembalikan($p, ['PRJ-001' => 'baik']);
-        $this->assertSame(2000, PeminjamanUnit::first()->denda);
-
-        Pengaturan::atur(Pengaturan::DENDA_PER_HARI, 5000);
-
-        $this->assertSame(2000, PeminjamanUnit::first()->fresh()->denda);
-    }
-
-    public function test_tarif_nol_berarti_tanpa_denda(): void
-    {
-        Pengaturan::atur(Pengaturan::DENDA_PER_HARI, 0);
-        $p = $this->pinjamanBerjalan('2026-10-01', '2026-10-03', ['PRJ-001']);
-
-        $this->kembalikan($p, ['PRJ-001' => 'baik']);
-
-        $this->assertSame(7, PeminjamanUnit::first()->hari_terlambat);
-        $this->assertSame(0, PeminjamanUnit::first()->denda);
     }
 
     public function test_tanggal_kembali_mundur_dihitung_sesuai_tanggal_tersebut(): void
@@ -248,7 +225,7 @@ class SerahPengembalianTest extends TestCase
 
     public function test_hari_terlambat_mengabaikan_jam(): void
     {
-        $svc = app(DendaService::class);
+        $svc = app(KeterlambatanService::class);
 
         $this->assertSame(0, $svc->hariTerlambat(Carbon::parse('2026-10-10'), Carbon::parse('2026-10-10 23:59')));
         $this->assertSame(1, $svc->hariTerlambat(Carbon::parse('2026-10-10'), Carbon::parse('2026-10-11 00:01')));

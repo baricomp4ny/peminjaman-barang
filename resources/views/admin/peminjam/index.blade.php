@@ -25,6 +25,7 @@
                         <th class="px-4 py-3">Unit / Prodi</th>
                         <th class="px-4 py-3">Kontak</th>
                         <th class="px-4 py-3">Transaksi</th>
+                        <th class="px-4 py-3">Terlambat</th>
                         <th class="px-4 py-3">Status</th>
                         <th class="px-4 py-3 text-right">Aksi</th>
                     </tr>
@@ -40,6 +41,8 @@
                                 <div class="text-xs text-marian-500">{{ $p->no_hp ?? '' }}</div>
                             </td>
                             <td class="px-4 py-3">{{ $p->peminjaman_count }}</td>
+                            {{-- Jumlah peminjaman yang pernah/sedang terlambat --}}
+                            <td class="px-4 py-3 {{ $p->jumlah_terlambat > 0 ? 'font-semibold text-red-600' : 'text-marian-500' }}">{{ $p->jumlah_terlambat }}×</td>
                             <td class="px-4 py-3"><x-admin.badge :value="$p->status" /></td>
                             <td class="space-x-3 whitespace-nowrap px-4 py-3 text-right">
                                 <a href="{{ route('admin.peminjam.show', $p) }}" class="font-medium text-marian-600 hover:text-marian-900">Detail</a>
@@ -48,7 +51,7 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="7" class="px-4 py-8 text-center text-marian-500">Tidak ada peminjam yang cocok.</td></tr>
+                        <tr><td colspan="8" class="px-4 py-8 text-center text-marian-500">Tidak ada peminjam yang cocok.</td></tr>
                     @endforelse
                 </tbody>
             </table>

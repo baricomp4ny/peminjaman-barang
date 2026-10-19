@@ -21,7 +21,8 @@ class DashboardController extends Controller
                 'siapAmbil' => Peminjaman::where('status', StatusPeminjaman::Disetujui)->count(),
                 'dipinjam' => Peminjaman::where('status', StatusPeminjaman::Dipinjam)->count(),
                 'terlambat' => Peminjaman::terlambat()->count(),
-                'dendaBulanIni' => (int) PeminjamanUnit::whereBetween('dikembalikan_pada', [now()->startOfMonth(), now()])->sum('denda'),
+                // Unit yang dikembalikan terlambat bulan ini (pengganti kartu denda)
+                'kembaliTerlambatBulanIni' => PeminjamanUnit::whereBetween('dikembalikan_pada', [now()->startOfMonth(), now()])->where('hari_terlambat', '>', 0)->count(),
             ],
             'statusUnit' => $statusUnit,
             'totalUnit' => $statusUnit->sum(),

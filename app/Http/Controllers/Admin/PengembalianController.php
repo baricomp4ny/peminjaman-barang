@@ -7,7 +7,7 @@ use App\Exceptions\PeminjamanException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\PengembalianRequest;
 use App\Models\Peminjaman;
-use App\Services\DendaService;
+use App\Services\KeterlambatanService;
 use App\Services\PeminjamanService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -32,7 +32,7 @@ class PengembalianController extends Controller
         return view('admin.pengembalian.index', compact('peminjaman'));
     }
 
-    public function create(Peminjaman $peminjaman, DendaService $denda): View|RedirectResponse
+    public function create(Peminjaman $peminjaman, KeterlambatanService $keterlambatan): View|RedirectResponse
     {
         if ($peminjaman->status !== StatusPeminjaman::Dipinjam) {
             return redirect()->route('admin.peminjaman.show', $peminjaman)
@@ -44,7 +44,7 @@ class PengembalianController extends Controller
         return view('admin.pengembalian.create', [
             'peminjaman' => $peminjaman,
             'belumKembali' => $peminjaman->peminjamanUnit->whereNull('dikembalikan_pada'),
-            'dendaHariIni' => $denda->hitung($peminjaman->tanggal_rencana_kembali, today()),
+            'terlambatHariIni' => $keterlambatan->hariTerlambat($peminjaman->tanggal_rencana_kembali, today()),
         ]);
     }
 
@@ -64,9 +64,9 @@ class PengembalianController extends Controller
             return back()->withInput()->with('error', $e->getMessage());
         }
 
-        $denda = (int) $hasil->sum('denda');
+        $terlambat = (int) $hasil->max('hari_terlambat');
         $pesan = "{$hasil->count()} unit dikembalikan."
-            .($denda > 0 ? ' Denda: '.rupiah($denda).'.' : ' Tanpa denda.')
+            .($terlambat > 0 ? " Terlambat {$terlambat} hari." : ' Tepat waktu.')
             .($peminjaman->fresh()->status === StatusPeminjaman::Selesai ? ' Peminjaman selesai.' : ' Masih ada unit yang belum kembali.');
 
         $pesan = "{$peminjaman->kode_peminjaman}: {$pesan}";
