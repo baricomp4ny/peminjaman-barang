@@ -9,6 +9,7 @@ use App\Models\Kategori;
 use App\Models\Lokasi;
 use App\Models\UnitBarang;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Storage;
 
 /** Data contoh alat Laboratorium Kultur Jaringan (10 jenis, 30 unit). */
 class MasterBarangSeeder extends Seeder
@@ -44,6 +45,7 @@ class MasterBarangSeeder extends Seeder
                 'kode' => $prefix,
                 'nama' => $nama,
                 'deskripsi' => $deskripsi,
+                'foto' => $this->foto($prefix),
             ]);
 
             for ($n = 1; $n <= $jumlah; $n++) {
@@ -65,5 +67,22 @@ class MasterBarangSeeder extends Seeder
         UnitBarang::where('kode_unit', 'MPP-002')->update([
             'kondisi' => KondisiUnit::Hilang, 'status' => StatusUnit::Hilang,
         ]);
+    }
+
+    /**
+     * Foto contoh disimpan di database/seeders/foto/{KODE}.jpg (ikut git) lalu disalin ke disk public,
+     * supaya migrate:fresh --seed tidak menghilangkan foto alat.
+     */
+    private function foto(string $kode): ?string
+    {
+        $sumber = database_path("seeders/foto/{$kode}.jpg");
+        if (! is_file($sumber)) {
+            return null;
+        }
+
+        $tujuan = "barang/{$kode}.jpg";
+        Storage::disk('public')->put($tujuan, file_get_contents($sumber));
+
+        return $tujuan;
     }
 }
