@@ -65,7 +65,7 @@ class PeminjamanController extends Controller
             'punyaTerlambat' => $service->punyaPinjamanTerlambat($peminjaman->peminjam),
             // Panel verifikasi: riwayat keterlambatan & penangguhan peminjam
             'jumlahTerlambat' => User::whereKey($peminjaman->user_id)->withJumlahTerlambat()->value('jumlah_terlambat') ?? 0,
-            'penangguhan' => $keterlambatan->pesanPenangguhan($peminjaman->peminjam),
+            'penangguhan' => $keterlambatan->pesanPenangguhan($peminjaman->peminjam, untukAdmin: true),
         ]);
     }
 

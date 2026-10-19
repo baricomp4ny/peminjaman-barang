@@ -36,7 +36,10 @@ class PengaturanController extends Controller
         if ($request->hasFile('template_surat')) {
             $lama = Pengaturan::teks(Pengaturan::TEMPLATE_SURAT);
             $file = $request->file('template_surat');
-            $path = $file->storeAs('template', 'template-surat-peminjaman.'.$file->getClientOriginalExtension(), 'public');
+            // Ekstensi ditebak dari ISI file, bukan dari nama kiriman klien (cegah file .php tersimpan di folder publik)
+            $ekstensi = $file->extension();
+            abort_unless(in_array($ekstensi, ['pdf', 'doc', 'docx'], true), 422, 'Format template tidak didukung.');
+            $path = $file->storeAs('template', 'template-surat-peminjaman.'.$ekstensi, 'public');
             if ($lama && $lama !== $path) {
                 Storage::disk('public')->delete($lama);
             }

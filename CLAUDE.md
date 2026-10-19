@@ -54,7 +54,7 @@ Semua primary key ULID (tanpa auto increment), foreign key `foreignUlid`.
 - unit_barang: barang_id, lokasi_id, kode_unit (unik, isi QR, otomatis, contoh PRJ-001), kondisi (baik, rusak, hilang), status (tersedia, dipinjam, perbaikan, hilang), tanggal_perolehan
 - peminjaman: kode_peminjaman (unik), user_id, tujuan, surat_peminjaman (path file surat, disk privat), tanggal_pinjam, tanggal_rencana_kembali, status (menunggu, disetujui, ditolak, dipinjam, selesai, dibatalkan, kedaluwarsa), alasan_penolakan, diverifikasi_oleh, diverifikasi_pada, diserahkan_pada
 - peminjaman_detail: peminjaman_id, barang_id, jumlah
-- peminjaman_unit: peminjaman_id, unit_barang_id, dikembalikan_pada, kondisi_kembali, hari_terlambat, denda, catatan
+- peminjaman_unit: peminjaman_id, unit_barang_id, dikembalikan_pada, kondisi_kembali, hari_terlambat, catatan
 - pengaturan: key, value
 "Terlambat" dihitung otomatis, bukan kolom.
 Seeder: 2 admin (admin@, petugas@), 5 peminjam tanpa akun login (NIM format SV IPB, mis. J0301201001), 4 kategori alat lab (Alat Ukur & Analisis, Peralatan Inokulasi, Persiapan Media & Sterilisasi, Wadah & Gelas Kultur), 3 lokasi (Ruang Persiapan Media, Ruang Tanam Aseptik, Gudang Alat), 10 jenis alat kultur jaringan (MKR, PHM, HPS, TBA, BNS, PSN, MPP, CTP, ERL, STR), 30 unit, contoh transaksi di semua status.
@@ -160,4 +160,10 @@ Responsif, menu aktif ditandai, pesan sukses/gagal jelas.
 - Kotak info di atas form ajuan: "Surat peminjaman wajib disiapkan…" + tombol "Buka Template Surat" (route publik peminjam.ajuan.template) dan "Estimasi peninjauan maksimal N hari kerja".
 - Template bawaan: resources/template/template-surat-peminjaman-alat.docx (diadaptasi dari format surat permohonan SV IPB). Admin bisa menggantinya di Aturan Peminjaman (upload DOCX/DOC/PDF → disk public template/, path di pengaturan template_surat). Pengaturan baru: estimasi_peninjauan_hari (default 2).
 - Tes: Storage::fake('local') di tests/TestCase.php supaya unggahan tes tidak ditulis ke storage asli.
+
+## Catatan audit (20 Okt 2026)
+- Upload: ekstensi file disimpan selalu dari isi file ($file->extension()), jangan getClientOriginalExtension().
+- Ekspor Excel: LaporanExport extends DefaultValueBinder + WithCustomValueBinder; teks diawali = + - @ tab CR (bukan angka) dipaksa TYPE_STRING. Baris kosong di array ekspor ditulis [''] (bukan []).
+- tests/Feature/SemuaHalamanTest.php membuka semua route GET dengan data seeder — jalankan setelah menambah halaman.
+- Untuk produksi: APP_DEBUG=false, APP_URL domain asli + HTTPS, php artisan storage:link, cron `php artisan schedule:run` tiap menit (kedaluwarsa & pengingat), SMTP untuk email.
 

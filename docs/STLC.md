@@ -642,3 +642,17 @@ Hasil terakhir: **194 tes lulus**.
 
 Hasil terakhir: **200 tes lulus**.
 
+## 13. Audit keamanan & bug (20 Okt 2026)
+
+| ID | Temuan | Tingkat | Perbaikan | Tes |
+|---|---|---|---|---|
+| AU-01 | Ekstensi file template surat diambil dari nama kiriman klien; berpotensi menyimpan file berbahaya di folder publik | Tinggi (sudah tertahan validasi `mimes` Laravel yang menolak nama .php) | Ekstensi ditentukan dari isi file (`extension()`) + whitelist pdf/doc/docx | AuditKeamananTest |
+| AU-02 | Ekspor Excel: teks dari form publik yang diawali `=`, `+`, `-`, `@` bisa dijalankan sebagai formula (formula injection) | Tinggi | `LaporanExport` memakai value binder: teks seperti itu disimpan sebagai TEKS | AuditKeamananTest |
+| AU-03 | Header tabel Excel bergeser ke baris 4 (baris kosong dibuang library), gaya tebal jatuh ke baris data pertama | Sedang | Baris pemisah diisi `''` | AuditKeamananTest |
+| AU-04 | Panel verifikasi admin menampilkan pesan penangguhan dengan kata "Anda" | Rendah | `pesanPenangguhan(..., untukAdmin: true)` → "Peminjam …" | KeterlambatanPenangguhanTest |
+| AU-05 | Uji asap seluruh halaman GET (publik & admin) + detail semua status + PDF/Excel semua laporan | — | Tidak ada error 5xx | SemuaHalamanTest |
+
+Diperiksa dan aman: semua route /admin di bawah auth + role:admin; form publik di-throttle + honeypot; tidak ada SQL mentah dengan input pengguna; keluaran Blade ter-escape (yang tidak di-escape hanya SVG QR buatan sistem); persetujuan mengunci baris barang (anti persetujuan ganda); serah-terima & pengembalian memvalidasi unit milik transaksi; surat peminjaman di disk privat; tautan batal bertanda tangan + kedaluwarsa.
+
+Hasil terakhir: **203 tes lulus**.
+

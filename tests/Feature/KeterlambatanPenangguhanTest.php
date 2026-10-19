@@ -114,7 +114,7 @@ class KeterlambatanPenangguhanTest extends TestCase
         $this->get("/admin/peminjam/{$this->peminjam->id}")->assertSee('2× terlambat')->assertSee('Penangguhan');
 
         $ajuan = $this->buatPeminjaman($this->peminjam, 'menunggu', '2026-10-20', '2026-10-21', [$this->barangId() => 1]);
-        $this->get("/admin/peminjaman/{$ajuan->id}")->assertSee('Riwayat terlambat 2×')->assertSee('pengajuan baru dapat dilakukan mulai 16 Okt 2026');
+        $this->get("/admin/peminjaman/{$ajuan->id}")->assertSee('Riwayat terlambat 2×')->assertSee('Peminjam mengembalikan alat terlambat')->assertSee('pengajuan baru dapat dilakukan mulai 16 Okt 2026');
     }
 
     public function test_pengingat_h1_hari_h_dan_setiap_hari_terlambat_tanpa_dobel(): void

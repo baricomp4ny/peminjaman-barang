@@ -59,14 +59,14 @@ class KeterlambatanService
     }
 
     /** Pesan alasan penangguhan untuk form ajuan & panel verifikasi. */
-    public function pesanPenangguhan(User $peminjam): ?string
+    public function pesanPenangguhan(User $peminjam, bool $untukAdmin = false): ?string
     {
         $berakhir = $this->penangguhanBerakhir($peminjam);
         if (! $berakhir) {
             return null;
         }
 
-        return 'Anda mengembalikan alat terlambat pada '.$this->kembaliTerlambatTerakhir($peminjam)->translatedFormat('d M Y')
+        return ($untukAdmin ? 'Peminjam' : 'Anda').' mengembalikan alat terlambat pada '.$this->kembaliTerlambatTerakhir($peminjam)->translatedFormat('d M Y')
             .'. Sesuai aturan penangguhan '.$this->lamaPenangguhan().' hari, pengajuan baru dapat dilakukan mulai '
             .$berakhir->translatedFormat('d M Y').'.';
     }
