@@ -15,14 +15,18 @@ class PengaturanController extends Controller
     {
         $nilai = collect(Pengaturan::DEFAULT)->mapWithKeys(fn ($default, $key) => [$key => Pengaturan::angka($key)]);
 
-        return view('admin.pengaturan.edit', compact('nilai'));
+        return view('admin.pengaturan.edit', [
+            'nilai' => $nilai,
+            'syarat' => Pengaturan::teks(Pengaturan::SYARAT_PEMINJAMAN),
+        ]);
     }
 
     public function update(PengaturanRequest $request): RedirectResponse
     {
         DB::transaction(function () use ($request) {
             foreach ($request->validated() as $key => $value) {
-                Pengaturan::atur($key, (int) $value);
+                // Pengaturan teks (syarat) disimpan apa adanya, sisanya angka
+                Pengaturan::atur($key, array_key_exists($key, Pengaturan::TEKS_DEFAULT) ? trim($value) : (int) $value);
             }
         });
 

@@ -42,6 +42,7 @@ class AjuanVerifikasiTest extends TestCase
             'no_hp' => '081234567890',
             'unit' => 'Teknik Informatika',
             'tujuan' => 'Presentasi seminar',
+            'setuju_syarat' => '1',
             'tanggal_pinjam' => '2026-10-11',
             'tanggal_rencana_kembali' => '2026-10-13',
             'items' => [['barang_id' => $this->barang->id, 'jumlah' => 1]],

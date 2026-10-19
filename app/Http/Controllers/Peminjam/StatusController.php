@@ -39,6 +39,31 @@ class StatusController extends Controller
         return URL::signedRoute('peminjam.status.show', ['kode' => $p->kode_peminjaman]);
     }
 
+    /**
+     * Tautan pembatalan untuk email (bertanda tangan, berlaku sampai tanggal rencana kembali).
+     * Pembatalan tetap hanya untuk status menunggu / disetujui yang belum diambil.
+     */
+    public static function tautanBatal(Peminjaman $p): string
+    {
+        return URL::temporarySignedRoute(
+            'peminjam.status.batal.konfirmasi',
+            $p->tanggal_rencana_kembali->copy()->endOfDay(),
+            ['kode' => $p->kode_peminjaman],
+        );
+    }
+
+    /** Halaman konfirmasi dari tautan email (middleware signed). */
+    public function konfirmasiBatal(Request $request, string $kode): View
+    {
+        $p = Peminjaman::with(['peminjam', 'detail.barang'])->where('kode_peminjaman', strtoupper($kode))->firstOrFail();
+
+        return view('peminjam.status.batal', [
+            'peminjaman' => $p,
+            // Form POST memakai URL yang sama (beserta tanda tangannya)
+            'aksi' => $request->fullUrl(),
+        ]);
+    }
+
     public function form(): View
     {
         return view('peminjam.status.form');
@@ -86,8 +111,13 @@ class StatusController extends Controller
     {
         $p = Peminjaman::with('peminjam')->where('kode_peminjaman', strtoupper($kode))->firstOrFail();
 
-        if (! in_array($p->id, $request->session()->get(self::KUNCI_SESI, []), true)) {
+        // Akses dari sesi (kode + NIM) atau dari tautan bertanda tangan di email
+        $dariTautan = $request->hasValidSignature();
+        if (! $dariTautan && ! in_array($p->id, $request->session()->get(self::KUNCI_SESI, []), true)) {
             abort(403, 'Anda tidak memiliki akses ke ajuan ini.');
+        }
+        if ($dariTautan) {
+            self::beriAkses($request, $p);
         }
 
         try {

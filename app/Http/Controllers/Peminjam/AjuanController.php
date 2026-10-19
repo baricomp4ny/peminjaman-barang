@@ -23,6 +23,7 @@ class AjuanController extends Controller
             'barangDipilih' => $request->query('barang_id'),
             'maksHari' => Pengaturan::angka(Pengaturan::LAMA_PINJAM_MAKS),
             'maksUnit' => Pengaturan::angka(Pengaturan::UNIT_MAKS_PER_AJUAN),
+            'syarat' => Pengaturan::teks(Pengaturan::SYARAT_PEMINJAMAN),
         ]);
     }
 

@@ -11,12 +11,14 @@ use App\Http\Requests\Admin\SerahTerimaRequest;
 use App\Models\Peminjaman;
 use App\Models\UnitBarang;
 use App\Models\User;
+use App\Services\BuktiPeminjamanService;
 use App\Services\KeterlambatanService;
 use App\Services\KetersediaanService;
 use App\Services\PeminjamanService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\Response;
 
 /** Peminjaman yang sudah disetujui (siap diambil) dan yang sedang dipinjam. */
 class PeminjamanController extends Controller
@@ -62,6 +64,15 @@ class PeminjamanController extends Controller
             // Panel verifikasi: riwayat keterlambatan & penangguhan peminjam
             'jumlahTerlambat' => User::whereKey($peminjaman->user_id)->withJumlahTerlambat()->value('jumlah_terlambat') ?? 0,
             'penangguhan' => $keterlambatan->pesanPenangguhan($peminjaman->peminjam),
+        ]);
+    }
+
+    /** Unduh PDF bukti peminjaman (kop lab, QR, identitas, barang, tanda tangan). */
+    public function bukti(Peminjaman $peminjaman, BuktiPeminjamanService $bukti): Response
+    {
+        return response($bukti->pdf($peminjaman), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="'.$bukti->namaFile($peminjaman).'"',
         ]);
     }
 

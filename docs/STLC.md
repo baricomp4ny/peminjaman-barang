@@ -614,3 +614,19 @@ Jalankan: `php artisan test` (database terpisah `peminjaman_barang_test`). Hasil
 | PN-08 | Denda hilang | Dashboard, detail transaksi, pengembalian, email, /admin/laporan/denda | Tidak ada nominal/kolom denda; laporan denda 404 | P | SerahPengembalianTest, KeterlambatanPenangguhanTest | | |
 
 Catatan: kasus uji bertema denda di bagian sebelumnya (mis. PerhitunganDendaTest, LP denda) tidak berlaku lagi. Hasil terakhir: **186 tes lulus**.
+
+## 11. Bukti PDF, pembatalan lewat email, persetujuan syarat (19 Okt 2026)
+
+| ID | Skenario | Langkah / Data uji | Hasil yang diharapkan | J | Tes otomatis | Hasil aktual | Status |
+|---|---|---|---|---|---|---|---|
+| BK-01 ★ | Cetak bukti dari detail transaksi | Admin → detail → Cetak Bukti (PDF) | PDF: kop lab, kode + QR, identitas, barang/unit, tanggal, tanda tangan | P | BuktiPembatalanSyaratTest | | |
+| BK-02 | Bukti tanpa login | Buka /admin/peminjaman/{id}/bukti | Diarahkan ke login | N | BuktiPembatalanSyaratTest | | |
+| BK-03 ★ | Lampiran email persetujuan | Admin setujui ajuan | Email berisi lampiran bukti-PJM-….pdf + tautan batal | P | BuktiPembatalanSyaratTest | | |
+| BT-12 ★ | Batal dari tautan email | Klik tautan batal → Ya, batalkan | Status dibatalkan (menunggu & disetujui) | P | BuktiPembatalanSyaratTest | | |
+| BT-13 | Tautan diubah / tanpa tanda tangan / kedaluwarsa | Ubah signature, buka setelah rencana kembali | 403, status tidak berubah | N | BuktiPembatalanSyaratTest | | |
+| BT-14 | Ajuan sudah diambil | Buka tautan batal pinjaman dipinjam | Pesan "tidak bisa dibatalkan lagi", POST ditolak | N | BuktiPembatalanSyaratTest | | |
+| SY-01 ★ | Checkbox syarat wajib | Kirim ajuan tanpa centang | Ditolak "Centang persetujuan syarat…" | N | BuktiPembatalanSyaratTest | | |
+| SY-02 | Admin ubah teks syarat | Aturan Peminjaman → syarat (>255 karakter) | Tersimpan & tampil di form ajuan; kosong ditolak | P/N | BuktiPembatalanSyaratTest, PeminjamPengaturanTest | | |
+
+Hasil terakhir: **194 tes lulus**.
+

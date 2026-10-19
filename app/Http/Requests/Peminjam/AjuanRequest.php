@@ -45,6 +45,8 @@ class AjuanRequest extends FormRequest
 
             // Ajuan
             'tujuan' => ['required', 'string', 'min:5', 'max:500'],
+            // Wajib menyetujui syarat peminjaman (teks syarat diatur admin)
+            'setuju_syarat' => ['accepted'],
             'tanggal_pinjam' => ['required', 'date', 'after_or_equal:today'],
             'tanggal_rencana_kembali' => ['required', 'date', 'after_or_equal:tanggal_pinjam'],
             'items' => ['required', 'array', 'min:1'],
@@ -149,6 +151,7 @@ class AjuanRequest extends FormRequest
             'nomor_identitas.regex' => 'Nomor identitas hanya boleh berisi huruf, angka, titik, atau tanda hubung.',
             'no_hp.regex' => 'No. HP hanya boleh berisi angka, spasi, + atau - (8–20 karakter).',
             'website.prohibited' => 'Ajuan tidak dapat diproses.',
+            'setuju_syarat.accepted' => 'Centang persetujuan syarat peminjaman untuk mengirim ajuan.',
             'tanggal_pinjam.after_or_equal' => 'Tanggal pinjam tidak boleh sebelum hari ini.',
             'tanggal_rencana_kembali.after_or_equal' => 'Tanggal rencana kembali tidak boleh sebelum tanggal pinjam.',
             'items.required' => 'Pilih minimal satu barang.',

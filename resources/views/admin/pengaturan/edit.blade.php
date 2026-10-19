@@ -33,6 +33,14 @@
                 </div>
             @endforeach
 
+            <div>
+                <x-input-label :for="Pengaturan::SYARAT_PEMINJAMAN" value="Syarat peminjaman *" />
+                <textarea id="{{ Pengaturan::SYARAT_PEMINJAMAN }}" name="{{ Pengaturan::SYARAT_PEMINJAMAN }}" rows="7" maxlength="3000" required
+                          class="mt-1 block w-full rounded-xl border-marian-200 text-sm text-marian-950 shadow-sm focus:border-marian-500 focus:ring-marian-500">{{ old(Pengaturan::SYARAT_PEMINJAMAN, $syarat) }}</textarea>
+                <p class="mt-1 text-xs text-marian-500">Ditampilkan di form ajuan; peminjam wajib mencentang persetujuan syarat ini. Satu poin per baris.</p>
+                <x-input-error :messages="$errors->get(Pengaturan::SYARAT_PEMINJAMAN)" class="mt-2" />
+            </div>
+
             <div class="rounded-md bg-marian-50 p-3 text-xs text-marian-600">
                 Aturan tetap: peminjam yang masih punya pinjaman terlambat tidak bisa mengajukan peminjaman baru.
             </div>

@@ -28,6 +28,22 @@ class Pengaturan extends Model
         self::BATAS_AMBIL_HARI => 1,
     ];
 
+    /** Syarat peminjaman (teks) yang wajib disetujui di form ajuan. */
+    public const SYARAT_PEMINJAMAN = 'syarat_peminjaman';
+
+    /** Nilai bawaan pengaturan berupa teks. */
+    public const TEKS_DEFAULT = [
+        self::SYARAT_PEMINJAMAN => '1. Alat hanya digunakan untuk kegiatan akademik di lingkungan Laboratorium Kultur Jaringan.
+'
+            .'2. Peminjam wajib menunjukkan kartu identitas asli saat pengambilan.
+'
+            .'3. Alat dikembalikan paling lambat pada tanggal rencana kembali dalam kondisi bersih dan lengkap.
+'
+            .'4. Kerusakan atau kehilangan alat menjadi tanggung jawab peminjam dan wajib dilaporkan kepada petugas.
+'
+            .'5. Keterlambatan pengembalian menyebabkan penangguhan pengajuan peminjaman berikutnya.',
+    ];
+
     private const CACHE_KEY = 'pengaturan.semua';
 
     protected $table = 'pengaturan';
@@ -49,7 +65,15 @@ class Pengaturan extends Model
         return (int) ($semua[$key] ?? self::DEFAULT[$key] ?? 0);
     }
 
-    public static function atur(string $key, int $value): void
+    /** Nilai pengaturan sebagai teks, contoh: Pengaturan::teks(Pengaturan::SYARAT_PEMINJAMAN). */
+    public static function teks(string $key): string
+    {
+        $semua = Cache::rememberForever(self::CACHE_KEY, fn () => static::query()->pluck('value', 'key')->all());
+
+        return (string) ($semua[$key] ?? self::TEKS_DEFAULT[$key] ?? '');
+    }
+
+    public static function atur(string $key, int|string $value): void
     {
         static::updateOrCreate(['key' => $key], ['value' => $value]);
     }

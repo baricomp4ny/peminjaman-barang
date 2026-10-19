@@ -131,10 +131,15 @@ class PeminjamPengaturanTest extends TestCase
             'unit_maks_per_ajuan' => 5,
             'lama_penangguhan_hari' => 0,
             'batas_ambil_hari' => 2,
+            'syarat_peminjaman' => '1. Gunakan alat dengan hati-hati.
+2. Kembalikan tepat waktu.',
         ])->assertSessionHasNoErrors()->assertSessionHas('success');
 
         $this->assertEquals(14, Pengaturan::angka(Pengaturan::LAMA_PINJAM_MAKS));
         $this->assertEquals(0, Pengaturan::angka(Pengaturan::LAMA_PENANGGUHAN_HARI));
+        $this->assertSame('1. Gunakan alat dengan hati-hati.
+2. Kembalikan tepat waktu.', Pengaturan::teks(Pengaturan::SYARAT_PEMINJAMAN));
+        $this->get('/ajuan')->assertSee('Gunakan alat dengan hati-hati.');
     }
 
     public function test_validasi_pengaturan_input_salah(): void

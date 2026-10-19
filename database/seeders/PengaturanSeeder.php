@@ -9,7 +9,7 @@ class PengaturanSeeder extends Seeder
 {
     public function run(): void
     {
-        foreach (Pengaturan::DEFAULT as $key => $value) {
+        foreach (Pengaturan::DEFAULT + Pengaturan::TEKS_DEFAULT as $key => $value) {
             Pengaturan::atur($key, $value);
         }
     }

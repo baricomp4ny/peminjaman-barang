@@ -5,6 +5,7 @@
     <x-slot name="header"><span class="text-sm text-marian-500">Transaksi</span></x-slot>
 
     <x-admin.judul :judul="'Peminjaman '.$p->kode_peminjaman" :kembali="url()->previous() !== url()->current() ? url()->previous() : route('admin.riwayat.index')">
+        <x-link-button variant="secondary" :href="route('admin.peminjaman.bukti', $p)" target="_blank">Cetak Bukti (PDF)</x-link-button>
         @if ($p->status === StatusPeminjaman::Disetujui)
             <x-link-button variant="secondary" :href="route('admin.peminjaman.serah', $p)">Serah-terima (form)</x-link-button>
             <x-link-button :href="route('admin.scan.index', ['mode' => 'serah', 'peminjaman' => $p->id])">Serah-terima (Scan QR)</x-link-button>

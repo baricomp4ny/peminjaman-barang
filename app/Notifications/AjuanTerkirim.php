@@ -2,6 +2,8 @@
 
 namespace App\Notifications;
 
+use Illuminate\Notifications\Messages\MailMessage;
+
 /** Ke peminjam: bukti ajuan terkirim berisi kode peminjaman & tautan cek status. */
 class AjuanTerkirim extends NotifikasiPeminjaman
 {
@@ -21,5 +23,10 @@ class AjuanTerkirim extends NotifikasiPeminjaman
         return $this->peminjaman->detail()->with('barang')->get()
             ->map(fn ($d) => "• {$d->barang->nama} × {$d->jumlah}")
             ->all();
+    }
+
+    public function toMail(object $notifiable): MailMessage
+    {
+        return $this->denganTautanBatal(parent::toMail($notifiable));
     }
 }

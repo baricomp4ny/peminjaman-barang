@@ -55,7 +55,7 @@ class KeterlambatanPenangguhanTest extends TestCase
     {
         return $this->post('/ajuan', [
             'name' => $this->peminjam->name, 'nomor_identitas' => 'J0301209999', 'email' => 'rina@contoh.test', 'no_hp' => '081234567890',
-            'tujuan' => 'Praktikum kultur jaringan', 'tanggal_pinjam' => '2026-10-20', 'tanggal_rencana_kembali' => '2026-10-21',
+            'tujuan' => 'Praktikum kultur jaringan', 'setuju_syarat' => '1', 'tanggal_pinjam' => '2026-10-20', 'tanggal_rencana_kembali' => '2026-10-21',
             'items' => [['barang_id' => $this->barangId(), 'jumlah' => 1]],
         ]);
     }

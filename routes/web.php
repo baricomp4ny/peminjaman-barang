@@ -26,6 +26,8 @@ Route::name('peminjam.')->group(function () {
     Route::get('/status', [Peminjam\StatusController::class, 'form'])->name('status.form');
     Route::post('/status', [Peminjam\StatusController::class, 'cek'])->middleware('throttle:10,1')->name('status.cek');
     Route::get('/status/{kode}', [Peminjam\StatusController::class, 'show'])->name('status.show');
+    // Pembatalan dari tautan bertanda tangan di email: GET = halaman konfirmasi, POST = eksekusi
+    Route::get('/status/{kode}/batal', [Peminjam\StatusController::class, 'konfirmasiBatal'])->middleware('signed')->name('status.batal.konfirmasi');
     Route::post('/status/{kode}/batal', [Peminjam\StatusController::class, 'batal'])->middleware('throttle:10,1')->name('status.batal');
 });
 
@@ -64,6 +66,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     Route::get('/peminjaman', [Admin\PeminjamanController::class, 'index'])->name('peminjaman.index');
     Route::get('/peminjaman/{peminjaman}', [Admin\PeminjamanController::class, 'show'])->name('peminjaman.show');
+    Route::get('/peminjaman/{peminjaman}/bukti', [Admin\PeminjamanController::class, 'bukti'])->name('peminjaman.bukti');
     Route::get('/peminjaman/{peminjaman}/serah', [Admin\PeminjamanController::class, 'serahForm'])->name('peminjaman.serah');
     Route::post('/peminjaman/{peminjaman}/serah', [Admin\PeminjamanController::class, 'serahkan'])->name('peminjaman.serahkan');
 

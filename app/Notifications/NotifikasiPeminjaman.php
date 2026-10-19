@@ -31,6 +31,13 @@ abstract class NotifikasiPeminjaman extends Notification
             : StatusController::tautan($this->peminjaman);
     }
 
+    /** Tambahkan tautan pembatalan bertanda tangan (dipakai email ajuan terkirim & disetujui). */
+    protected function denganTautanBatal(MailMessage $mail): MailMessage
+    {
+        return $mail->line('Berubah rencana? Batalkan ajuan ini sebelum alat diambil melalui tautan berikut: '
+            .StatusController::tautanBatal($this->peminjaman));
+    }
+
     /** Baris tambahan di email (opsional). */
     protected function rincian(): array
     {

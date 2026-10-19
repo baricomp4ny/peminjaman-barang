@@ -146,6 +146,20 @@
                 <x-input-error :messages="$errors->get('tujuan')" class="mt-2" />
             </fieldset>
 
+            {{-- 5. Syarat peminjaman (teks diatur admin) + persetujuan wajib --}}
+            <fieldset class="border-t border-marian-100 pt-6">
+                <legend class="flex items-center gap-3 text-base font-extrabold text-marian-900">
+                    <span class="flex h-8 w-8 items-center justify-center rounded-full bg-marian-800 text-sm text-white">5</span> Syarat Peminjaman
+                </legend>
+                <div class="mt-4 max-h-48 overflow-y-auto whitespace-pre-line rounded-2xl bg-marian-50 p-4 text-sm leading-relaxed text-marian-800 ring-1 ring-marian-100">{{ $syarat }}</div>
+                <label class="mt-3 flex items-start gap-3 text-sm font-semibold text-marian-900">
+                    <input type="checkbox" name="setuju_syarat" value="1" required @checked(old('setuju_syarat'))
+                           class="mt-0.5 h-5 w-5 shrink-0 rounded border-marian-300 text-marian-800 focus:ring-marian-500">
+                    Saya menyetujui syarat peminjaman dan bertanggung jawab atas barang yang dipinjam
+                </label>
+                <x-input-error :messages="$errors->get('setuju_syarat')" class="mt-2" />
+            </fieldset>
+
             <div class="flex flex-wrap items-center gap-3 border-t border-marian-100 pt-6">
                 <x-primary-button class="px-7 py-3">
                     Kirim Ajuan
