@@ -25,6 +25,8 @@ class UnitBarangUpdateRequest extends FormRequest
             // Status "dipinjam" hanya diatur oleh transaksi, tidak bisa dipilih manual
             'status' => ['required', Rule::in(array_column(StatusUnit::pilihanManual(), 'value'))],
             'tanggal_perolehan' => ['nullable', 'date', 'before_or_equal:today'],
+            // Alasan perubahan kondisi/status (masuk riwayat kondisi unit)
+            'keterangan' => ['nullable', 'string', 'max:500'],
         ];
     }
 

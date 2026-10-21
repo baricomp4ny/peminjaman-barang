@@ -194,6 +194,14 @@ class SerahPengembalianTest extends TestCase
         $this->assertSame(StatusUnit::Perbaikan, $unit['PRJ-002']);
         $this->assertSame(StatusUnit::Hilang, $unit['PRJ-003']);
         $this->assertSame(KondisiUnit::Rusak, UnitBarang::where('kode_unit', 'PRJ-002')->value('kondisi'));
+
+        // Setiap perubahan tercatat di riwayat kondisi unit, terhubung ke transaksinya
+        $this->assertDatabaseHas('riwayat_kondisi_unit', [
+            'unit_barang_id' => UnitBarang::where('kode_unit', 'PRJ-002')->value('id'),
+            'jenis' => 'pengembalian', 'kondisi_lama' => 'baik', 'kondisi_baru' => 'rusak',
+            'status_lama' => 'dipinjam', 'status_baru' => 'perbaikan',
+            'peminjaman_id' => $p->id, 'dicatat_oleh' => $this->admin->id,
+        ]);
     }
 
     public function test_tanggal_kembali_mundur_dihitung_sesuai_tanggal_tersebut(): void

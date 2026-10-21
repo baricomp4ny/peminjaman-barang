@@ -56,6 +56,7 @@ Semua primary key ULID (tanpa auto increment), foreign key `foreignUlid`.
 - peminjaman_detail: peminjaman_id, barang_id, jumlah
 - peminjaman_unit: peminjaman_id, unit_barang_id, dikembalikan_pada, kondisi_kembali, hari_terlambat, catatan
 - pengaturan: key, value
+- riwayat_kondisi_unit: unit_barang_id, jenis (pengembalian, ubah_manual, perbaikan_selesai), kondisi_lama, kondisi_baru, status_lama, status_baru, keterangan, dicatat_oleh, peminjaman_id (ditambahkan 21 Okt 2026)
 "Terlambat" dihitung otomatis, bukan kolom.
 Seeder: 2 admin (admin@, petugas@), 5 peminjam tanpa akun login (NIM format SV IPB, mis. J0301201001), 4 kategori alat lab (Alat Ukur & Analisis, Peralatan Inokulasi, Persiapan Media & Sterilisasi, Wadah & Gelas Kultur), 3 lokasi (Ruang Persiapan Media, Ruang Tanam Aseptik, Gudang Alat), 10 jenis alat kultur jaringan (MKR, PHM, HPS, TBA, BNS, PSN, MPP, CTP, ERL, STR), 30 unit, contoh transaksi di semua status.
 
@@ -178,3 +179,10 @@ Responsif, menu aktif ditandai, pesan sukses/gagal jelas.
 - Halaman/menu Transaksi → Pengembalian (route admin.pengembalian.index) dihapus; pencatatan tetap lewat tombol "Catat Pengembalian" di Peminjaman Aktif / detail transaksi / Scan (route pengembalian.create & store tetap). /admin/pengembalian → 404.
 - Laporan Transaksi (jenis "peminjaman") dihapus dari Laporan; diganti tombol Unduh PDF/Excel di Riwayat Transaksi (RiwayatController ?format=pdf|excel) yang mengikuti filter status, kata kunci, dan rentang tanggal. LaporanService::riwayat() + LaporanService::unduh() dipakai bersama halaman Laporan. /admin/laporan diarahkan ke laporan pengembalian.
 
+## Catatan desain (rapikan + fitur 21 Okt 2026, disetujui)
+- Data Peminjam tanpa "Tambah Peminjam": resource peminjam ->except(['create','store']); peminjam dibuat otomatis lewat ajuan. Admin hanya lihat/ubah/nonaktifkan.
+- Teks syarat di form ajuan dilipat (line-clamp-3 + tombol "Baca selengkapnya", Alpine); checkbox setuju tetap wajib.
+- Seeder: database/seeders/surat/contoh-surat.pdf (ikut git) disalin ke disk local surat/{kode}.pdf untuk setiap transaksi contoh.
+- Riwayat kondisi unit: migration 2026_10_21_000001, model RiwayatKondisiUnit, KondisiUnitService::catat() (riwayat hanya ditulis bila kondisi/status berubah) dipakai PeminjamanService::kembalikan (jenis pengembalian), UnitBarangController::update (ubah_manual, field keterangan opsional), dan perbaikanSelesai() (route admin.unit.perbaikan-selesai, keterangan wajib 5–500, hanya unit berstatus perbaikan → baik + tersedia, lockForUpdate). Riwayat tampil di halaman ubah unit; tautan "Perbaikan selesai" di daftar unit & detail jenis barang.
+- Tombol WhatsApp: App\Support\WhatsApp (nomor 08…/+62…/8… → 628…, validasi 628 + 7–12 digit; tautan wa.me + pesan pengingat terlambat), komponen x-admin.tombol-wa di Peminjaman Aktif (baris terlambat) dan detail transaksi terlambat. Tidak tampil bila no. HP kosong/tidak valid. Tanpa API — admin mengirim dari WhatsApp sendiri.
+- Grafik Dashboard: Chart.js 4.4.4 (npm, dynamic import di resources/js/grafik-dashboard.js → chunk terpisah, hanya dimuat di Dashboard; Alpine.data('grafikDashboard')). Dua grafik batang satu warna marian-800: peminjaman per bulan (6 bulan, berdasarkan diserahkan_pada) dan 5 alat terpopuler (jumlah unit diserahkan, 6 bulan). Tabel alternatif di <details> "Lihat tabel".

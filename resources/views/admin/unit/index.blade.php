@@ -65,6 +65,9 @@
                             <td class="px-4 py-3">{{ $u->tanggal_perolehan?->translatedFormat('d M Y') ?? '—' }}</td>
                             <td class="space-x-3 whitespace-nowrap px-4 py-3 text-right">
                                 <a href="{{ route('admin.unit.qr', [$u, 'unduh' => 1]) }}" class="font-medium text-marian-600 hover:text-marian-900">QR</a>
+                                @if ($u->status === \App\Enums\StatusUnit::Perbaikan)
+                                    <a href="{{ route('admin.unit.edit', $u) }}#perbaikan" class="font-semibold text-marian-900 hover:underline">Perbaikan selesai</a>
+                                @endif
                                 <a href="{{ route('admin.unit.edit', $u) }}" class="font-medium text-indigo-600 hover:text-indigo-800">Ubah</a>
                                 <x-admin.hapus :action="route('admin.unit.destroy', $u)" :nama="'unit '.$u->kode_unit" />
                             </td>

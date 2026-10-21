@@ -19,6 +19,41 @@
         @endforeach
     </div>
 
+    {{-- Grafik pemakaian (Chart.js, resources/js/grafik-dashboard.js); tabel di <details> sebagai alternatif teks --}}
+    <div class="mt-6 grid gap-6 lg:grid-cols-2" x-data="grafikDashboard(@js($grafik))">
+        <section class="rounded-3xl bg-white p-4 shadow-lembut ring-1 ring-marian-100">
+            <h2 class="font-semibold text-marian-900">Peminjaman per bulan</h2>
+            <p class="text-xs text-marian-500">Jumlah transaksi diserahkan · {{ $grafik['periode'] }}</p>
+            <div class="relative mt-3 h-56"><canvas x-ref="bulan" role="img" aria-label="Grafik batang jumlah peminjaman per bulan"></canvas></div>
+            <details class="mt-2 text-xs text-marian-600">
+                <summary class="cursor-pointer">Lihat tabel</summary>
+                <table class="mt-2 w-full">
+                    @foreach ($grafik['bulan']['label'] as $i => $label)
+                        <tr class="border-t border-marian-50"><td class="py-1">{{ $label }}</td><td class="py-1 text-right font-semibold text-marian-900">{{ $grafik['bulan']['nilai'][$i] }}</td></tr>
+                    @endforeach
+                </table>
+            </details>
+        </section>
+
+        <section class="rounded-3xl bg-white p-4 shadow-lembut ring-1 ring-marian-100">
+            <h2 class="font-semibold text-marian-900">5 alat terpopuler</h2>
+            <p class="text-xs text-marian-500">Jumlah unit dipinjam · {{ $grafik['periode'] }}</p>
+            @if ($grafik['populer']['nilai'])
+                <div class="relative mt-3 h-56"><canvas x-ref="populer" role="img" aria-label="Grafik batang lima alat paling sering dipinjam"></canvas></div>
+                <details class="mt-2 text-xs text-marian-600">
+                    <summary class="cursor-pointer">Lihat tabel</summary>
+                    <table class="mt-2 w-full">
+                        @foreach ($grafik['populer']['label'] as $i => $label)
+                            <tr class="border-t border-marian-50"><td class="py-1">{{ $label }}</td><td class="py-1 text-right font-semibold text-marian-900">{{ $grafik['populer']['nilai'][$i] }} unit</td></tr>
+                        @endforeach
+                    </table>
+                </details>
+            @else
+                <p class="mt-6 text-center text-sm text-marian-500">Belum ada alat yang dipinjam pada periode ini.</p>
+            @endif
+        </section>
+    </div>
+
     <div class="mt-6 grid gap-6 lg:grid-cols-3">
         <div class="space-y-6 lg:col-span-2">
             <div class="rounded-3xl bg-white shadow-lembut ring-1 ring-marian-100">

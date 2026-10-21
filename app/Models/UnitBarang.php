@@ -47,6 +47,12 @@ class UnitBarang extends Model
         return $this->hasMany(PeminjamanUnit::class);
     }
 
+    /** Riwayat perubahan kondisi/status, terbaru di atas. */
+    public function riwayatKondisi(): HasMany
+    {
+        return $this->hasMany(RiwayatKondisiUnit::class)->latest();
+    }
+
     /** Catatan pengembalian terakhir (sumber keterangan kondisi di laporan inventaris). */
     public function pengembalianTerakhir(): HasOne
     {

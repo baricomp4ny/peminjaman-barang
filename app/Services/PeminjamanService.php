@@ -39,6 +39,7 @@ class PeminjamanService
         private KetersediaanService $ketersediaan,
         private KeterlambatanService $keterlambatan,
         private KodePeminjamanService $kode,
+        private KondisiUnitService $kondisiUnit,
     ) {}
 
     // ------------------------------------------------------------------
@@ -292,7 +293,7 @@ class PeminjamanService
             throw new PeminjamanException('Pilih minimal satu unit yang dikembalikan.');
         }
 
-        $dikembalikan = DB::transaction(function () use ($peminjaman, $unit, $waktuKembali) {
+        $dikembalikan = DB::transaction(function () use ($peminjaman, $admin, $unit, $waktuKembali) {
             $p = $this->kunci($peminjaman, [StatusPeminjaman::Dipinjam]);
 
             if ($waktuKembali->copy()->startOfDay()->lt(Carbon::parse($p->diserahkan_pada)->startOfDay())) {
@@ -324,11 +325,9 @@ class PeminjamanService
                     'catatan' => $data['catatan'] ?? null,
                 ]);
 
-                // Kondisi saat kembali menentukan status unit berikutnya
-                $row->unitBarang->update([
-                    'kondisi' => $data['kondisi'],
-                    'status' => KondisiUnit::from($data['kondisi'])->statusUnit(),
-                ]);
+                // Kondisi saat kembali menentukan status unit berikutnya (+ dicatat di riwayat kondisi)
+                $kondisi = KondisiUnit::from($data['kondisi']);
+                $this->kondisiUnit->catat($row->unitBarang, $kondisi, $kondisi->statusUnit(), 'pengembalian', $admin, $data['catatan'] ?? null, $p);
 
                 $hasil->push($row);
             }

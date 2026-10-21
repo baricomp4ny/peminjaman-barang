@@ -10,6 +10,7 @@ use App\Models\Peminjaman;
 use App\Models\PeminjamanUnit;
 use App\Models\UnitBarang;
 use App\Models\User;
+use App\Services\KondisiUnitService;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Storage;
@@ -149,14 +150,9 @@ class PeminjamanSeeder extends Seeder
             'catatan' => $catatan,
         ]);
 
-        // Unit rusak masuk perbaikan, unit hilang ditandai hilang, selain itu tersedia lagi
-        $unit->update([
-            'kondisi' => $kondisi,
-            'status' => match ($kondisi) {
-                KondisiUnit::Rusak => StatusUnit::Perbaikan,
-                KondisiUnit::Hilang => StatusUnit::Hilang,
-                default => StatusUnit::Tersedia,
-            },
-        ]);
+        // Unit rusak masuk perbaikan, unit hilang ditandai hilang, selain itu tersedia lagi (+ riwayat kondisi)
+        $riwayat = app(KondisiUnitService::class)->catat($unit, $kondisi, $kondisi->statusUnit(), 'pengembalian',
+            User::admin()->first(), $catatan, $peminjaman);
+        $riwayat?->forceFill(['created_at' => $waktu, 'updated_at' => $waktu])->save();
     }
 }

@@ -2,15 +2,21 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\KondisiUnit;
+use App\Enums\StatusUnit;
+use App\Exceptions\PeminjamanException;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\PerbaikanSelesaiRequest;
 use App\Http\Requests\Admin\UnitBarangStoreRequest;
 use App\Http\Requests\Admin\UnitBarangUpdateRequest;
 use App\Models\Barang;
 use App\Models\Lokasi;
 use App\Models\UnitBarang;
 use App\Services\KodeUnitService;
+use App\Services\KondisiUnitService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class UnitBarangController extends Controller
@@ -66,7 +72,7 @@ class UnitBarangController extends Controller
 
     public function edit(UnitBarang $unit): View
     {
-        $unit->load('barang');
+        $unit->load(['barang', 'riwayatKondisi.pencatat', 'riwayatKondisi.peminjaman']);
 
         return view('admin.unit.edit', [
             'unit' => $unit,
@@ -74,12 +80,32 @@ class UnitBarangController extends Controller
         ]);
     }
 
-    public function update(UnitBarangUpdateRequest $request, UnitBarang $unit): RedirectResponse
+    public function update(UnitBarangUpdateRequest $request, UnitBarang $unit, KondisiUnitService $kondisiUnit): RedirectResponse
     {
-        $unit->update($request->validated());
+        $data = $request->validated();
+
+        DB::transaction(function () use ($unit, $data, $request, $kondisiUnit) {
+            $unit->update(collect($data)->only(['lokasi_id', 'tanggal_perolehan'])->all());
+            // Perubahan kondisi/status lewat service supaya tercatat di riwayat
+            $kondisiUnit->catat($unit, KondisiUnit::from($data['kondisi']), StatusUnit::from($data['status']),
+                'ubah_manual', $request->user(), $data['keterangan'] ?? null);
+        });
 
         return redirect()->route('admin.barang.show', $unit->barang_id)
             ->with('success', "Unit {$unit->kode_unit} berhasil diperbarui.");
+    }
+
+    /** Tombol "Perbaikan selesai": unit rusak kembali baik & tersedia. */
+    public function perbaikanSelesai(PerbaikanSelesaiRequest $request, UnitBarang $unit, KondisiUnitService $kondisiUnit): RedirectResponse
+    {
+        try {
+            $kondisiUnit->perbaikanSelesai($unit, $request->user(), $request->validated('keterangan'));
+        } catch (PeminjamanException $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
+        return redirect()->route('admin.unit.edit', $unit)
+            ->with('success', "Perbaikan unit {$unit->kode_unit} selesai. Unit kembali tersedia untuk dipinjam.");
     }
 
     public function destroy(UnitBarang $unit): RedirectResponse

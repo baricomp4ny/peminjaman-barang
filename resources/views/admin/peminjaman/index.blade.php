@@ -50,6 +50,9 @@
                                 @if ($p->status === StatusPeminjaman::Disetujui)
                                     <x-link-button :href="route('admin.peminjaman.serah', $p)" class="!px-3">Serah-terima</x-link-button>
                                 @else
+                                    @if ($p->isTerlambat())
+                                        <x-admin.tombol-wa :peminjaman="$p" class="me-1" />
+                                    @endif
                                     <x-link-button :href="route('admin.pengembalian.create', $p)" class="!px-3">Catat Pengembalian</x-link-button>
                                 @endif
                             </td>

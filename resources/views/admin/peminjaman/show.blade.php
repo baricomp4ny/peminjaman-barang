@@ -105,6 +105,7 @@
             @elseif ($p->isTerlambat())
                 <div class="rounded-lg bg-red-50 p-5 text-sm text-red-800 shadow-lembut ring-1 ring-marian-100">
                     Terlambat <strong>{{ $p->hariTerlambatBerjalan() }} hari</strong>. Peminjam akan ditangguhkan setelah alat dikembalikan.
+                    <div class="mt-3"><x-admin.tombol-wa :peminjaman="$p" /></div>
                 </div>
             @endif
         </div>
