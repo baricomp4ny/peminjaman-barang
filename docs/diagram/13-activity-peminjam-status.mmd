@@ -1,0 +1,52 @@
+%% Activity Diagram — Peminjam: cek status dan membatalkan ajuan
+flowchart TB
+    subgraph SY["Sistem"]
+        direction TB
+        y1[Tampilkan form Cek Status:<br/>kolom kode PJM & NIM]
+        y2{Kode & NIM cocok?}
+        y3[Tampilkan 'Kode peminjaman<br/>atau NIM tidak cocok']
+        y4[Verifikasi tanda tangan tautan]
+        y5[Tampilkan halaman status:<br/>QR kode PJM, status berwarna,<br/>alat & jumlah, tanggal pinjam/kembali,<br/>batas ambil, alasan bila ditolak]
+        y6{Status menunggu atau<br/>disetujui & belum diambil?}
+        y7[Tampilkan tombol 'Batalkan Ajuan']
+        y8[Tampilkan konfirmasi pembatalan]
+        y9[Ubah status menjadi Dibatalkan,<br/>stok kembali tersedia,<br/>tampilkan pesan sukses]
+        y10[Tampilkan status saja<br/>tanpa tombol batal]
+    end
+
+    subgraph U["Peminjam"]
+        direction TB
+        s((●))
+        c{Masuk dari?}
+        u1[Klik menu 'Cek Status']
+        u2[Isi kode PJM + NIM,<br/>klik 'Cek Status']
+        u3[Klik tautan 'Lihat status' /<br/>'Batalkan' di email]
+        u4{Ingin<br/>membatalkan?}
+        u5[Klik 'Batalkan Ajuan']
+        u6[Klik 'Ya, batalkan']
+        e((◉))
+    end
+
+    s --> c
+    c -- "Menu web" --> u1 --> y1 --> u2 --> y2
+    y2 -- "Tidak" --> y3 --> u2
+    y2 -- "Ya" --> y5
+    c -- "Email" --> u3 --> y4 --> y5
+    y5 --> y6
+    y6 -- "Ya" --> y7 --> u4
+    y6 -- "Tidak" --> y10 --> e
+    u4 -- "Tidak" --> e
+    u4 -- "Ya" --> u5 --> y8 --> u6 --> y9 --> e
+
+    classDef mulai fill:#131E4A,stroke:#131E4A,color:#ffffff
+    classDef aksi fill:#EEF1FB,stroke:#263C92,color:#131E4A
+    classDef sistem fill:#ffffff,stroke:#263C92,color:#131E4A
+    classDef pilih fill:#FED80B,stroke:#1E2F72,color:#131E4A
+    classDef gagal fill:#FEF2F2,stroke:#DC2626,color:#7F1D1D
+    class s,e mulai
+    class u1,u2,u3,u5,u6 aksi
+    class y1,y4,y5,y7,y8,y9,y10 sistem
+    class c,y2,y6,u4 pilih
+    class y3 gagal
+    style U fill:#F7F8FD,stroke:#93A5E2,color:#263C92
+    style SY fill:#ffffff,stroke:#93A5E2,color:#263C92

@@ -1,0 +1,43 @@
+%% Sequence Diagram 1 — Mengajukan peminjaman (peminjam tanpa login)
+sequenceDiagram
+    autonumber
+    actor P as Peminjam
+    participant UI as Halaman Ajuan<br/>(ajuan/create)
+    participant C as AjuanController
+    participant RQ as AjuanRequest
+    participant ID as IdentitasPeminjam<br/>Service
+    participant S as Peminjaman<br/>Service
+    participant K as Ketersediaan<br/>Service
+    participant DB as Database
+    participant M as Email
+
+    P->>UI: Buka form, isi identitas, alat, tanggal,<br/>setujui syarat, unggah surat
+    UI->>C: POST /ajuan
+    C->>RQ: Validasi input (lama pinjam, maks unit,<br/>file surat, penangguhan)
+    alt Input tidak valid / sedang ditangguhkan
+        RQ-->>UI: Kembali dengan pesan error
+    else Valid
+        C->>DB: Simpan file surat (disk privat)
+        C->>ID: cariAtauBuat(identitas)
+        ID->>DB: Cari user berdasarkan NIM
+        ID-->>C: User peminjam
+        C->>S: ajukan(peminjam, data)
+        activate S
+        S->>DB: BEGIN TRANSACTION
+        S->>K: kekurangan(permintaan, tgl pinjam, tgl kembali)
+        K->>DB: Hitung ajuan disetujui/dipinjam<br/>yang tanggalnya bertabrakan
+        K-->>S: Sisa unit per jenis
+        alt Stok tidak cukup
+            S-->>C: PeminjamanException
+            C->>DB: Hapus file surat
+            C-->>UI: Pesan "stok tidak cukup"
+        else Stok cukup
+            S->>DB: Simpan peminjaman (status menunggu,<br/>kode PJM-…) + detail
+            S->>DB: COMMIT
+            S->>M: Kirim email AjuanTerkirim (kode + QR)
+            S-->>C: Peminjaman
+            deactivate S
+            C-->>UI: Redirect ke halaman status
+            UI-->>P: Tampilkan kode PJM + QR Code
+        end
+    end

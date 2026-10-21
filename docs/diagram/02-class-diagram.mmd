@@ -1,0 +1,158 @@
+%% Class Diagram — model (entitas) & service utama
+classDiagram
+    direction LR
+
+    class User {
+        +ulid id
+        +string name
+        +string email
+        +string? password
+        +Peran role
+        +string? nomor_identitas
+        +string? unit
+        +string? no_hp
+        +StatusAkun status
+        +peminjaman() HasMany
+        +verifikasi() HasMany
+        +isAdmin() bool
+        +isAktif() bool
+        +alasanTidakBisaDihapus(oleh) string?
+    }
+    class Kategori {
+        +ulid id
+        +string nama
+        +barang() HasMany
+    }
+    class Lokasi {
+        +ulid id
+        +string nama
+        +string? keterangan
+        +unitBarang() HasMany
+    }
+    class Barang {
+        +ulid id
+        +ulid kategori_id
+        +string kode
+        +string nama
+        +string? deskripsi
+        +string? foto
+        +kategori() BelongsTo
+        +unit() HasMany
+    }
+    class UnitBarang {
+        +ulid id
+        +ulid barang_id
+        +ulid lokasi_id
+        +string kode_unit
+        +KondisiUnit kondisi
+        +StatusUnit status
+        +date? tanggal_perolehan
+        +riwayatKondisi() HasMany
+        +bisaDipinjam() bool
+        +keteranganKondisi() string
+    }
+    class Peminjaman {
+        +ulid id
+        +string kode_peminjaman
+        +ulid user_id
+        +string tujuan
+        +string? surat_peminjaman
+        +date tanggal_pinjam
+        +date tanggal_rencana_kembali
+        +StatusPeminjaman status
+        +string? alasan_penolakan
+        +ulid? diverifikasi_oleh
+        +datetime? diverifikasi_pada
+        +datetime? diserahkan_pada
+        +isTerlambat() bool
+        +hariTerlambatBerjalan() int
+        +bisaDibatalkan() bool
+    }
+    class PeminjamanDetail {
+        +ulid id
+        +ulid peminjaman_id
+        +ulid barang_id
+        +int jumlah
+    }
+    class PeminjamanUnit {
+        +ulid id
+        +ulid peminjaman_id
+        +ulid unit_barang_id
+        +datetime? dikembalikan_pada
+        +KondisiUnit? kondisi_kembali
+        +int hari_terlambat
+        +string? catatan
+    }
+    class RiwayatKondisiUnit {
+        +ulid id
+        +ulid unit_barang_id
+        +string jenis
+        +KondisiUnit kondisi_lama
+        +KondisiUnit kondisi_baru
+        +StatusUnit status_lama
+        +StatusUnit status_baru
+        +string? keterangan
+        +ulid? dicatat_oleh
+        +ulid? peminjaman_id
+    }
+    class Pengaturan {
+        +ulid id
+        +string key
+        +text value
+        +angka(key) int
+        +teks(key) string
+    }
+
+    class PeminjamanService {
+        +ajukan(peminjam, data) Peminjaman
+        +setujui(peminjaman, admin) void
+        +tolak(peminjaman, admin, alasan) void
+        +batalkan(peminjaman) void
+        +cekUnitUntukSerah(peminjaman, unit) void
+        +serahkan(peminjaman, admin, unit) void
+        +kembalikan(peminjaman, admin, unit, waktu) Collection
+        +prosesKedaluwarsa(tanggal) int
+        +kirimPengingat(tanggal) int
+    }
+    class KetersediaanService {
+        +hitung(barangIds, mulai, selesai) array
+        +sisa(barangId, mulai, selesai) int
+        +kekurangan(permintaan, mulai, selesai) array
+    }
+    class KeterlambatanService {
+        +hariTerlambat(rencana, kembali) int
+        +penangguhanBerakhir(user) Carbon?
+        +pesanPenangguhan(user) string?
+    }
+    class ScanService {
+        +normalisasi(kode) string
+        +cari(kode, mode) array
+        +cekUnit(peminjaman, kode, mode) array
+    }
+    class KondisiUnitService {
+        +catat(unit, kondisi, status, jenis) RiwayatKondisiUnit?
+        +perbaikanSelesai(unit, admin, keterangan) RiwayatKondisiUnit
+    }
+    class IdentitasPeminjamService {
+        +cariAtauBuat(identitas) User
+    }
+
+    Kategori "1" --> "0..*" Barang : mengelompokkan
+    Barang "1" --> "0..*" UnitBarang : memiliki
+    Lokasi "1" --> "0..*" UnitBarang : menyimpan
+    User "1" --> "0..*" Peminjaman : mengajukan
+    User "1" --> "0..*" Peminjaman : memverifikasi
+    Peminjaman "1" *-- "1..*" PeminjamanDetail : berisi
+    Barang "1" --> "0..*" PeminjamanDetail : diajukan
+    Peminjaman "1" *-- "0..*" PeminjamanUnit : diserahkan
+    UnitBarang "1" --> "0..*" PeminjamanUnit : dipinjam
+    UnitBarang "1" *-- "0..*" RiwayatKondisiUnit : riwayat
+    User "1" --> "0..*" RiwayatKondisiUnit : mencatat
+    Peminjaman "0..1" --> "0..*" RiwayatKondisiUnit : sumber
+
+    PeminjamanService ..> KetersediaanService : memakai
+    PeminjamanService ..> KeterlambatanService : memakai
+    PeminjamanService ..> KondisiUnitService : memakai
+    PeminjamanService ..> Peminjaman : mengelola
+    ScanService ..> PeminjamanService : memakai
+    IdentitasPeminjamService ..> User : mencari/membuat

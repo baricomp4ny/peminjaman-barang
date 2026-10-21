@@ -1,0 +1,39 @@
+%% Sequence Diagram 2 — Admin memverifikasi ajuan (setujui / tolak)
+sequenceDiagram
+    autonumber
+    actor A as Admin
+    participant UI as Halaman Ajuan<br/>Peminjaman
+    participant C as AjuanController
+    participant S as Peminjaman<br/>Service
+    participant K as Ketersediaan<br/>Service
+    participant DB as Database
+    participant M as Email
+
+    A->>UI: Buka detail ajuan (identitas, surat,<br/>riwayat keterlambatan, ketersediaan)
+    alt Setujui
+        A->>C: POST setujui
+        C->>S: setujui(peminjaman, admin)
+        activate S
+        S->>DB: BEGIN TRANSACTION + kunci baris ajuan
+        S->>K: kekurangan(permintaan, rentang tanggal)
+        Note over S,K: Cek ULANG ketersediaan di dalam transaksi
+        K->>DB: Hitung pemakaian yang bertabrakan
+        K-->>S: Hasil
+        alt Stok tidak cukup
+            S-->>C: PeminjamanException
+            C-->>UI: Pesan gagal
+        else Cukup
+            S->>DB: status = disetujui,<br/>diverifikasi_oleh, diverifikasi_pada
+            S->>DB: COMMIT
+            S->>M: Email AjuanDisetujui + lampiran<br/>Bukti Peminjaman (PDF)
+            S-->>C: OK
+            C-->>UI: Pesan sukses
+        end
+        deactivate S
+    else Tolak
+        A->>C: POST tolak (alasan wajib)
+        C->>S: tolak(peminjaman, admin, alasan)
+        S->>DB: status = ditolak, alasan_penolakan
+        S->>M: Email AjuanDitolak (berisi alasan)
+        C-->>UI: Pesan sukses
+    end

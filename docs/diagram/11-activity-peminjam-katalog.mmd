@@ -1,0 +1,41 @@
+%% Activity Diagram — Peminjam: melihat katalog, detail alat, dan jadwal
+flowchart TB
+    subgraph SY["Sistem"]
+        direction TB
+        y1[Tampilkan beranda: hero, fitur,<br/>pita aturan + cek status,<br/>katalog alat 9 per halaman]
+        y2[Hitung sisa unit per alat pada<br/>rentang tanggal dipilih<br/>KetersediaanService]
+        y3[Tampilkan kartu alat sesuai filter:<br/>foto, nama, kategori, kode,<br/>'N tersedia' / pita 'Habis']
+        y4[Tampilkan detail alat: foto, deskripsi,<br/>tersedia hari ini, lama pinjam maks,<br/>lokasi, tombol Ajukan & Matriks]
+        y5[Tampilkan Jadwal Alat 14 hari<br/>hanya untuk alat ini:<br/>putih tersedia, biru muda dipesan,<br/>biru tua dipinjam, merah terlambat]
+        y6[Buka form ajuan dengan alat<br/>& tanggal pinjam sudah terisi]
+    end
+
+    subgraph U["Peminjam"]
+        direction TB
+        s((●))
+        u1[Buka alamat web<br/>peminjaman-barang.test]
+        u2[Isi filter: cari nama/kode,<br/>pilih tanggal mulai–selesai,<br/>kategori, lokasi, 'hanya tersedia']
+        u3{Klik kartu alat<br/>atau tombol Pinjam?}
+        u4[Klik 'Lihat Alat Ini<br/>dalam Matriks']
+        u5{Ada tanggal<br/>kosong?}
+        u6[Klik sel kosong<br/>pada matriks]
+        e((◉))
+    end
+
+    s --> u1 --> y1 --> u2 --> y2 --> y3 --> u3
+    u3 -- "Kartu alat" --> y4 --> u4 --> y5 --> u5
+    u3 -- "Tombol Pinjam" --> y6
+    u5 -- "Ya" --> u6 --> y6
+    u5 -- "Tidak" --> u2
+    y6 --> e
+
+    classDef mulai fill:#131E4A,stroke:#131E4A,color:#ffffff
+    classDef aksi fill:#EEF1FB,stroke:#263C92,color:#131E4A
+    classDef sistem fill:#ffffff,stroke:#263C92,color:#131E4A
+    classDef pilih fill:#FED80B,stroke:#1E2F72,color:#131E4A
+    class s,e mulai
+    class u1,u2,u4,u6 aksi
+    class y1,y2,y3,y4,y5,y6 sistem
+    class u3,u5 pilih
+    style U fill:#F7F8FD,stroke:#93A5E2,color:#263C92
+    style SY fill:#ffffff,stroke:#93A5E2,color:#263C92

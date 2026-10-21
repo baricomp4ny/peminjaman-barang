@@ -1,0 +1,45 @@
+%% Activity Diagram — Admin: login dan dashboard
+flowchart TB
+    subgraph SY["Sistem"]
+        direction TB
+        y1[Tampilkan halaman Login:<br/>email, password + ikon mata,<br/>'Ingat saya', 'Lupa password?']
+        y2{Email & password benar,<br/>role admin, akun aktif?}
+        y3[Tampilkan 'Email atau password salah'<br/>batasi percobaan berulang]
+        y4[Kirim email tautan reset password]
+        y5[Arahkan ke Dashboard:<br/>strip statistik ajuan menunggu,<br/>siap diambil, dipinjam, terlambat,<br/>kembali terlambat bulan ini]
+        y6[Muat grafik 'Peminjaman per bulan'<br/>& '5 alat terpopuler' + 'Lihat tabel',<br/>daftar ajuan menunggu, jatuh tempo,<br/>status unit, daftar terlambat]
+        y7[Buka halaman terkait<br/>mis. Ajuan / Peminjaman Aktif tab Terlambat]
+        y8[Hapus sesi, kembali ke<br/>halaman Login]
+    end
+
+    subgraph U["Admin"]
+        direction TB
+        s((●))
+        u1[Klik 'Login Admin'<br/>di navbar publik]
+        u2[Isi email & password,<br/>klik 'Masuk']
+        u3[Klik 'Lupa password?',<br/>isi email]
+        u4{Pilih aksi<br/>di dashboard}
+        u5[Klik angka di strip statistik<br/>atau baris daftar]
+        u6[Klik avatar → 'Logout']
+        e((◉))
+    end
+
+    s --> u1 --> y1 --> u2 --> y2
+    y2 -- "Tidak" --> y3 --> u2
+    y3 -.-> u3 --> y4 --> e
+    y2 -- "Ya" --> y5 --> y6 --> u4
+    u4 -- "Lihat detail" --> u5 --> y7 --> e
+    u4 -- "Keluar" --> u6 --> y8 --> e
+
+    classDef mulai fill:#131E4A,stroke:#131E4A,color:#ffffff
+    classDef aksi fill:#EEF1FB,stroke:#263C92,color:#131E4A
+    classDef sistem fill:#ffffff,stroke:#263C92,color:#131E4A
+    classDef pilih fill:#FED80B,stroke:#1E2F72,color:#131E4A
+    classDef gagal fill:#FEF2F2,stroke:#DC2626,color:#7F1D1D
+    class s,e mulai
+    class u1,u2,u3,u5,u6 aksi
+    class y1,y4,y5,y6,y7,y8 sistem
+    class y2,u4 pilih
+    class y3 gagal
+    style U fill:#F7F8FD,stroke:#93A5E2,color:#263C92
+    style SY fill:#ffffff,stroke:#93A5E2,color:#263C92

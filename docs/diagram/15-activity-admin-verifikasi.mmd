@@ -1,0 +1,50 @@
+%% Activity Diagram — Admin: memverifikasi ajuan peminjaman
+flowchart TB
+    subgraph SY["Sistem"]
+        direction TB
+        y1[Tampilkan daftar Ajuan Peminjaman<br/>status Menunggu + badge jumlah:<br/>kode, peminjam, alat, tanggal]
+        y2[Tampilkan panel verifikasi:<br/>identitas & riwayat keterlambatan,<br/>checklist, ketersediaan per alat<br/>pada rentang tanggal, aturan]
+        y3[Buka file surat peminjaman<br/>di tab baru]
+        y4{Cek ulang stok di dalam<br/>transaksi: masih cukup?}
+        y5[Tampilkan 'Stok tidak cukup<br/>pada rentang tanggal tersebut']
+        y6[Status → Disetujui, catat verifikator;<br/>email 'Ajuan Disetujui' + Bukti PDF<br/>+ tautan batal; pesan sukses hijau]
+        y7[Tampilkan kolom alasan penolakan]
+        y8{Alasan diisi?}
+        y9[Tampilkan 'Alasan penolakan wajib diisi']
+        y10[Status → Ditolak, simpan alasan;<br/>email 'Ajuan Ditolak'; pesan sukses]
+        y11[Badge ajuan berkurang,<br/>kembali ke daftar ajuan]
+    end
+
+    subgraph U["Admin"]
+        direction TB
+        s((●))
+        u1[Klik menu Transaksi →<br/>'Ajuan Peminjaman']
+        u2[Klik salah satu ajuan]
+        u3[Klik 'Lihat Surat Peminjaman',<br/>periksa isi & tanda tangan]
+        u4{Ajuan layak?}
+        u5[Klik 'Setujui']
+        u6[Klik 'Tolak']
+        u7[Isi alasan penolakan,<br/>klik 'Kirim Penolakan']
+        e((◉))
+    end
+
+    s --> u1 --> y1 --> u2 --> y2 --> u3 --> y3 --> u4
+    u4 -- "Ya" --> u5 --> y4
+    y4 -- "Tidak" --> y5 --> u4
+    y4 -- "Ya" --> y6 --> y11
+    u4 -- "Tidak" --> u6 --> y7 --> u7 --> y8
+    y8 -- "Tidak" --> y9 --> u7
+    y8 -- "Ya" --> y10 --> y11 --> e
+
+    classDef mulai fill:#131E4A,stroke:#131E4A,color:#ffffff
+    classDef aksi fill:#EEF1FB,stroke:#263C92,color:#131E4A
+    classDef sistem fill:#ffffff,stroke:#263C92,color:#131E4A
+    classDef pilih fill:#FED80B,stroke:#1E2F72,color:#131E4A
+    classDef gagal fill:#FEF2F2,stroke:#DC2626,color:#7F1D1D
+    class s,e mulai
+    class u1,u2,u3,u5,u6,u7 aksi
+    class y1,y2,y3,y6,y7,y10,y11 sistem
+    class u4,y4,y8 pilih
+    class y5,y9 gagal
+    style U fill:#F7F8FD,stroke:#93A5E2,color:#263C92
+    style SY fill:#ffffff,stroke:#93A5E2,color:#263C92

@@ -1,0 +1,58 @@
+%% Activity Diagram — Admin: serah-terima alat dengan scan QR
+flowchart TB
+    subgraph SY["Sistem"]
+        direction TB
+        y1[Tampilkan halaman Scan mode 'Serah':<br/>kotak kamera, kolom kode manual,<br/>indikator 'Scanner siap']
+        y2[Nyalakan kamera belakang<br/>butuh HTTPS / localhost]
+        y3[Bersihkan kode; abaikan kode sama<br/>dalam 2,5 detik; masukkan antrean]
+        y4{Kode PJM ditemukan &<br/>status Disetujui & masih<br/>dalam batas ambil?}
+        y5[Kotak merah berkedip + bunyi rendah:<br/>'QR tidak dikenal' / 'belum disetujui' /<br/>'sudah kedaluwarsa']
+        y6[Tampilkan identitas peminjam,<br/>daftar alat & jumlah yang harus<br/>di-scan, penghitung 0/N]
+        y7{Unit sesuai jenis ajuan,<br/>kondisi baik & tersedia,<br/>jumlah belum lebih,<br/>belum di-scan?}
+        y8[Pesan merah + bunyi rendah<br/>sesuai alasan, unit tidak masuk]
+        y9[Pesan biru + bunyi tinggi,<br/>unit masuk daftar, penghitung naik]
+        y10{Semua jumlah<br/>sudah lengkap?}
+        y11[Aktifkan tombol<br/>'Selesaikan serah-terima']
+        y12[Cek ulang semua unit di transaksi;<br/>unit → Dipinjam, peminjaman → Dipinjam,<br/>catat waktu serah; email 'Alat Diserahkan']
+        y13[Kembali ke halaman Scan<br/>+ pesan sukses hijau,<br/>siap scan peminjam berikutnya]
+    end
+
+    subgraph U["Admin"]
+        direction TB
+        s((●))
+        u1[Klik menu 'Scan Barcode',<br/>pilih tab 'Serah-terima']
+        u2{Cara input?}
+        u3[Klik 'Nyalakan kamera',<br/>arahkan ke QR]
+        u4[Tembak QR dengan<br/>scanner USB]
+        u5[Ketik kode lalu Enter]
+        u6[Scan QR kode PJM dari<br/>layar/email peminjam]
+        u7[Cocokkan kartu identitas<br/>asli peminjam]
+        u8[Scan QR label unit alat]
+        u9[Klik 'Selesaikan serah-terima']
+        e((◉))
+    end
+
+    s --> u1 --> y1 --> u2
+    u2 -- "Kamera" --> u3 --> y2 --> u6
+    u2 -- "Scanner USB" --> u4 --> u6
+    u2 -- "Manual" --> u5 --> u6
+    u6 --> y3 --> y4
+    y4 -- "Tidak" --> y5 --> u6
+    y4 -- "Ya" --> y6 --> u7 --> u8 --> y7
+    y7 -- "Tidak" --> y8 --> u8
+    y7 -- "Ya" --> y9 --> y10
+    y10 -- "Belum" --> u8
+    y10 -- "Ya" --> y11 --> u9 --> y12 --> y13 --> e
+
+    classDef mulai fill:#131E4A,stroke:#131E4A,color:#ffffff
+    classDef aksi fill:#EEF1FB,stroke:#263C92,color:#131E4A
+    classDef sistem fill:#ffffff,stroke:#263C92,color:#131E4A
+    classDef pilih fill:#FED80B,stroke:#1E2F72,color:#131E4A
+    classDef gagal fill:#FEF2F2,stroke:#DC2626,color:#7F1D1D
+    class s,e mulai
+    class u1,u3,u4,u5,u6,u7,u8,u9 aksi
+    class y1,y2,y3,y6,y9,y11,y12,y13 sistem
+    class u2,y4,y7,y10 pilih
+    class y5,y8 gagal
+    style U fill:#F7F8FD,stroke:#93A5E2,color:#263C92
+    style SY fill:#ffffff,stroke:#93A5E2,color:#263C92

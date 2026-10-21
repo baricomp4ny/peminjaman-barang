@@ -1,0 +1,49 @@
+%% Use Case Diagram — Sistem Informasi Peminjaman Barang (QR Code)
+flowchart LR
+    Peminjam["👤<br/><b>Peminjam</b><br/>(tanpa login)"]
+    Admin["👤<br/><b>Admin / Petugas Lab</b>"]
+    Sistem["⚙️<br/><b>Sistem</b><br/>(scheduler)"]
+
+    subgraph S["Sistem Informasi Peminjaman Barang Berbasis Web dengan QR Code"]
+        direction TB
+        UC1([Melihat katalog & cek ketersediaan])
+        UC2([Melihat jadwal pemakaian alat])
+        UC3([Mengajukan peminjaman])
+        UC3a([Mengunggah surat peminjaman])
+        UC4([Cek status peminjaman])
+        UC5([Membatalkan ajuan])
+
+        UC6([Login])
+        UC7([Memverifikasi ajuan<br/>setujui / tolak])
+        UC8([Serah-terima via scan QR])
+        UC9([Pengembalian via scan QR])
+        UC10([Mengelola data barang, unit,<br/>kategori, lokasi])
+        UC10a([Perbaikan selesai unit])
+        UC11([Mencetak label QR])
+        UC12([Mengelola data peminjam])
+        UC13([Melihat & mengunduh laporan])
+        UC14([Mengatur aturan peminjaman<br/>& data admin])
+        UC15([Mengingatkan peminjam terlambat<br/>via WhatsApp])
+
+        UC16([Mengirim notifikasi email])
+        UC17([Menandai ajuan kedaluwarsa])
+        UC18([Mengirim pengingat jatuh tempo])
+    end
+
+    Peminjam --- UC1 & UC2 & UC3 & UC4 & UC5
+    UC3 -. "&lt;&lt;include&gt;&gt;" .-> UC3a
+
+    Admin --- UC6
+    Admin --- UC7 & UC8 & UC9 & UC10 & UC11 & UC12 & UC13 & UC14 & UC15
+    UC7 -. "&lt;&lt;include&gt;&gt;" .-> UC6
+    UC8 -. "&lt;&lt;include&gt;&gt;" .-> UC6
+    UC10a -. "&lt;&lt;extend&gt;&gt;" .-> UC10
+
+    UC16 & UC17 & UC18 --- Sistem
+    UC7 -. "&lt;&lt;include&gt;&gt;" .-> UC16
+
+    classDef aktor fill:#ffffff,stroke:#263C92,stroke-width:2px,color:#131E4A
+    classDef uc fill:#EEF1FB,stroke:#263C92,color:#131E4A
+    class Peminjam,Admin,Sistem aktor
+    class UC1,UC2,UC3,UC3a,UC4,UC5,UC6,UC7,UC8,UC9,UC10,UC10a,UC11,UC12,UC13,UC14,UC15,UC16,UC17,UC18 uc
+    style S fill:#ffffff,stroke:#93A5E2,stroke-width:2px,color:#263C92

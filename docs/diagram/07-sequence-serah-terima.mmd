@@ -1,0 +1,43 @@
+%% Sequence Diagram 3 — Serah-terima dengan scan QR
+sequenceDiagram
+    autonumber
+    actor A as Admin
+    participant JS as Halaman Scan<br/>(scan-qr.js)
+    participant C as ScanController
+    participant SC as ScanService
+    participant S as Peminjaman<br/>Service
+    participant DB as Database
+    participant M as Email
+
+    A->>JS: Scan QR kode peminjaman (PJM-…)<br/>dari layar/email peminjam
+    JS->>JS: Bersihkan kode, cegah scan ganda (2,5 dtk),<br/>masukkan antrean
+    JS->>C: POST /admin/scan/cari (AJAX)
+    C->>SC: cari(kode, mode serah)
+    SC->>DB: Ambil peminjaman berstatus disetujui
+    SC-->>JS: Identitas peminjam + daftar alat yang diajukan
+    A->>A: Cocokkan kartu identitas asli
+
+    loop Setiap unit alat
+        A->>JS: Scan QR unit (mis. PRJ-001)
+        JS->>C: POST /admin/scan/cek-unit
+        C->>SC: cekUnit(peminjaman, kode, serah)
+        SC->>S: cekUnitUntukSerah(peminjaman, unit)
+        S->>DB: Cek jenis sesuai ajuan, unit baik & tersedia,<br/>jumlah belum melebihi
+        alt Tidak sesuai
+            SC-->>JS: Pesan gagal
+            JS-->>A: Kotak merah berkedip + bunyi rendah
+        else Sesuai
+            SC-->>JS: Data unit
+            JS-->>A: Pesan berhasil + bunyi tinggi,<br/>unit masuk daftar
+        end
+    end
+
+    A->>JS: Klik "Selesaikan serah-terima"<br/>(aktif bila semua unit lengkap)
+    JS->>S: POST serahkan (daftar unit)
+    activate S
+    S->>DB: BEGIN TRANSACTION, cek ulang semua unit
+    S->>DB: Simpan peminjaman_unit, unit → dipinjam,<br/>peminjaman → dipinjam, diserahkan_pada
+    S->>DB: COMMIT
+    S->>M: Email AlatDiserahkan
+    deactivate S
+    S-->>JS: Redirect ke halaman scan + pesan sukses

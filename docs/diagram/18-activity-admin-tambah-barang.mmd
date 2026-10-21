@@ -1,0 +1,45 @@
+%% Activity Diagram — Admin: menambah jenis barang dan unit (kode QR otomatis)
+flowchart TB
+    subgraph SY["Sistem"]
+        direction TB
+        y1[Tampilkan daftar Jenis Barang:<br/>foto, kode, kategori,<br/>unit tersedia/total, checkbox,<br/>tombol '+ Tambah Jenis']
+        y2[Tampilkan form jenis barang:<br/>kategori, kode prefix mis. PRJ,<br/>nama, deskripsi, unggah foto]
+        y3[Buka alat potong foto:<br/>persegi / 4:3 / bebas, zoom, putar;<br/>hasil JPEG maks 1200 px]
+        y4{Validasi lolos?<br/>kode unik, data wajib terisi,<br/>file berupa gambar}
+        y5[Tampilkan pesan error<br/>di bawah kolom yang salah]
+        y6[Simpan jenis barang,<br/>pesan sukses hijau,<br/>buka halaman detail jenis]
+        y7[Tampilkan form tambah unit:<br/>lokasi, jumlah, kondisi,<br/>tanggal perolehan,<br/>pratinjau kode berikutnya mis. PRJ-004]
+        y8[Buat unit dengan kode otomatis<br/>berurutan PRJ-004, PRJ-005, …;<br/>pesan 'N unit ditambahkan']
+        y9[Tampilkan unit baru di tabel<br/>dengan tombol QR / Ubah / Hapus]
+    end
+
+    subgraph U["Admin"]
+        direction TB
+        s((●))
+        u1[Klik menu Data Barang →<br/>'Jenis Barang']
+        u2[Klik '+ Tambah Jenis']
+        u3[Isi kategori, kode, nama,<br/>deskripsi; pilih file foto]
+        u4[Atur potongan foto,<br/>klik 'Pakai foto']
+        u5[Klik 'Simpan']
+        u6[Klik '+ Tambah Unit']
+        u7[Pilih lokasi, isi jumlah,<br/>klik 'Simpan']
+        u8[Klik 'QR' untuk melihat /<br/>mencetak label unit]
+        e((◉))
+    end
+
+    s --> u1 --> y1 --> u2 --> y2 --> u3 --> y3 --> u4 --> u5 --> y4
+    y4 -- "Tidak" --> y5 --> u3
+    y4 -- "Ya" --> y6 --> u6 --> y7 --> u7 --> y8 --> y9 --> u8 --> e
+
+    classDef mulai fill:#131E4A,stroke:#131E4A,color:#ffffff
+    classDef aksi fill:#EEF1FB,stroke:#263C92,color:#131E4A
+    classDef sistem fill:#ffffff,stroke:#263C92,color:#131E4A
+    classDef pilih fill:#FED80B,stroke:#1E2F72,color:#131E4A
+    classDef gagal fill:#FEF2F2,stroke:#DC2626,color:#7F1D1D
+    class s,e mulai
+    class u1,u2,u3,u4,u5,u6,u7,u8 aksi
+    class y1,y2,y3,y6,y7,y8,y9 sistem
+    class y4 pilih
+    class y5 gagal
+    style U fill:#F7F8FD,stroke:#93A5E2,color:#263C92
+    style SY fill:#ffffff,stroke:#93A5E2,color:#263C92

@@ -1,0 +1,74 @@
+%% Use Case Diagram rinci — Admin / Petugas Lab
+flowchart LR
+    A["👤<br/><b>Admin /<br/>Petugas Lab</b>"]
+
+    subgraph S["Sistem Peminjaman Alat Lab — Panel Admin"]
+        direction TB
+        L([Login])
+        D([Melihat dashboard<br/>statistik & grafik])
+
+        subgraph T["Transaksi"]
+            direction TB
+            V1([Memverifikasi ajuan])
+            V2([Melihat surat peminjaman])
+            V3([Menyetujui ajuan])
+            V4([Menolak ajuan + alasan])
+            P1([Melihat peminjaman aktif])
+            P2([Mengingatkan via WhatsApp])
+            P3([Mencetak bukti peminjaman PDF])
+            J([Melihat jadwal pemakaian])
+            R1([Melihat & mengunduh<br/>riwayat transaksi])
+        end
+
+        subgraph Q["Scan Barcode"]
+            direction TB
+            Q1([Serah-terima via scan QR])
+            Q2([Pengembalian via scan QR])
+            Q3([Input kode manual /<br/>scanner USB / kamera])
+        end
+
+        subgraph B["Data Barang & Peminjam"]
+            direction TB
+            B1([Mengelola jenis barang + foto])
+            B2([Mengelola unit & kondisi])
+            B3([Perbaikan selesai unit])
+            B4([Mencetak label QR])
+            B5([Mengelola kategori & lokasi])
+            B6([Mengelola data peminjam])
+            B7([Hapus banyak data terpilih])
+        end
+
+        subgraph LP["Laporan & Pengaturan"]
+            direction TB
+            R2([Melihat laporan pengembalian,<br/>inventaris, keterlambatan, statistik])
+            R3([Mengunduh laporan PDF / Excel])
+            G1([Mengatur aturan peminjaman<br/>& template surat])
+            G2([Mengelola akun admin])
+            G3([Mengubah profil & password])
+        end
+    end
+
+    A --- L
+    A --- D & V1 & P1 & J & R1 & Q1 & Q2 & B1 & B2 & B5 & B6 & R2 & G1 & G2 & G3
+    D -. "&lt;&lt;include&gt;&gt;" .-> L
+    V1 -. "&lt;&lt;include&gt;&gt;" .-> V2
+    V1 -. "&lt;&lt;extend&gt;&gt;" .-> V3
+    V1 -. "&lt;&lt;extend&gt;&gt;" .-> V4
+    P1 -. "&lt;&lt;extend&gt;&gt;" .-> P2
+    P1 -. "&lt;&lt;extend&gt;&gt;" .-> P3
+    Q1 -. "&lt;&lt;include&gt;&gt;" .-> Q3
+    Q2 -. "&lt;&lt;include&gt;&gt;" .-> Q3
+    B2 -. "&lt;&lt;extend&gt;&gt;" .-> B3
+    B2 -. "&lt;&lt;extend&gt;&gt;" .-> B4
+    B2 -. "&lt;&lt;extend&gt;&gt;" .-> B7
+    R2 -. "&lt;&lt;extend&gt;&gt;" .-> R3
+
+    classDef aktor fill:#ffffff,stroke:#263C92,stroke-width:2px,color:#131E4A
+    classDef uc fill:#EEF1FB,stroke:#263C92,color:#131E4A
+    class A aktor
+    class L,D,V1,V2,V3,V4,P1,P2,P3,J,R1,Q1,Q2,Q3,B1,B2,B3,B4,B5,B6,B7,R2,R3,G1,G2,G3 uc
+    style S fill:#ffffff,stroke:#93A5E2,stroke-width:2px,color:#263C92
+    style T fill:#F7F8FD,stroke:#BCC7EE,color:#263C92
+    style Q fill:#F7F8FD,stroke:#BCC7EE,color:#263C92
+    style B fill:#F7F8FD,stroke:#BCC7EE,color:#263C92
+    style LP fill:#F7F8FD,stroke:#BCC7EE,color:#263C92

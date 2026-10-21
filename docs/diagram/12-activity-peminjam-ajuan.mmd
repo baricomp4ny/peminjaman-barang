@@ -1,0 +1,54 @@
+%% Activity Diagram — Peminjam: mengajukan peminjaman
+flowchart TB
+    subgraph SY["Sistem"]
+        direction TB
+        y1[Tampilkan form ajuan 6 bagian +<br/>kotak info 'Surat wajib disiapkan',<br/>tombol 'Buka Template Surat',<br/>estimasi peninjauan N hari kerja]
+        y2[Unduh file template surat<br/>DOCX/PDF]
+        y3[Tampilkan sisa unit setiap alat<br/>untuk tanggal yang dipilih<br/>+ ringkasan ajuan]
+        y4[Tampilkan teks syarat 3 baris<br/>+ tombol 'Baca selengkapnya']
+        y5[Buka/tutup teks syarat lengkap]
+        y6{Validasi: data lengkap, lama pinjam<br/>≤ maks, unit ≤ maks, file PDF/DOC ≤ 4 MB,<br/>NIM–email cocok, tidak ditangguhkan<br/>& tidak punya pinjaman terlambat?}
+        y7[Tampilkan form lagi dengan<br/>pesan error merah di kolom<br/>yang salah, isian tetap ada]
+        y8{Cek ulang stok pada<br/>rentang tanggal cukup?}
+        y9[Hapus file surat, tampilkan<br/>'Stok tidak cukup pada<br/>rentang tanggal tersebut']
+        y10[Simpan ajuan status Menunggu,<br/>buat kode PJM-…,<br/>kirim email 'Ajuan Terkirim']
+        y11[Tampilkan halaman status:<br/>kode PJM + QR Code, detail alat,<br/>status Menunggu verifikasi,<br/>tombol Batalkan]
+    end
+
+    subgraph U["Peminjam"]
+        direction TB
+        s((●))
+        u1[Klik menu 'Ajukan Peminjaman'<br/>atau tombol Pinjam di katalog]
+        u2{Sudah punya<br/>surat?}
+        u3[Klik 'Buka Template Surat',<br/>isi & minta tanda tangan]
+        u4[Isi identitas: nama, NIM/NIP,<br/>email, no. HP, unit/prodi]
+        u5[Pilih alat + jumlah,<br/>tujuan, tanggal pinjam<br/>& rencana kembali]
+        u6[Klik 'Baca selengkapnya'<br/>lalu centang 'Saya menyetujui<br/>syarat peminjaman']
+        u7[Unggah file surat peminjaman]
+        u8[Klik 'Kirim Ajuan']
+        u9[Perbaiki isian]
+        u10[Simpan / tangkap layar<br/>kode PJM & QR]
+        e((◉))
+    end
+
+    s --> u1 --> y1 --> u2
+    u2 -- "Belum" --> u3 --> y2 --> u4
+    u2 -- "Sudah" --> u4
+    u4 --> u5 --> y3 --> y4 --> u6 --> y5 --> u7 --> u8 --> y6
+    y6 -- "Tidak" --> y7 --> u9 --> u8
+    y6 -- "Ya" --> y8
+    y8 -- "Tidak" --> y9 --> u5
+    y8 -- "Ya" --> y10 --> y11 --> u10 --> e
+
+    classDef mulai fill:#131E4A,stroke:#131E4A,color:#ffffff
+    classDef aksi fill:#EEF1FB,stroke:#263C92,color:#131E4A
+    classDef sistem fill:#ffffff,stroke:#263C92,color:#131E4A
+    classDef pilih fill:#FED80B,stroke:#1E2F72,color:#131E4A
+    classDef gagal fill:#FEF2F2,stroke:#DC2626,color:#7F1D1D
+    class s,e mulai
+    class u1,u3,u4,u5,u6,u7,u8,u9,u10 aksi
+    class y1,y2,y3,y4,y5,y10,y11 sistem
+    class u2,y6,y8 pilih
+    class y7,y9 gagal
+    style U fill:#F7F8FD,stroke:#93A5E2,color:#263C92
+    style SY fill:#ffffff,stroke:#93A5E2,color:#263C92

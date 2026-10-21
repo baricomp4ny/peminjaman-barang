@@ -1,0 +1,49 @@
+%% Activity Diagram — Admin: melihat & mengunduh laporan
+flowchart TB
+    subgraph SY["Sistem"]
+        direction TB
+        y1[Tampilkan Laporan Pengembalian:<br/>4 kartu angka, 'Rincian ringkasan',<br/>pil Jenis & Periode, PDF, Excel,<br/>baris data bergaya kartu]
+        y2[Pindah ke laporan terpilih:<br/>Pengembalian / Inventaris /<br/>Keterlambatan / Statistik Pemakaian]
+        y3{Tanggal valid?<br/>sampai ≥ dari}
+        y4[Pesan error periode]
+        y5[Hitung ulang kartu & baris<br/>untuk periode baru]
+        y6[Buka panel detail baris:<br/>kolom lain + tautan aksi<br/>Buka transaksi / Buka unit /<br/>WhatsApp / Lihat jadwal alat]
+        y7[Buat file PDF A4 landscape<br/>berkop lab, unduh]
+        y8[Buat file Excel .xlsx<br/>teks aman dari formula, unduh]
+        y9[Tampilkan kartu Per Kondisi /<br/>Per Status / Per Tahun]
+    end
+
+    subgraph U["Admin"]
+        direction TB
+        s((●))
+        u1[Klik menu 'Laporan']
+        u2[Pilih jenis di pil 'Jenis']
+        u3[Ubah tanggal Periode,<br/>klik 'Tampilkan']
+        u4{Pilih aksi}
+        u5[Klik 'Rincian ringkasan ▾']
+        u6[Klik salah satu baris]
+        u7[Klik 'PDF']
+        u8[Klik 'Excel']
+        e((◉))
+    end
+
+    s --> u1 --> y1 --> u2 --> y2 --> u3 --> y3
+    y3 -- "Tidak" --> y4 --> u3
+    y3 -- "Ya" --> y5 --> u4
+    u4 -- "Ringkasan" --> u5 --> y9 --> u4
+    u4 -- "Detail" --> u6 --> y6 --> u4
+    u4 -- "Unduh PDF" --> u7 --> y7 --> e
+    u4 -- "Unduh Excel" --> u8 --> y8 --> e
+
+    classDef mulai fill:#131E4A,stroke:#131E4A,color:#ffffff
+    classDef aksi fill:#EEF1FB,stroke:#263C92,color:#131E4A
+    classDef sistem fill:#ffffff,stroke:#263C92,color:#131E4A
+    classDef pilih fill:#FED80B,stroke:#1E2F72,color:#131E4A
+    classDef gagal fill:#FEF2F2,stroke:#DC2626,color:#7F1D1D
+    class s,e mulai
+    class u1,u2,u3,u5,u6,u7,u8 aksi
+    class y1,y2,y5,y6,y7,y8,y9 sistem
+    class u4,y3 pilih
+    class y4 gagal
+    style U fill:#F7F8FD,stroke:#93A5E2,color:#263C92
+    style SY fill:#ffffff,stroke:#93A5E2,color:#263C92

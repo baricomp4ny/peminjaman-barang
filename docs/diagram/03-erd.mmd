@@ -1,0 +1,58 @@
+%% ERD notasi Chen: entitas (persegi), relasi (belah ketupat), atribut utama (elips)
+%% Tabel pengaturan berdiri sendiri (tanpa relasi) sehingga hanya tampil di LRS
+flowchart LR
+    USER[USER]
+    KATEGORI[KATEGORI]
+    LOKASI[LOKASI]
+    BARANG[BARANG]
+    UNIT[UNIT_BARANG]
+    PJM[PEMINJAMAN]
+    RIWAYAT[RIWAYAT_KONDISI_UNIT]
+
+    R1{mengelompokkan}
+    R2{memiliki}
+    R3{menyimpan}
+    R4{mengajukan}
+    R5{memverifikasi}
+    R6{"berisi<br/>(detail: jumlah)"}
+    R7{"menyerahkan<br/>(unit: dikembalikan_pada,<br/>kondisi_kembali, hari_terlambat)"}
+    R8{mencatat}
+    R9{dicatat}
+
+    KATEGORI ---|1| R1 ---|N| BARANG
+    BARANG ---|1| R2 ---|N| UNIT
+    LOKASI ---|1| R3 ---|N| UNIT
+    USER ---|1| R4 ---|N| PJM
+    USER ---|1| R5 ---|N| PJM
+    PJM ---|M| R6 ---|N| BARANG
+    PJM ---|M| R7 ---|N| UNIT
+    UNIT ---|1| R8 ---|N| RIWAYAT
+    USER ---|1| R9 ---|N| RIWAYAT
+
+    a1((<u>id</u>)) --- USER
+    a2((nomor_identitas)) --- USER
+    a3((role)) --- USER
+    a4((<u>id</u>)) --- KATEGORI
+    a5((nama)) --- KATEGORI
+    a6((<u>id</u>)) --- LOKASI
+    a7((nama)) --- LOKASI
+    a8((<u>id</u>)) --- BARANG
+    a9((kode)) --- BARANG
+    a10((nama)) --- BARANG
+    a11((<u>id</u>)) --- UNIT
+    a12((kode_unit)) --- UNIT
+    a13((kondisi)) --- UNIT
+    a14((status)) --- UNIT
+    a15((<u>id</u>)) --- PJM
+    a16((kode_peminjaman)) --- PJM
+    a17((tanggal_pinjam)) --- PJM
+    a18((status)) --- PJM
+    a19((<u>id</u>)) --- RIWAYAT
+    a20((jenis)) --- RIWAYAT
+
+    classDef entitas fill:#263C92,stroke:#131E4A,color:#ffffff,font-weight:bold
+    classDef relasi fill:#FED80B,stroke:#1E2F72,color:#131E4A
+    classDef atribut fill:#ffffff,stroke:#93A5E2,color:#131E4A
+    class USER,KATEGORI,LOKASI,BARANG,UNIT,PJM,RIWAYAT entitas
+    class R1,R2,R3,R4,R5,R6,R7,R8,R9 relasi
+    class a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17,a18,a19,a20 atribut

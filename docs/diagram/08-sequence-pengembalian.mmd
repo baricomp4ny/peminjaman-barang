@@ -1,0 +1,41 @@
+%% Sequence Diagram 4 — Pengembalian dengan scan QR (boleh sebagian)
+sequenceDiagram
+    autonumber
+    actor A as Admin
+    participant JS as Halaman Scan<br/>(mode kembali)
+    participant C as ScanController
+    participant SC as ScanService
+    participant S as Peminjaman<br/>Service
+    participant KT as Keterlambatan<br/>Service
+    participant KU as KondisiUnit<br/>Service
+    participant DB as Database
+    participant M as Email
+
+    A->>JS: Scan QR unit yang dikembalikan
+    JS->>C: POST /admin/scan/cari
+    C->>SC: cari(kode unit, mode kembali)
+    SC->>DB: Cari peminjaman "dipinjam" yang memegang unit ini
+    SC-->>JS: Data peminjaman + unit yang belum kembali
+    loop Unit lain dalam peminjaman yang sama
+        A->>JS: Scan QR unit berikutnya
+        JS->>C: POST /admin/scan/cek-unit
+        C-->>JS: Valid / tidak
+    end
+    A->>JS: Pilih kondisi tiap unit (baik/rusak/hilang),<br/>catatan, tanggal kembali
+    JS->>S: POST pengembalian (unit + kondisi)
+    activate S
+    S->>DB: BEGIN TRANSACTION + kunci peminjaman
+    loop Setiap unit dikembalikan
+        S->>KT: hariTerlambat(rencana kembali, tanggal kembali)
+        KT-->>S: Jumlah hari terlambat
+        S->>DB: Update peminjaman_unit (dikembalikan_pada,<br/>kondisi_kembali, hari_terlambat, catatan)
+        S->>KU: catat(unit, kondisi, status, "pengembalian")
+        KU->>DB: Update unit (baik→tersedia, rusak→perbaikan,<br/>hilang→hilang) + simpan riwayat kondisi
+    end
+    alt Semua unit sudah kembali
+        S->>DB: peminjaman → selesai
+    end
+    S->>DB: COMMIT
+    S->>M: Email PengembalianDicatat<br/>(+ tanggal boleh mengajukan lagi bila terlambat)
+    deactivate S
+    S-->>JS: Pesan sukses

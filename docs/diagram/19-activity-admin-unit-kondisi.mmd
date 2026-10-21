@@ -1,0 +1,42 @@
+%% Activity Diagram — Admin: Unit & Kondisi — pilih banyak (cetak label terpilih, hapus terpilih)
+flowchart TB
+    subgraph SY["Sistem"]
+        direction TB
+        y1[Tampilkan daftar Unit & Kondisi:<br/>filter jenis/lokasi/status, checkbox,<br/>pil kondisi & status, tautan<br/>'Perbaikan selesai' pada unit perbaikan]
+        y2[Tampilkan bilah kuning:<br/>'N unit dipilih · Cetak label terpilih ·<br/>Hapus terpilih · Batal']
+        y3[Buka halaman label QR di tab baru:<br/>QR + kode unit + nama alat]
+        y4[Tampilkan dialog konfirmasi:<br/>'Hapus N unit? … tidak bisa dibatalkan']
+        y5[Hapus unit yang boleh; lewati unit<br/>yang pernah dipinjam; pesan<br/>'N dihapus. M dilewati: kode alasan']
+        y10[Kosongkan pilihan,<br/>bilah kuning hilang]
+    end
+
+    subgraph U["Admin"]
+        direction TB
+        s((●))
+        u1[Klik menu Data Barang →<br/>'Unit & Kondisi']
+        u3[Centang beberapa unit atau<br/>centang 'pilih semua' di kepala tabel]
+        u4{Aksi untuk<br/>unit terpilih?}
+        u5[Klik 'Cetak label terpilih',<br/>lalu cetak dari browser]
+        u6[Klik 'Hapus terpilih']
+        u7{Yakin?}
+        u8[Klik 'Batal']
+        e((◉))
+    end
+
+    s --> u1 --> y1 --> u3 --> y2 --> u4
+    u4 -- "Cetak" --> u5 --> y3 --> e
+    u4 -- "Hapus" --> u6 --> y4 --> u7
+    u7 -- "OK" --> y5 --> e
+    u7 -- "Batal" --> y2
+    u4 -- "Batal" --> u8 --> y10 --> e
+
+    classDef mulai fill:#131E4A,stroke:#131E4A,color:#ffffff
+    classDef aksi fill:#EEF1FB,stroke:#263C92,color:#131E4A
+    classDef sistem fill:#ffffff,stroke:#263C92,color:#131E4A
+    classDef pilih fill:#FED80B,stroke:#1E2F72,color:#131E4A
+    class s,e mulai
+    class u1,u3,u5,u6,u8 aksi
+    class y1,y2,y3,y4,y5,y10 sistem
+    class u4,u7 pilih
+    style U fill:#F7F8FD,stroke:#93A5E2,color:#263C92
+    style SY fill:#ffffff,stroke:#93A5E2,color:#263C92

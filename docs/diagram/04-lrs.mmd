@@ -1,0 +1,98 @@
+%% LRS (Logical Record Structure): tabel fisik, PK, FK, dan kardinalitas
+erDiagram
+    users {
+        ulid id PK
+        string name
+        string email UK
+        string password "nullable"
+        string role "admin|peminjam"
+        string nomor_identitas UK "NIM/NIP"
+        string unit
+        string no_hp
+        string status "aktif|nonaktif"
+    }
+    kategori {
+        ulid id PK
+        string nama
+    }
+    lokasi {
+        ulid id PK
+        string nama
+        string keterangan
+    }
+    barang {
+        ulid id PK
+        ulid kategori_id FK
+        string kode UK
+        string nama
+        text deskripsi
+        string foto
+    }
+    unit_barang {
+        ulid id PK
+        ulid barang_id FK
+        ulid lokasi_id FK
+        string kode_unit UK "isi QR"
+        string kondisi "baik|rusak|hilang"
+        string status "tersedia|dipinjam|perbaikan|hilang"
+        date tanggal_perolehan
+    }
+    peminjaman {
+        ulid id PK
+        string kode_peminjaman UK
+        ulid user_id FK
+        string tujuan
+        string surat_peminjaman
+        date tanggal_pinjam
+        date tanggal_rencana_kembali
+        string status
+        text alasan_penolakan
+        ulid diverifikasi_oleh FK
+        datetime diverifikasi_pada
+        datetime diserahkan_pada
+    }
+    peminjaman_detail {
+        ulid id PK
+        ulid peminjaman_id FK
+        ulid barang_id FK
+        int jumlah
+    }
+    peminjaman_unit {
+        ulid id PK
+        ulid peminjaman_id FK
+        ulid unit_barang_id FK
+        datetime dikembalikan_pada
+        string kondisi_kembali
+        int hari_terlambat
+        text catatan
+    }
+    riwayat_kondisi_unit {
+        ulid id PK
+        ulid unit_barang_id FK
+        string jenis
+        string kondisi_lama
+        string kondisi_baru
+        string status_lama
+        string status_baru
+        text keterangan
+        ulid dicatat_oleh FK
+        ulid peminjaman_id FK
+    }
+    pengaturan {
+        ulid id PK
+        string key UK
+        text value
+    }
+
+    kategori ||--o{ barang : "kategori_id"
+    barang ||--o{ unit_barang : "barang_id"
+    lokasi ||--o{ unit_barang : "lokasi_id"
+    users ||--o{ peminjaman : "user_id"
+    users |o--o{ peminjaman : "diverifikasi_oleh"
+    peminjaman ||--|{ peminjaman_detail : "peminjaman_id"
+    barang ||--o{ peminjaman_detail : "barang_id"
+    peminjaman ||--o{ peminjaman_unit : "peminjaman_id"
+    unit_barang ||--o{ peminjaman_unit : "unit_barang_id"
+    unit_barang ||--o{ riwayat_kondisi_unit : "unit_barang_id"
+    users |o--o{ riwayat_kondisi_unit : "dicatat_oleh"
+    peminjaman |o--o{ riwayat_kondisi_unit : "peminjaman_id"

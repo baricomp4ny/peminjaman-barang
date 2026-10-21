@@ -1,0 +1,46 @@
+%% Use Case Diagram rinci — Peminjam (tanpa login)
+flowchart LR
+    P["👤<br/><b>Peminjam</b><br/>(mahasiswa / dosen,<br/>tanpa login)"]
+
+    subgraph S["Sistem Peminjaman Alat Lab — Halaman Publik"]
+        direction TB
+        K1([Melihat katalog alat])
+        K2([Mencari alat nama/kode])
+        K3([Menyaring kategori / lokasi /<br/>hanya yang tersedia])
+        K4([Cek sisa unit pada<br/>rentang tanggal])
+        K5([Melihat detail alat])
+        J1([Melihat jadwal pemakaian alat<br/>Per Tanggal / Per Alat / Mingguan])
+        J2([Melihat jadwal satu alat<br/>dalam matriks])
+        A1([Mengajukan peminjaman])
+        A2([Mengisi identitas<br/>nama, NIM/NIP, email, HP, unit])
+        A3([Memilih alat, jumlah,<br/>tanggal pinjam & kembali])
+        A4([Menyetujui syarat peminjaman])
+        A5([Mengunduh template surat])
+        A6([Mengunggah surat peminjaman])
+        A7([Menerima kode PJM + QR<br/>di layar & email])
+        S1([Cek status peminjaman<br/>kode PJM + NIM])
+        S2([Membuka status lewat<br/>tautan email])
+        S3([Membatalkan ajuan<br/>sebelum diambil])
+        E1([Menerima email notifikasi<br/>disetujui / ditolak / pengingat])
+    end
+
+    P --- K1 & J1 & A1 & S1 & E1
+    K1 -. "&lt;&lt;extend&gt;&gt;" .-> K2
+    K1 -. "&lt;&lt;extend&gt;&gt;" .-> K3
+    K1 -. "&lt;&lt;extend&gt;&gt;" .-> K4
+    K1 -. "&lt;&lt;extend&gt;&gt;" .-> K5
+    K5 -. "&lt;&lt;extend&gt;&gt;" .-> J2
+    A1 -. "&lt;&lt;include&gt;&gt;" .-> A2
+    A1 -. "&lt;&lt;include&gt;&gt;" .-> A3
+    A1 -. "&lt;&lt;include&gt;&gt;" .-> A4
+    A1 -. "&lt;&lt;include&gt;&gt;" .-> A6
+    A1 -. "&lt;&lt;include&gt;&gt;" .-> A7
+    A6 -. "&lt;&lt;extend&gt;&gt;" .-> A5
+    S1 -. "&lt;&lt;extend&gt;&gt;" .-> S3
+    S2 -. "&lt;&lt;extend&gt;&gt;" .-> S1
+
+    classDef aktor fill:#ffffff,stroke:#263C92,stroke-width:2px,color:#131E4A
+    classDef uc fill:#EEF1FB,stroke:#263C92,color:#131E4A
+    class P aktor
+    class K1,K2,K3,K4,K5,J1,J2,A1,A2,A3,A4,A5,A6,A7,S1,S2,S3,E1 uc
+    style S fill:#ffffff,stroke:#93A5E2,stroke-width:2px,color:#263C92

@@ -1,0 +1,42 @@
+%% Activity Diagram — Admin: perbaikan selesai unit rusak
+flowchart TB
+    subgraph SY["Sistem"]
+        direction TB
+        y1[Tampilkan daftar Unit & Kondisi;<br/>unit berstatus Perbaikan punya<br/>tautan 'Perbaikan selesai']
+        y2[Tampilkan halaman ubah unit:<br/>panel kuning 'Unit sedang dalam perbaikan'<br/>+ kolom keterangan, form ubah unit,<br/>tabel Riwayat Kondisi]
+        y3{Keterangan diisi<br/>5–500 karakter?}
+        y4[Tampilkan 'keterangan perbaikan<br/>wajib diisi']
+        y5{Unit masih berstatus<br/>Perbaikan?}
+        y6[Tampilkan 'Unit tidak sedang<br/>dalam perbaikan']
+        y7[Unit → kondisi Baik, status Tersedia;<br/>catat riwayat 'Perbaikan selesai'<br/>beserta keterangan & nama admin]
+        y8[Pesan sukses: 'Unit kembali tersedia';<br/>panel kuning hilang; baris baru<br/>muncul di Riwayat Kondisi]
+    end
+
+    subgraph U["Admin"]
+        direction TB
+        s((●))
+        u1[Klik menu Data Barang →<br/>'Unit & Kondisi']
+        u2[Klik 'Perbaikan selesai'<br/>pada unit yang sudah diperbaiki]
+        u3[Isi keterangan, mis. 'elemen<br/>pemanas diganti teknisi']
+        u4[Klik tombol 'Perbaikan selesai']
+        e((◉))
+    end
+
+    s --> u1 --> y1 --> u2 --> y2 --> u3 --> u4 --> y3
+    y3 -- "Tidak" --> y4 --> u3
+    y3 -- "Ya" --> y5
+    y5 -- "Tidak" --> y6 --> e
+    y5 -- "Ya" --> y7 --> y8 --> e
+
+    classDef mulai fill:#131E4A,stroke:#131E4A,color:#ffffff
+    classDef aksi fill:#EEF1FB,stroke:#263C92,color:#131E4A
+    classDef sistem fill:#ffffff,stroke:#263C92,color:#131E4A
+    classDef pilih fill:#FED80B,stroke:#1E2F72,color:#131E4A
+    classDef gagal fill:#FEF2F2,stroke:#DC2626,color:#7F1D1D
+    class s,e mulai
+    class u1,u2,u3,u4 aksi
+    class y1,y2,y7,y8 sistem
+    class y3,y5 pilih
+    class y4,y6 gagal
+    style U fill:#F7F8FD,stroke:#93A5E2,color:#263C92
+    style SY fill:#ffffff,stroke:#93A5E2,color:#263C92
