@@ -1,7 +1,12 @@
 <x-app-layout>
     <x-slot name="header"><span class="text-sm text-marian-500">Transaksi</span></x-slot>
 
-    <x-admin.judul judul="Riwayat Peminjaman" />
+    {{-- Unduhan mengikuti filter yang sedang dipakai (pengganti Laporan Transaksi) --}}
+    @php $filter = request()->only(['q', 'status', 'dari', 'sampai']); @endphp
+    <x-admin.judul judul="Riwayat Peminjaman">
+        <x-link-button variant="secondary" :href="route('admin.riwayat.index', $filter + ['format' => 'pdf'])">Unduh PDF</x-link-button>
+        <x-link-button :href="route('admin.riwayat.index', $filter + ['format' => 'excel'])">Unduh Excel</x-link-button>
+    </x-admin.judul>
 
     <div class="rounded-3xl bg-white shadow-lembut ring-1 ring-marian-100">
         <form method="GET" class="grid gap-2 border-b p-4 sm:grid-cols-2 lg:grid-cols-5">

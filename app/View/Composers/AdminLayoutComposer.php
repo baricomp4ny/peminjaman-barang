@@ -14,7 +14,6 @@ use Illuminate\View\View;
 class AdminLayoutComposer
 {
     private const LAPORAN = [
-        'peminjaman' => 'Transaksi',
         'pengembalian' => 'Pengembalian',
         'inventaris' => 'Inventaris',
         'keterlambatan' => 'Keterlambatan',
@@ -58,19 +57,18 @@ class AdminLayoutComposer
             ['label' => 'Data Peminjam', 'route' => 'admin.peminjam.index', 'aktif' => 'admin.peminjam.*', 'pola' => ['admin.peminjam.*'],
                 'deskripsi' => 'Pengelolaan identitas dan riwayat peminjaman setiap peminjam'],
             ['grup' => 'Transaksi', 'pola' => ['admin.ajuan.*', 'admin.peminjaman.*', 'admin.pengembalian.*', 'admin.riwayat.*', 'admin.jadwal'],
-                'deskripsi' => 'Pengelolaan pengajuan, peminjaman aktif, pengembalian, jadwal pemakaian, dan riwayat transaksi',
+                'deskripsi' => 'Pengelolaan pengajuan, peminjaman aktif & pengembalian, jadwal pemakaian, dan riwayat transaksi',
                 'badge' => true,
                 'items' => [
                     ['label' => 'Ajuan Peminjaman', 'route' => 'admin.ajuan.index', 'aktif' => 'admin.ajuan.*', 'badge' => true],
-                    ['label' => 'Peminjaman Aktif', 'route' => 'admin.peminjaman.index', 'aktif' => 'admin.peminjaman.*'],
-                    ['label' => 'Pengembalian', 'route' => 'admin.pengembalian.index', 'aktif' => 'admin.pengembalian.*'],
+                    ['label' => 'Peminjaman Aktif', 'route' => 'admin.peminjaman.index', 'aktif' => ['admin.peminjaman.*', 'admin.pengembalian.*']],
                     ['label' => 'Jadwal Pemakaian', 'route' => 'admin.jadwal', 'aktif' => 'admin.jadwal'],
                     ['label' => 'Riwayat Transaksi', 'route' => 'admin.riwayat.index', 'aktif' => 'admin.riwayat.*'],
                 ]],
             ['label' => 'Scan Barcode', 'route' => 'admin.scan.index', 'aktif' => 'admin.scan.*', 'pola' => ['admin.scan.*'],
                 'deskripsi' => 'Pemindaian barcode untuk mencatat penyerahan dan pengembalian barang'],
             ['grup' => 'Laporan', 'pola' => ['admin.laporan.*'],
-                'deskripsi' => 'Rekapitulasi transaksi, pengembalian, inventaris, keterlambatan, dan statistik pemakaian',
+                'deskripsi' => 'Rekapitulasi pengembalian, inventaris, keterlambatan, dan statistik pemakaian',
                 'items' => collect(self::LAPORAN)->map(fn ($label, $jenis) => [
                     'label' => $label,
                     'route' => 'admin.laporan.show',

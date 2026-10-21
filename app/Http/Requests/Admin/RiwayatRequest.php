@@ -21,6 +21,7 @@ class RiwayatRequest extends FormRequest
             'status' => ['nullable', Rule::enum(StatusPeminjaman::class)],
             'dari' => ['nullable', 'date'],
             'sampai' => ['nullable', 'date', 'after_or_equal:dari'],
+            'format' => ['nullable', 'in:pdf,excel'],
         ];
     }
 

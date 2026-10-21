@@ -64,9 +64,9 @@ Admin (sidebar, urutan & deskripsi sebagai subjudul halaman):
 - Dashboard — Ringkasan inventaris dan transaksi aktif
 - Data Barang (Jenis Barang, Unit & Kondisi, Kategori, Lokasi, Cetak Label Barcode) — Pengelolaan data barang, jenis, kategori, unit, kondisi, lokasi, serta barcode
 - Data Peminjam — Pengelolaan identitas dan riwayat peminjaman setiap peminjam
-- Transaksi (Ajuan Peminjaman + badge, Peminjaman Aktif, Pengembalian, Jadwal Pemakaian, Riwayat Transaksi) — Pengelolaan pengajuan, peminjaman aktif, pengembalian, jadwal pemakaian, dan riwayat transaksi
+- Transaksi (Ajuan Peminjaman + badge, Peminjaman Aktif [+ tombol Catat Pengembalian], Jadwal Pemakaian, Riwayat Transaksi [+ Unduh PDF/Excel]) — Pengelolaan pengajuan, peminjaman aktif & pengembalian, jadwal pemakaian, dan riwayat transaksi
 - Scan Barcode — Pemindaian barcode untuk mencatat penyerahan dan pengembalian barang
-- Laporan (Transaksi, Pengembalian, Inventaris, Keterlambatan, Statistik Pemakaian — PDF/Excel, filter tanggal) — Rekapitulasi transaksi, pengembalian, inventaris, keterlambatan, dan statistik pemakaian
+- Laporan (Pengembalian, Inventaris, Keterlambatan, Statistik Pemakaian — PDF/Excel, filter tanggal) — Rekapitulasi pengembalian, inventaris, keterlambatan, dan statistik pemakaian
 - Pengaturan (Data Admin, Aturan Peminjaman) — Pengelolaan data admin dan aturan peminjaman
 - avatar: profil, ganti password, logout
 Peminjam (navbar publik): Katalog Barang, Jadwal Alat, Ajukan Peminjaman, Cek Status; tautan Login Admin.
@@ -173,4 +173,8 @@ Responsif, menu aktif ditandai, pesan sukses/gagal jelas.
 - Tab Per Alat: terpakai/kapasitas per hari dari KetersediaanService (ajuan menunggu tidak dihitung). Tab Ringkasan Mingguan: tingkat pemakaian %, ajuan, unit diserahkan, kembali terlambat, sedang terlambat, 3 alat terpopuler.
 - Publik: tanpa nama peminjam, kode PJM, dan ajuan menunggu; sel kosong/sisa > 0 menaut ke /ajuan?barang_id=…&tanggal_pinjam=… (AjuanController mengisi tanggal; tanggal lampau diganti hari ini).
 - Warna: putih tersedia, gold menunggu (admin), marian-300 disetujui/dipesan, marian-800 dipinjam, red-600 terlambat, abu tidak tersedia.
+
+## Catatan desain (menu dirampingkan, disetujui)
+- Halaman/menu Transaksi → Pengembalian (route admin.pengembalian.index) dihapus; pencatatan tetap lewat tombol "Catat Pengembalian" di Peminjaman Aktif / detail transaksi / Scan (route pengembalian.create & store tetap). /admin/pengembalian → 404.
+- Laporan Transaksi (jenis "peminjaman") dihapus dari Laporan; diganti tombol Unduh PDF/Excel di Riwayat Transaksi (RiwayatController ?format=pdf|excel) yang mengikuti filter status, kata kunci, dan rentang tanggal. LaporanService::riwayat() + LaporanService::unduh() dipakai bersama halaman Laporan. /admin/laporan diarahkan ke laporan pengembalian.
 

@@ -79,10 +79,13 @@ class SemuaHalamanTest extends TestCase
             $this->get(route('admin.peminjaman.serah', $p))->assertStatus($p->status->value === 'disetujui' ? 200 : 302);
             $this->get(route('admin.pengembalian.create', $p))->assertStatus($p->status->value === 'dipinjam' ? 200 : 302);
         }
-        foreach (['peminjaman', 'pengembalian', 'inventaris', 'keterlambatan', 'statistik'] as $jenis) {
+        foreach (['pengembalian', 'inventaris', 'keterlambatan', 'statistik'] as $jenis) {
             $this->get(route('admin.laporan.show', ['jenis' => $jenis, 'format' => 'pdf']))->assertOk();
             $this->get(route('admin.laporan.show', ['jenis' => $jenis, 'format' => 'excel']))->assertOk();
         }
+
+        $this->get(route('admin.riwayat.index', ['format' => 'pdf']))->assertOk();
+        $this->get(route('admin.riwayat.index', ['format' => 'excel']))->assertOk();
 
         $this->assertGreaterThan(30, $dibuka);
     }

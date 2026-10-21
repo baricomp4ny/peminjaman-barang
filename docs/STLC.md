@@ -669,3 +669,13 @@ Hasil terakhir: **203 tes lulus**.
 
 Hasil terakhir: **208 tes lulus**.
 
+## 15. Menu dirampingkan (21 Okt 2026)
+
+| ID | Skenario | Langkah | Hasil yang diharapkan | J | Tes otomatis | Hasil aktual | Status |
+|---|---|---|---|---|---|---|---|
+| MR-01 | Menu Pengembalian dihapus | Buka sidebar; buka /admin/pengembalian | Tidak ada menu Pengembalian; URL 404; tombol "Catat Pengembalian" di Peminjaman Aktif | P/N | SchedulerNotifikasiLaporanTest | | |
+| MR-02 ★ | Unduh dari Riwayat | Riwayat → filter status Selesai → Unduh PDF / Excel | File berisi hanya transaksi sesuai filter, periode tercantum di kop | P | RiwayatUnduhTest | | |
+| MR-03 | Laporan Transaksi dihapus | Buka /admin/laporan/peminjaman | 404; menu Laporan tinggal 4 | N | SchedulerNotifikasiLaporanTest | | |
+
+Hasil terakhir: **209 tes lulus**.
+

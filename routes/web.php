@@ -73,7 +73,6 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/peminjaman/{peminjaman}/serah', [Admin\PeminjamanController::class, 'serahForm'])->name('peminjaman.serah');
     Route::post('/peminjaman/{peminjaman}/serah', [Admin\PeminjamanController::class, 'serahkan'])->name('peminjaman.serahkan');
 
-    Route::get('/pengembalian', [Admin\PengembalianController::class, 'index'])->name('pengembalian.index');
     Route::get('/pengembalian/{peminjaman}', [Admin\PengembalianController::class, 'create'])->name('pengembalian.create');
     Route::post('/pengembalian/{peminjaman}', [Admin\PengembalianController::class, 'store'])->name('pengembalian.store');
 
@@ -83,7 +82,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     // Laporan
     Route::get('/laporan', [Admin\LaporanController::class, 'index'])->name('laporan.index');
     Route::get('/laporan/{jenis}', [Admin\LaporanController::class, 'show'])
-        ->whereIn('jenis', ['peminjaman', 'pengembalian', 'inventaris', 'keterlambatan', 'statistik'])
+        ->whereIn('jenis', ['pengembalian', 'inventaris', 'keterlambatan', 'statistik'])
         ->name('laporan.show');
 
     // Pengaturan: data admin + aturan peminjaman

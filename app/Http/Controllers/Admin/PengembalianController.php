@@ -10,28 +10,11 @@ use App\Models\Peminjaman;
 use App\Services\KeterlambatanService;
 use App\Services\PeminjamanService;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\View\View;
 
 class PengembalianController extends Controller
 {
-    /** Pinjaman yang masih berjalan; yang terlambat ditampilkan paling atas. */
-    public function index(Request $request): View
-    {
-        $peminjaman = Peminjaman::with(['peminjam', 'detail.barang', 'peminjamanUnit'])
-            ->where('status', StatusPeminjaman::Dipinjam)
-            ->when($request->filled('q'), fn ($q) => $q->where(function ($q) use ($request) {
-                $q->where('kode_peminjaman', 'like', '%'.$request->q.'%')
-                    ->orWhereHas('peminjam', fn ($u) => $u->where('name', 'like', '%'.$request->q.'%'));
-            }))
-            ->orderBy('tanggal_rencana_kembali')
-            ->paginate(15)
-            ->withQueryString();
-
-        return view('admin.pengembalian.index', compact('peminjaman'));
-    }
-
     public function create(Peminjaman $peminjaman, KeterlambatanService $keterlambatan): View|RedirectResponse
     {
         if ($peminjaman->status !== StatusPeminjaman::Dipinjam) {

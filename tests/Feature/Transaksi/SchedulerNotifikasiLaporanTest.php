@@ -138,7 +138,7 @@ class SchedulerNotifikasiLaporanTest extends TestCase
         $p = $this->buatPeminjaman($this->peminjam, 'disetujui', '2026-10-02', '2026-10-05', [$b->id => 1]);
         $this->serahkanUnit($p, ['PRJ-001']);
 
-        foreach (['peminjaman', 'pengembalian', 'inventaris', 'keterlambatan', 'statistik'] as $jenis) {
+        foreach (['pengembalian', 'inventaris', 'keterlambatan', 'statistik'] as $jenis) {
             $this->actingAs($admin)->get("/admin/laporan/{$jenis}?dari=2026-10-01&sampai=2026-10-10")->assertOk();
 
             $pdf = $this->get("/admin/laporan/{$jenis}?dari=2026-10-01&sampai=2026-10-10&format=pdf");
@@ -181,9 +181,11 @@ class SchedulerNotifikasiLaporanTest extends TestCase
     {
         $admin = User::factory()->admin()->create();
 
-        $this->actingAs($admin)->get('/admin/laporan/peminjaman?dari=2026-10-10&sampai=2026-10-01')->assertSessionHasErrors('sampai');
+        $this->actingAs($admin)->get('/admin/laporan/pengembalian?dari=2026-10-10&sampai=2026-10-01')->assertSessionHasErrors('sampai');
+        // Laporan Transaksi dipindah ke Riwayat
+        $this->get('/admin/laporan/peminjaman')->assertNotFound();
         $this->get('/admin/laporan/tidakada')->assertNotFound();
-        $this->actingAs($this->peminjam)->get('/admin/laporan/peminjaman')->assertForbidden();
+        $this->actingAs($this->peminjam)->get('/admin/laporan/pengembalian')->assertForbidden();
     }
 
     public function test_dashboard_dan_halaman_transaksi_terisi(): void
@@ -197,7 +199,9 @@ class SchedulerNotifikasiLaporanTest extends TestCase
         foreach (['disetujui', 'dipinjam', 'terlambat'] as $tab) {
             $this->get("/admin/peminjaman?tab={$tab}")->assertOk();
         }
-        $this->get('/admin/pengembalian')->assertOk();
+        // Menu Pengembalian dihapus; pencatatan lewat Peminjaman Aktif
+        $this->get('/admin/pengembalian')->assertNotFound();
+        $this->get('/admin/peminjaman?tab=dipinjam')->assertSee('Catat Pengembalian');
         $this->get('/admin/riwayat?status=selesai')->assertOk();
         foreach (Peminjaman::all() as $p) {
             $this->get("/admin/peminjaman/{$p->id}")->assertOk();

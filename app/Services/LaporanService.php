@@ -2,11 +2,16 @@
 
 namespace App\Services;
 
+use App\Exports\LaporanExport;
 use App\Models\Barang;
 use App\Models\Peminjaman;
 use App\Models\PeminjamanUnit;
 use App\Models\UnitBarang;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
+use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Menyusun data laporan dalam bentuk netral (judul, kolom, baris, ringkasan)
@@ -15,7 +20,6 @@ use Illuminate\Support\Carbon;
 class LaporanService
 {
     public const JENIS = [
-        'peminjaman' => 'Laporan Peminjaman',
         'pengembalian' => 'Laporan Pengembalian',
         'inventaris' => 'Laporan Inventaris Barang',
         'keterlambatan' => 'Laporan Keterlambatan',
@@ -33,7 +37,6 @@ class LaporanService
         $sampai = $sampai->copy()->endOfDay();
 
         $data = match ($jenis) {
-            'peminjaman' => $this->peminjaman($dari, $sampai),
             'pengembalian' => $this->pengembalian($dari, $sampai),
             'inventaris' => $this->inventaris(),
             'keterlambatan' => $this->keterlambatan($dari, $sampai),
@@ -49,14 +52,17 @@ class LaporanService
         ], $data);
     }
 
-    private function peminjaman(Carbon $dari, Carbon $sampai): array
+    /**
+     * Laporan riwayat transaksi dari hasil filter halaman Riwayat (status, kata kunci, rentang tanggal).
+     *
+     * @param  Collection<int, Peminjaman>  $data
+     */
+    public function riwayat(Collection $data, string $periode): array
     {
-        $data = Peminjaman::with(['peminjam', 'detail.barang'])
-            ->whereBetween('tanggal_pinjam', [$dari->toDateString(), $sampai->toDateString()])
-            ->orderBy('tanggal_pinjam')
-            ->get();
-
         return [
+            'jenis' => 'riwayat',
+            'judul' => 'Laporan Riwayat Transaksi',
+            'periode' => $periode,
             'kolom' => ['No', 'Kode', 'Peminjam', 'No. Identitas', 'Barang', 'Tgl Pinjam', 'Rencana Kembali', 'Status'],
             'baris' => $data->values()->map(fn ($p, $i) => [
                 $i + 1, $p->kode_peminjaman, $p->peminjam->name, $p->peminjam->nomor_identitas, $p->ringkasanBarang(),
@@ -67,6 +73,16 @@ class LaporanService
                 $data->countBy(fn ($r) => $r->status->value)->mapWithKeys(fn ($n, $s) => ['Status '.$s => $n])->all()
             ),
         ];
+    }
+
+    /** Unduh laporan sebagai PDF (A4 landscape) atau Excel; dipakai halaman Laporan & Riwayat. */
+    public function unduh(array $laporan, string $format): Response
+    {
+        $namaFile = 'laporan-'.$laporan['jenis'].'-'.now()->format('Ymd-His');
+
+        return $format === 'excel'
+            ? Excel::download(new LaporanExport($laporan), $namaFile.'.xlsx')
+            : Pdf::loadView('admin.laporan.pdf', ['laporan' => $laporan])->setPaper('a4', 'landscape')->download($namaFile.'.pdf');
     }
 
     private function pengembalian(Carbon $dari, Carbon $sampai): array
