@@ -31,4 +31,14 @@ class Barang extends Model
     {
         return $this->hasMany(PeminjamanDetail::class);
     }
+
+    /** Alasan jenis barang tidak boleh dihapus (null = boleh). */
+    public function alasanTidakBisaDihapus(): ?string
+    {
+        return match (true) {
+            $this->unit()->exists() => 'masih memiliki unit',
+            $this->peminjamanDetail()->exists() => 'tercatat di riwayat peminjaman',
+            default => null,
+        };
+    }
 }

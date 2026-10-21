@@ -19,4 +19,10 @@ class Kategori extends Model
     {
         return $this->hasMany(Barang::class);
     }
+
+    /** Alasan kategori tidak boleh dihapus (null = boleh). Dipakai hapus satuan & hapus banyak. */
+    public function alasanTidakBisaDihapus(): ?string
+    {
+        return $this->barang()->exists() ? 'masih dipakai oleh jenis barang' : null;
+    }
 }

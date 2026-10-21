@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Enums\Peran;
 use App\Enums\StatusAkun;
+use App\Http\Controllers\Concerns\HapusBanyak;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\AkunAdminRequest;
 use App\Models\User;
@@ -15,6 +16,8 @@ use Illuminate\View\View;
 /** Pengaturan > Data Admin: akun yang boleh login ke panel admin. Parameter {akunAdmin} hanya cocok dengan role admin. */
 class AkunAdminController extends Controller
 {
+    use HapusBanyak;
+
     public function index(): View
     {
         $admin = User::where('role', Peran::Admin)
@@ -67,21 +70,18 @@ class AkunAdminController extends Controller
 
     public function destroy(Request $request, User $akunAdmin): RedirectResponse
     {
-        if ($akunAdmin->is($request->user())) {
-            return back()->with('error', 'Anda tidak bisa menghapus akun sendiri.');
-        }
-
-        // Admin yang pernah memverifikasi ajuan disimpan demi jejak audit; cukup dinonaktifkan
-        if ($akunAdmin->verifikasi()->exists()) {
-            return back()->with('error', "Akun \"{$akunAdmin->name}\" pernah memverifikasi ajuan sehingga tidak bisa dihapus. Nonaktifkan saja.");
-        }
-
-        if ($akunAdmin->isAktif() && User::where('role', Peran::Admin)->where('status', StatusAkun::Aktif)->count() <= 1) {
-            return back()->with('error', 'Minimal harus ada satu admin aktif.');
+        // Akun sendiri, admin yang pernah memverifikasi (jejak audit), atau admin aktif terakhir tidak boleh dihapus
+        if ($alasan = $akunAdmin->alasanTidakBisaDihapus($request->user())) {
+            return back()->with('error', "Akun \"{$akunAdmin->name}\" tidak bisa dihapus karena {$alasan}.");
         }
 
         $akunAdmin->delete();
 
         return redirect()->route('admin.akun-admin.index')->with('success', "Akun admin \"{$akunAdmin->name}\" berhasil dihapus.");
+    }
+
+    public function hapusTerpilih(Request $request): RedirectResponse
+    {
+        return $this->hapusBanyak($request, User::admin(), 'akun admin', fn ($a) => $a->name, fn ($a) => $a->alasanTidakBisaDihapus($request->user()));
     }
 }

@@ -5,7 +5,7 @@
         <x-link-button :href="route('admin.barang.create')">+ Tambah Jenis Barang</x-link-button>
     </x-admin.judul>
 
-    <div class="rounded-3xl bg-white shadow-lembut ring-1 ring-marian-100">
+    <div class="rounded-3xl bg-white shadow-lembut ring-1 ring-marian-100" x-data="pilihBanyak(@js($barang->pluck('id')))">
         <form method="GET" class="flex flex-col gap-2 border-b p-4 sm:flex-row">
             <x-text-input name="q" :value="request('q')" placeholder="Cari nama atau kode…" class="w-full sm:w-72" />
             <x-select name="kategori_id" class="w-full sm:w-56">
@@ -17,10 +17,13 @@
             <x-secondary-button type="submit">Filter</x-secondary-button>
         </form>
 
+        <x-admin.bilah-pilih :aksi="route('admin.barang.hapus-terpilih')" sebutan="jenis barang" />
+
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-marian-100 text-sm">
                 <thead class="bg-marian-50 text-left text-xs font-semibold uppercase text-marian-500">
                     <tr>
+                        <th class="w-8 px-4 py-3"><input type="checkbox" class="rounded border-marian-300 text-marian-800" aria-label="Pilih semua di halaman ini" :checked="semuaDipilih" :indeterminate="sebagianDipilih" @change="pilihSemua($event.target.checked)"></th>
                         <th class="px-4 py-3">Barang</th>
                         <th class="px-4 py-3">Kode</th>
                         <th class="px-4 py-3">Kategori</th>
@@ -31,6 +34,7 @@
                 <tbody class="divide-y divide-marian-50">
                     @forelse ($barang as $b)
                         <tr>
+                            <td class="px-4 py-3"><input type="checkbox" value="{{ $b->id }}" x-model="dipilih" class="rounded border-marian-300 text-marian-800" aria-label="Pilih {{ $b->nama }}"></td>
                             <td class="px-4 py-3">
                                 <div class="flex items-center gap-3">
                                     @if ($b->foto)
@@ -51,7 +55,7 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="5" class="px-4 py-8 text-center text-marian-500">Belum ada jenis barang{{ request()->hasAny(['q', 'kategori_id']) ? ' yang cocok dengan filter' : '' }}.</td></tr>
+                        <tr><td colspan="6" class="px-4 py-8 text-center text-marian-500">Belum ada jenis barang{{ request()->hasAny(['q', 'kategori_id']) ? ' yang cocok dengan filter' : '' }}.</td></tr>
                     @endforelse
                 </tbody>
             </table>

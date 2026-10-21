@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Concerns\HapusBanyak;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\PeminjamRequest;
 use App\Models\User;
@@ -13,6 +14,8 @@ use Illuminate\View\View;
 /** Data peminjam (dibuat otomatis lewat ajuan; admin hanya melihat, mengubah, menonaktifkan). Parameter {peminjam} hanya cocok dengan user ber-role peminjam (lihat RouteServiceProvider). */
 class PeminjamController extends Controller
 {
+    use HapusBanyak;
+
     public function index(Request $request): View
     {
         $peminjam = User::peminjam()
@@ -66,13 +69,18 @@ class PeminjamController extends Controller
     public function destroy(User $peminjam): RedirectResponse
     {
         // Peminjam dengan riwayat tidak dihapus agar laporan tetap utuh; cukup dinonaktifkan
-        if ($peminjam->peminjaman()->exists()) {
-            return back()->with('error', "Peminjam \"{$peminjam->name}\" tidak bisa dihapus karena memiliki riwayat peminjaman. Nonaktifkan akunnya saja.");
+        if ($alasan = $peminjam->alasanTidakBisaDihapus()) {
+            return back()->with('error', "Peminjam \"{$peminjam->name}\" tidak bisa dihapus karena {$alasan}. Nonaktifkan akunnya saja.");
         }
 
         $peminjam->delete();
 
         return redirect()->route('admin.peminjam.index')
             ->with('success', "Peminjam \"{$peminjam->name}\" berhasil dihapus.");
+    }
+
+    public function hapusTerpilih(Request $request): RedirectResponse
+    {
+        return $this->hapusBanyak($request, User::peminjam(), 'peminjam', fn ($p) => $p->name, fn ($p) => $p->alasanTidakBisaDihapus());
     }
 }

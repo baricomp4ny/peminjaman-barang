@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\StatusUnit;
+use App\Http\Controllers\Concerns\HapusBanyak;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\BarangRequest;
 use App\Models\Barang;
@@ -14,6 +15,8 @@ use Illuminate\View\View;
 
 class BarangController extends Controller
 {
+    use HapusBanyak;
+
     public function index(Request $request): View
     {
         $barang = Barang::query()
@@ -97,12 +100,8 @@ class BarangController extends Controller
     public function destroy(Barang $barang): RedirectResponse
     {
         // Jenis barang yang sudah punya unit atau pernah diajukan tidak boleh dihapus
-        if ($barang->unit()->exists()) {
-            return back()->with('error', "Jenis barang \"{$barang->nama}\" tidak bisa dihapus karena masih memiliki unit.");
-        }
-
-        if ($barang->peminjamanDetail()->exists()) {
-            return back()->with('error', "Jenis barang \"{$barang->nama}\" tidak bisa dihapus karena tercatat di riwayat peminjaman.");
+        if ($alasan = $barang->alasanTidakBisaDihapus()) {
+            return back()->with('error', "Jenis barang \"{$barang->nama}\" tidak bisa dihapus karena {$alasan}.");
         }
 
         $this->hapusFoto($barang);
@@ -110,6 +109,12 @@ class BarangController extends Controller
 
         return redirect()->route('admin.barang.index')
             ->with('success', "Jenis barang \"{$barang->nama}\" berhasil dihapus.");
+    }
+
+    public function hapusTerpilih(Request $request): RedirectResponse
+    {
+        return $this->hapusBanyak($request, Barang::query(), 'jenis barang', fn ($b) => $b->nama,
+            fn ($b) => $b->alasanTidakBisaDihapus(), fn ($b) => $this->hapusFoto($b));
     }
 
     private function hapusFoto(Barang $barang): void

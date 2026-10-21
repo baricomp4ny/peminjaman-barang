@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\KondisiUnit;
 use App\Enums\StatusUnit;
 use App\Exceptions\PeminjamanException;
+use App\Http\Controllers\Concerns\HapusBanyak;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\PerbaikanSelesaiRequest;
 use App\Http\Requests\Admin\UnitBarangStoreRequest;
@@ -21,6 +22,8 @@ use Illuminate\View\View;
 
 class UnitBarangController extends Controller
 {
+    use HapusBanyak;
+
     public function index(Request $request): View
     {
         $unit = UnitBarang::query()
@@ -111,12 +114,17 @@ class UnitBarangController extends Controller
     public function destroy(UnitBarang $unit): RedirectResponse
     {
         // Unit yang pernah dipinjam tetap disimpan demi riwayat; ubah statusnya saja
-        if ($unit->peminjamanUnit()->exists()) {
-            return back()->with('error', "Unit {$unit->kode_unit} tidak bisa dihapus karena tercatat di riwayat peminjaman. Ubah statusnya bila tidak dipakai lagi.");
+        if ($alasan = $unit->alasanTidakBisaDihapus()) {
+            return back()->with('error', "Unit {$unit->kode_unit} tidak bisa dihapus karena {$alasan}. Ubah statusnya bila tidak dipakai lagi.");
         }
 
         $unit->delete();
 
         return back()->with('success', "Unit {$unit->kode_unit} berhasil dihapus.");
+    }
+
+    public function hapusTerpilih(Request $request): RedirectResponse
+    {
+        return $this->hapusBanyak($request, UnitBarang::query(), 'unit', fn ($u) => $u->kode_unit, fn ($u) => $u->alasanTidakBisaDihapus());
     }
 }

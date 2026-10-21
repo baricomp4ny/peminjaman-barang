@@ -19,4 +19,10 @@ class Lokasi extends Model
     {
         return $this->hasMany(UnitBarang::class);
     }
+
+    /** Alasan lokasi tidak boleh dihapus (null = boleh). */
+    public function alasanTidakBisaDihapus(): ?string
+    {
+        return $this->unitBarang()->exists() ? 'masih ada unit barang di lokasi ini' : null;
+    }
 }

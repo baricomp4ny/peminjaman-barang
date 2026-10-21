@@ -84,4 +84,10 @@ class UnitBarang extends Model
     {
         return $this->kondisi === KondisiUnit::Baik && $this->status === StatusUnit::Tersedia;
     }
+
+    /** Unit yang pernah dipinjam disimpan demi riwayat (null = boleh dihapus). */
+    public function alasanTidakBisaDihapus(): ?string
+    {
+        return $this->peminjamanUnit()->exists() ? 'tercatat di riwayat peminjaman' : null;
+    }
 }

@@ -7,7 +7,7 @@
         <x-link-button :href="route('admin.unit.create')">+ Tambah Unit</x-link-button>
     </x-admin.judul>
 
-    <div class="rounded-3xl bg-white shadow-lembut ring-1 ring-marian-100">
+    <div class="rounded-3xl bg-white shadow-lembut ring-1 ring-marian-100" x-data="pilihBanyak(@js($unit->pluck('id')))">
         <form method="GET" class="grid gap-2 border-b p-4 sm:grid-cols-2 lg:grid-cols-5">
             <x-text-input name="q" :value="request('q')" placeholder="Cari kode unit…" />
             <x-select name="barang_id">
@@ -31,19 +31,17 @@
             <x-secondary-button type="submit" class="justify-center">Filter</x-secondary-button>
         </form>
 
-        {{-- Checkbox di tabel memakai atribut form="form-label" karena form hapus ada di dalam tabel --}}
-        <form id="form-label" method="GET" action="{{ route('admin.unit.label') }}" target="_blank"
-              x-data="{ n: 0 }" @change="n = document.querySelectorAll('input[form=form-label]:checked').length"
-              class="flex items-center gap-3 border-b px-4 py-2 text-sm">
-            <span class="text-marian-500" x-text="n + ' unit dipilih'"></span>
-            <x-secondary-button type="submit" x-bind:disabled="n === 0" class="disabled:opacity-50">Cetak label terpilih</x-secondary-button>
-        </form>
+        {{-- Checkbox tabel dipakai bersama: Cetak label (form GET, atribut form="form-label") & Hapus terpilih --}}
+        <form id="form-label" method="GET" action="{{ route('admin.unit.label') }}" target="_blank" class="hidden"></form>
+        <x-admin.bilah-pilih :aksi="route('admin.unit.hapus-terpilih')" sebutan="unit">
+            <button type="submit" form="form-label" class="rounded-full bg-white px-4 py-1.5 text-xs font-bold text-marian-800 ring-1 ring-marian-200 hover:bg-marian-50">Cetak label terpilih</button>
+        </x-admin.bilah-pilih>
 
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-marian-100 text-sm">
                 <thead class="bg-marian-50 text-left text-xs font-semibold uppercase text-marian-500">
                     <tr>
-                        <th class="w-8 px-4 py-3"><span class="sr-only">Pilih</span></th>
+                        <th class="w-8 px-4 py-3"><input type="checkbox" class="rounded border-marian-300 text-marian-800" aria-label="Pilih semua di halaman ini" :checked="semuaDipilih" :indeterminate="sebagianDipilih" @change="pilihSemua($event.target.checked)"></th>
                         <th class="px-4 py-3">Kode Unit</th>
                         <th class="px-4 py-3">Jenis Barang</th>
                         <th class="px-4 py-3">Lokasi</th>
@@ -56,7 +54,7 @@
                 <tbody class="divide-y divide-marian-50">
                     @forelse ($unit as $u)
                         <tr>
-                            <td class="px-4 py-3"><input type="checkbox" form="form-label" name="unit[]" value="{{ $u->id }}" class="rounded border-marian-200 text-indigo-600" aria-label="Pilih {{ $u->kode_unit }}" onchange="document.getElementById('form-label').dispatchEvent(new Event('change'))"></td>
+                            <td class="px-4 py-3"><input type="checkbox" form="form-label" name="unit[]" value="{{ $u->id }}" x-model="dipilih" class="rounded border-marian-300 text-marian-800" aria-label="Pilih {{ $u->kode_unit }}"></td>
                             <td class="whitespace-nowrap px-4 py-3 font-mono font-medium">{{ $u->kode_unit }}</td>
                             <td class="px-4 py-3"><a href="{{ route('admin.barang.show', $u->barang_id) }}" class="hover:text-indigo-600">{{ $u->barang->nama }}</a></td>
                             <td class="px-4 py-3">{{ $u->lokasi->nama }}</td>

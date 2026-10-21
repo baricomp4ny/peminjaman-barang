@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Concerns\HapusBanyak;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\KategoriRequest;
 use App\Models\Kategori;
@@ -11,6 +12,8 @@ use Illuminate\View\View;
 
 class KategoriController extends Controller
 {
+    use HapusBanyak;
+
     public function index(Request $request): View
     {
         $kategori = Kategori::query()
@@ -52,13 +55,18 @@ class KategoriController extends Controller
     public function destroy(Kategori $kategori): RedirectResponse
     {
         // Kategori yang masih dipakai jenis barang tidak boleh dihapus
-        if ($kategori->barang()->exists()) {
-            return back()->with('error', "Kategori \"{$kategori->nama}\" tidak bisa dihapus karena masih dipakai oleh jenis barang.");
+        if ($alasan = $kategori->alasanTidakBisaDihapus()) {
+            return back()->with('error', "Kategori \"{$kategori->nama}\" tidak bisa dihapus karena {$alasan}.");
         }
 
         $kategori->delete();
 
         return redirect()->route('admin.kategori.index')
             ->with('success', "Kategori \"{$kategori->nama}\" berhasil dihapus.");
+    }
+
+    public function hapusTerpilih(Request $request): RedirectResponse
+    {
+        return $this->hapusBanyak($request, Kategori::query(), 'kategori', fn ($k) => $k->nama, fn ($k) => $k->alasanTidakBisaDihapus());
     }
 }

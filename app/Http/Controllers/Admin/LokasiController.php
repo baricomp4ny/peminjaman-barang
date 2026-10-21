@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Concerns\HapusBanyak;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\LokasiRequest;
 use App\Models\Lokasi;
@@ -11,6 +12,8 @@ use Illuminate\View\View;
 
 class LokasiController extends Controller
 {
+    use HapusBanyak;
+
     public function index(Request $request): View
     {
         $lokasi = Lokasi::query()
@@ -55,13 +58,18 @@ class LokasiController extends Controller
     public function destroy(Lokasi $lokasi): RedirectResponse
     {
         // Lokasi yang masih menyimpan unit tidak boleh dihapus
-        if ($lokasi->unitBarang()->exists()) {
-            return back()->with('error', "Lokasi \"{$lokasi->nama}\" tidak bisa dihapus karena masih ada unit barang di lokasi ini.");
+        if ($alasan = $lokasi->alasanTidakBisaDihapus()) {
+            return back()->with('error', "Lokasi \"{$lokasi->nama}\" tidak bisa dihapus karena {$alasan}.");
         }
 
         $lokasi->delete();
 
         return redirect()->route('admin.lokasi.index')
             ->with('success', "Lokasi \"{$lokasi->nama}\" berhasil dihapus.");
+    }
+
+    public function hapusTerpilih(Request $request): RedirectResponse
+    {
+        return $this->hapusBanyak($request, Lokasi::query(), 'lokasi', fn ($l) => $l->nama, fn ($l) => $l->alasanTidakBisaDihapus());
     }
 }

@@ -55,6 +55,13 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/unit/{unit}/qr', [Admin\QrController::class, 'unit'])->name('unit.qr');
 
     // Data Barang & Data Peminjam
+    // Hapus banyak dari checkbox "pilih banyak" (didaftarkan sebelum resource agar tidak dianggap {id})
+    Route::delete('/kategori/hapus-terpilih', [Admin\KategoriController::class, 'hapusTerpilih'])->name('kategori.hapus-terpilih');
+    Route::delete('/lokasi/hapus-terpilih', [Admin\LokasiController::class, 'hapusTerpilih'])->name('lokasi.hapus-terpilih');
+    Route::delete('/barang/hapus-terpilih', [Admin\BarangController::class, 'hapusTerpilih'])->name('barang.hapus-terpilih');
+    Route::delete('/unit/hapus-terpilih', [Admin\UnitBarangController::class, 'hapusTerpilih'])->name('unit.hapus-terpilih');
+    Route::delete('/peminjam/hapus-terpilih', [Admin\PeminjamController::class, 'hapusTerpilih'])->name('peminjam.hapus-terpilih');
+    Route::delete('/pengaturan/admin/hapus-terpilih', [Admin\AkunAdminController::class, 'hapusTerpilih'])->name('akun-admin.hapus-terpilih');
     Route::resource('kategori', Admin\KategoriController::class)->except('show');
     Route::resource('lokasi', Admin\LokasiController::class)->except('show');
     Route::resource('barang', Admin\BarangController::class);

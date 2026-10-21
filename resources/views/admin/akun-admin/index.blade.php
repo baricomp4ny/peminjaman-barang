@@ -3,11 +3,14 @@
         <x-link-button :href="route('admin.akun-admin.create')">+ Tambah Admin</x-link-button>
     </x-admin.judul>
 
-    <div class="rounded-3xl bg-white shadow-lembut ring-1 ring-marian-100">
+    <div class="rounded-3xl bg-white shadow-lembut ring-1 ring-marian-100" x-data="pilihBanyak(@js($admin->reject(fn ($a) => $a->is(auth()->user()))->pluck('id')->values()))">
+        <x-admin.bilah-pilih :aksi="route('admin.akun-admin.hapus-terpilih')" sebutan="akun admin" />
+
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-marian-100 text-sm">
                 <thead class="bg-marian-50 text-left text-xs font-semibold uppercase text-marian-500">
                     <tr>
+                        <th class="w-8 px-4 py-3"><input type="checkbox" class="rounded border-marian-300 text-marian-800" aria-label="Pilih semua di halaman ini" :checked="semuaDipilih" :indeterminate="sebagianDipilih" @change="pilihSemua($event.target.checked)"></th>
                         <th class="px-4 py-3">Nama</th>
                         <th class="px-4 py-3">Email</th>
                         <th class="px-4 py-3">No. HP</th>
@@ -19,6 +22,7 @@
                 <tbody class="divide-y divide-marian-50">
                     @foreach ($admin as $a)
                         <tr>
+                            <td class="px-4 py-3">@if (! $a->is(auth()->user()))<input type="checkbox" value="{{ $a->id }}" x-model="dipilih" class="rounded border-marian-300 text-marian-800" aria-label="Pilih {{ $a->name }}">@endif</td>
                             <td class="px-4 py-3 font-medium text-marian-900">
                                 {{ $a->name }}
                                 @if ($a->is(auth()->user())) <span class="ms-1 rounded bg-indigo-100 px-1.5 text-xs text-indigo-700">Anda</span> @endif

@@ -105,4 +105,23 @@ class User extends Authenticatable
     {
         return $this->status === StatusAkun::Aktif;
     }
+
+    /**
+     * Alasan akun tidak boleh dihapus (null = boleh).
+     * Peminjam: punya riwayat. Admin: akun sendiri, pernah memverifikasi, atau admin aktif terakhir.
+     */
+    public function alasanTidakBisaDihapus(?User $oleh = null): ?string
+    {
+        if (! $this->isAdmin()) {
+            return $this->peminjaman()->exists() ? 'memiliki riwayat peminjaman' : null;
+        }
+
+        return match (true) {
+            $oleh !== null && $this->is($oleh) => 'akun Anda sendiri',
+            // Disimpan demi jejak audit; cukup dinonaktifkan
+            $this->verifikasi()->exists() => 'pernah memverifikasi ajuan',
+            $this->isAktif() && self::admin()->where('status', StatusAkun::Aktif)->count() <= 1 => 'harus ada minimal satu admin aktif',
+            default => null,
+        };
+    }
 }
