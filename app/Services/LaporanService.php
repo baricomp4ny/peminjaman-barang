@@ -7,6 +7,7 @@ use App\Models\Barang;
 use App\Models\Peminjaman;
 use App\Models\PeminjamanUnit;
 use App\Models\UnitBarang;
+use App\Support\WhatsApp;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -16,6 +17,7 @@ use Symfony\Component\HttpFoundation\Response;
 /**
  * Menyusun data laporan dalam bentuk netral (judul, kolom, baris, ringkasan)
  * supaya tampilan web, PDF, dan Excel memakai isi yang sama persis.
+ * Kunci "web" hanya untuk halaman: kartu angka, kolom utama per baris, dan tautan aksi per baris.
  */
 class LaporanService
 {
@@ -29,7 +31,7 @@ class LaporanService
     public function __construct(private KeterlambatanService $keterlambatan) {}
 
     /**
-     * @return array{jenis:string, judul:string, periode:string, kolom:array<string>, baris:array<array>, ringkasan:array<string, string|int>}
+     * @return array{jenis:string, judul:string, periode:string, kolom:array<string>, baris:array<array>, ringkasan:array<string, string|int>, web:array}
      */
     public function buat(string $jenis, Carbon $dari, Carbon $sampai): array
     {
@@ -106,6 +108,19 @@ class LaporanService
                 'Hilang' => $data->where('kondisi_kembali', 'hilang')->count(),
                 'Kembali terlambat' => $data->where('hari_terlambat', '>', 0)->count().' unit',
             ],
+            'web' => $this->web(
+                kartu: [
+                    ['Unit dikembalikan', $data->count(), false],
+                    ['Kondisi baik', $data->where('kondisi_kembali', 'baik')->count(), false],
+                    ['Rusak / hilang', $data->whereIn('kondisi_kembali', ['rusak', 'hilang'])->count(), true],
+                    ['Kembali terlambat', $data->where('hari_terlambat', '>', 0)->count(), true],
+                ],
+                utama: [1 => '1.2fr', 2 => '1.6fr', 3 => '1fr', 6 => '1.2fr', 7 => '1fr'],
+                pil: [7],
+                aksi: $data->values()->map(fn ($u) => [
+                    ['Buka transaksi', route('admin.peminjaman.show', $u->peminjaman_id)],
+                ])->all(),
+            ),
         ];
     }
 
@@ -131,6 +146,19 @@ class LaporanService
                 $data->countBy(fn ($r) => $r->status->value)->mapWithKeys(fn ($n, $s) => ['Status '.$s => $n])->all(),
                 $perTahun->all(),
             ),
+            'web' => $this->web(
+                kartu: [
+                    ['Total unit', $data->count(), false],
+                    ['Kondisi baik', $data->where('kondisi', 'baik')->count(), false],
+                    ['Kondisi rusak', $data->where('kondisi', 'rusak')->count(), true],
+                    ['Kondisi hilang', $data->where('kondisi', 'hilang')->count(), true],
+                ],
+                utama: [1 => '1fr', 2 => '1.8fr', 4 => '1.5fr', 5 => '1fr', 7 => '1fr'],
+                pil: [5, 7],
+                aksi: $data->values()->map(fn ($u) => [
+                    [$u->status->value === 'perbaikan' ? 'Buka unit & perbaikan' : 'Buka unit', route('admin.unit.edit', $u)],
+                ])->all(),
+            ),
         ];
     }
 
@@ -142,12 +170,13 @@ class LaporanService
             ->whereBetween('dikembalikan_pada', [$dari, $sampai])
             ->get();
 
-        $masihTerlambat = PeminjamanUnit::with(['peminjaman.peminjam', 'unitBarang.barang'])
+        $masihTerlambat = PeminjamanUnit::with(['peminjaman.peminjam', 'peminjaman.detail.barang', 'unitBarang.barang'])
             ->whereNull('dikembalikan_pada')
             ->whereHas('peminjaman', fn ($q) => $q->terlambat())
             ->get();
 
-        $baris = $kembaliTerlambat->concat($masihTerlambat)->values()->map(function ($u, $i) {
+        $semua = $kembaliTerlambat->concat($masihTerlambat)->values();
+        $baris = $semua->map(function ($u, $i) {
             $p = $u->peminjaman;
             $belum = $u->dikembalikan_pada === null;
             $hari = $belum ? $this->keterlambatan->hariTerlambat($p->tanggal_rencana_kembali, today()) : $u->hari_terlambat;
@@ -166,6 +195,22 @@ class LaporanService
                 'Kembali terlambat (periode ini)' => $kembaliTerlambat->count().' unit',
                 'Masih terlambat (hari ini)' => $masihTerlambat->count().' unit',
             ],
+            'web' => $this->web(
+                kartu: [
+                    ['Kembali terlambat', $kembaliTerlambat->count(), false],
+                    ['Masih terlambat', $masihTerlambat->count(), true],
+                    ['Peminjam terlibat', $semua->pluck('peminjaman.user_id')->unique()->count(), false],
+                    ['Terlambat terlama (hari)', (int) collect($baris)->map(fn ($b) => (int) $b[8])->max(), true],
+                ],
+                utama: [1 => '1.3fr', 2 => '1.5fr', 5 => '1.5fr', 6 => '1fr', 8 => '1fr'],
+                pil: [8],
+                // Peminjaman yang masih terlambat bisa langsung diingatkan lewat WhatsApp
+                aksi: $semua->map(fn ($u) => array_values(array_filter([
+                    ['Buka transaksi', route('admin.peminjaman.show', $u->peminjaman_id)],
+                    $u->dikembalikan_pada === null && ($wa = WhatsApp::tautan($u->peminjaman->peminjam->no_hp, WhatsApp::pesanTerlambat($u->peminjaman)))
+                        ? ['WhatsApp', $wa, 'wa'] : null,
+                ])))->all(),
+            ),
         ];
     }
 
@@ -213,6 +258,32 @@ class LaporanService
                 'Paling sering dipinjam' => $nama($data->take(3)),
                 'Paling jarang dipinjam' => $nama($data->reverse()->take(3)),
             ],
+            'web' => $this->web(
+                kartu: [
+                    ['Total transaksi', $pakai->sum('transaksi'), false],
+                    ['Unit dipinjam', $pakai->sum('unit'), false],
+                    ['Jenis alat dipakai', $data->where('unit', '>', 0)->count(), false],
+                    ['Tidak pernah dipinjam', $data->where('unit', 0)->count(), true],
+                ],
+                utama: [0 => '0.7fr', 2 => '1.8fr', 3 => '1.6fr', 4 => '1fr', 5 => '1fr'],
+                pil: [6],
+                aksi: $data->map(fn ($r) => [
+                    ['Lihat jadwal alat', route('admin.jadwal', ['barang_id' => $r['barang']->id])],
+                ])->all(),
+            ),
         ];
+    }
+
+    /**
+     * Pengaturan tampilan web.
+     *
+     * @param  array<int, array{0:string, 1:int, 2:bool}>  $kartu  [label, angka, perlu perhatian?]
+     * @param  array<int, string>  $utama  indeks kolom yang tampil di baris => lebar kolom grid
+     * @param  array<int, int>  $pil  indeks kolom yang ditampilkan sebagai pil berwarna
+     * @param  array<int, array>  $aksi  per baris: [[label, url, jenis?], ...]
+     */
+    private function web(array $kartu, array $utama, array $pil, array $aksi): array
+    {
+        return compact('kartu', 'utama', 'pil', 'aksi');
     }
 }
