@@ -40,7 +40,7 @@
     </div>
 
     <div class="mt-6 grid items-start gap-6 lg:[grid-template-columns:minmax(0,1fr)_20rem]"
-         x-data="formAjuan(@js($barisAwal), @js(old('tanggal_pinjam', now()->toDateString())), @js(old('tanggal_rencana_kembali', now()->addDay()->toDateString())), {{ $maksUnit }}, @js($namaBarang))"
+         x-data="formAjuan(@js($barisAwal), @js(old('tanggal_pinjam', $tanggalAwal)), @js(old('tanggal_rencana_kembali', $tanggalKembaliAwal)), {{ $maksUnit }}, @js($namaBarang))"
          x-init="cekStok()">
 
         <form method="POST" action="{{ route('peminjam.ajuan.store') }}" enctype="multipart/form-data" class="space-y-6 rounded-5xl bg-white p-5 shadow-lembut ring-1 ring-marian-100 sm:p-8">

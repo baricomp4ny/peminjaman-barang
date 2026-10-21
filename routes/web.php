@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Route;
 Route::name('peminjam.')->group(function () {
     Route::get('/', [Peminjam\KatalogController::class, 'index'])->name('katalog.index');
     Route::get('/katalog/{barang}', [Peminjam\KatalogController::class, 'show'])->name('katalog.show');
+    Route::get('/jadwal', Peminjam\JadwalController::class)->name('jadwal');
     Route::get('/ketersediaan', Peminjam\KetersediaanController::class)->middleware('throttle:60,1')->name('ketersediaan');
 
     Route::get('/ajuan', [Peminjam\AjuanController::class, 'create'])->name('ajuan.create');
@@ -77,6 +78,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('/pengembalian/{peminjaman}', [Admin\PengembalianController::class, 'store'])->name('pengembalian.store');
 
     Route::get('/riwayat', [Admin\RiwayatController::class, 'index'])->name('riwayat.index');
+    Route::get('/jadwal', Admin\JadwalController::class)->name('jadwal');
 
     // Laporan
     Route::get('/laporan', [Admin\LaporanController::class, 'index'])->name('laporan.index');

@@ -64,12 +64,12 @@ Admin (sidebar, urutan & deskripsi sebagai subjudul halaman):
 - Dashboard — Ringkasan inventaris dan transaksi aktif
 - Data Barang (Jenis Barang, Unit & Kondisi, Kategori, Lokasi, Cetak Label Barcode) — Pengelolaan data barang, jenis, kategori, unit, kondisi, lokasi, serta barcode
 - Data Peminjam — Pengelolaan identitas dan riwayat peminjaman setiap peminjam
-- Transaksi (Ajuan Peminjaman + badge, Peminjaman Aktif, Pengembalian, Riwayat Transaksi) — Pengelolaan pengajuan, peminjaman aktif, pengembalian, dan riwayat transaksi
+- Transaksi (Ajuan Peminjaman + badge, Peminjaman Aktif, Pengembalian, Jadwal Pemakaian, Riwayat Transaksi) — Pengelolaan pengajuan, peminjaman aktif, pengembalian, jadwal pemakaian, dan riwayat transaksi
 - Scan Barcode — Pemindaian barcode untuk mencatat penyerahan dan pengembalian barang
 - Laporan (Transaksi, Pengembalian, Inventaris, Keterlambatan, Statistik Pemakaian — PDF/Excel, filter tanggal) — Rekapitulasi transaksi, pengembalian, inventaris, keterlambatan, dan statistik pemakaian
 - Pengaturan (Data Admin, Aturan Peminjaman) — Pengelolaan data admin dan aturan peminjaman
 - avatar: profil, ganti password, logout
-Peminjam (navbar publik): Katalog Barang, Ajukan Peminjaman, Cek Status; tautan Login Admin.
+Peminjam (navbar publik): Katalog Barang, Jadwal Alat, Ajukan Peminjaman, Cek Status; tautan Login Admin.
 Teknologi label tetap QR Code (dibaca scanner 2D & kamera); di menu disebut "barcode".
 Responsif, menu aktif ditandai, pesan sukses/gagal jelas.
 
@@ -166,4 +166,11 @@ Responsif, menu aktif ditandai, pesan sukses/gagal jelas.
 - Ekspor Excel: LaporanExport extends DefaultValueBinder + WithCustomValueBinder; teks diawali = + - @ tab CR (bukan angka) dipaksa TYPE_STRING. Baris kosong di array ekspor ditulis [''] (bukan []).
 - tests/Feature/SemuaHalamanTest.php membuka semua route GET dengan data seeder — jalankan setelah menambah halaman.
 - Untuk produksi: APP_DEBUG=false, APP_URL domain asli + HTTPS, php artisan storage:link, cron `php artisan schedule:run` tiap menit (kedaluwarsa & pengingat), SMTP untuk email.
+
+## Catatan desain (Jadwal Pemakaian Alat, disetujui)
+- Halaman admin /admin/jadwal (admin.jadwal, menu Transaksi) dan publik /jadwal (peminjam.jadwal, navbar "Jadwal Alat"); komponen bersama x-jadwal, data dari JadwalService::susun(mulai, filter, publik), validasi JadwalRequest (mulai, kategori_id, lokasi_id, q, tab=tanggal|alat|minggu). Tidak ada perubahan database.
+- Tab Per Tanggal: baris = unit, kolom = 14 hari. Unit yang sudah diserahkan memakai data asli (dipinjam / terlambat sampai hari ini); ajuan disetujui (dan menunggu, khusus admin) ditempatkan ke unit kosong pertama dari jenisnya hanya untuk tampilan. Unit perbaikan/hilang = abu-abu "Tidak tersedia".
+- Tab Per Alat: terpakai/kapasitas per hari dari KetersediaanService (ajuan menunggu tidak dihitung). Tab Ringkasan Mingguan: tingkat pemakaian %, ajuan, unit diserahkan, kembali terlambat, sedang terlambat, 3 alat terpopuler.
+- Publik: tanpa nama peminjam, kode PJM, dan ajuan menunggu; sel kosong/sisa > 0 menaut ke /ajuan?barang_id=…&tanggal_pinjam=… (AjuanController mengisi tanggal; tanggal lampau diganti hari ini).
+- Warna: putih tersedia, gold menunggu (admin), marian-300 disetujui/dipesan, marian-800 dipinjam, red-600 terlambat, abu tidak tersedia.
 

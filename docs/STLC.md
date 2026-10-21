@@ -656,3 +656,16 @@ Diperiksa dan aman: semua route /admin di bawah auth + role:admin; form publik d
 
 Hasil terakhir: **203 tes lulus**.
 
+## 14. Jadwal Pemakaian Alat (21 Okt 2026)
+
+| ID | Skenario | Langkah / Data uji | Hasil yang diharapkan | J | Tes otomatis | Hasil aktual | Status |
+|---|---|---|---|---|---|---|---|
+| JD-01 ★ | Timeline per unit | Admin → Transaksi → Jadwal Pemakaian, mulai 14 Okt | Balok dipinjam/terlambat/disetujui/menunggu di unit & tanggal yang benar; klik balok → detail | P | JadwalPemakaianTest | | |
+| JD-02 ★ | Versi publik | Buka /jadwal | Tanpa nama, kode PJM, dan ajuan menunggu | P | JadwalPemakaianTest | | |
+| JD-03 | Ajukan dari jadwal | Klik sel kosong 20 Okt | Form ajuan terisi alat & tanggal 20–21 Okt | P | JadwalPemakaianTest | | |
+| JD-04 | Unit perbaikan | Unit rusak | Baris abu-abu "Tidak tersedia", tidak menerima pesanan | N | JadwalPemakaianTest | | |
+| JD-05 | Per Alat & Ringkasan | Tab Per Alat / Ringkasan Mingguan | Terpakai/kapasitas per hari; metrik minggu | P | JadwalPemakaianTest | | |
+| JD-06 | Filter & validasi | Cari "Mikroskop"; tab=salah | Hanya unit cocok; tab salah ditolak | P/N | JadwalPemakaianTest | | |
+
+Hasil terakhir: **208 tes lulus**.
+

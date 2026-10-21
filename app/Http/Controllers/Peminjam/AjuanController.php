@@ -11,6 +11,7 @@ use App\Services\IdentitasPeminjamService;
 use App\Services\PeminjamanService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -20,14 +21,30 @@ class AjuanController extends Controller
 {
     public function create(Request $request): View
     {
+        $tanggalAwal = $this->tanggalAwal($request->query('tanggal_pinjam'));
+
         return view('peminjam.ajuan.create', [
             'barang' => Barang::orderBy('nama')->get(['id', 'nama', 'kode']),
             'barangDipilih' => $request->query('barang_id'),
+            // Dari halaman Jadwal: tanggal kosong yang diklik (tidak boleh sebelum hari ini)
+            'tanggalAwal' => $tanggalAwal,
+            'tanggalKembaliAwal' => Carbon::parse($tanggalAwal)->addDay()->toDateString(),
             'maksHari' => Pengaturan::angka(Pengaturan::LAMA_PINJAM_MAKS),
             'maksUnit' => Pengaturan::angka(Pengaturan::UNIT_MAKS_PER_AJUAN),
             'syarat' => Pengaturan::teks(Pengaturan::SYARAT_PEMINJAMAN),
             'estimasiHari' => Pengaturan::angka(Pengaturan::ESTIMASI_PENINJAUAN_HARI),
         ]);
+    }
+
+    private function tanggalAwal(mixed $nilai): string
+    {
+        try {
+            $tanggal = is_string($nilai) && $nilai !== '' ? Carbon::parse($nilai)->startOfDay() : today();
+        } catch (\Throwable) {
+            $tanggal = today();
+        }
+
+        return $tanggal->max(today())->toDateString();
     }
 
     /** Unduh template surat: unggahan admin bila ada, selain itu template bawaan. */

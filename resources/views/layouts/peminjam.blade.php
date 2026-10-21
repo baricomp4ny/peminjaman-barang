@@ -2,6 +2,7 @@
     // Navbar publik untuk peminjam (tanpa login)
     $menu = [
         ['label' => 'Katalog Alat', 'route' => 'peminjam.katalog.index', 'aktif' => 'peminjam.katalog.*'],
+        ['label' => 'Jadwal Alat', 'route' => 'peminjam.jadwal', 'aktif' => 'peminjam.jadwal'],
         ['label' => 'Ajukan Peminjaman', 'route' => 'peminjam.ajuan.create', 'aktif' => 'peminjam.ajuan.*'],
         ['label' => 'Cek Status', 'route' => 'peminjam.status.form', 'aktif' => 'peminjam.status.*'],
     ];
