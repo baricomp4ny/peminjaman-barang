@@ -70,6 +70,8 @@ class KatalogFilterTest extends TestCase
 
         $this->get('/?mulai=2026-10-09')->assertSessionHasErrors('mulai');
         $this->get('/?mulai=2026-10-12&selesai=2026-10-11')->assertSessionHasErrors('selesai');
+        // Tanggal kembali saja (tanpa tanggal pinjam) tidak boleh di masa lalu
+        $this->get('/?selesai=2026-10-09')->assertSessionHasErrors('selesai');
     }
 
     public function test_urut_nama_dan_paginasi(): void

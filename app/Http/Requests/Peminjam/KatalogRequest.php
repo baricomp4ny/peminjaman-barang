@@ -20,7 +20,7 @@ class KatalogRequest extends FormRequest
             'kategori_id' => ['nullable', 'ulid', 'exists:kategori,id'],
             'lokasi_id' => ['nullable', 'ulid', 'exists:lokasi,id'],
             'mulai' => ['nullable', 'date', 'after_or_equal:today'],
-            'selesai' => ['nullable', 'date', 'after_or_equal:mulai'],
+            'selesai' => ['nullable', 'date', 'after_or_equal:today', 'after_or_equal:mulai'],
             'tersedia' => ['nullable', 'boolean'],
         ];
     }
