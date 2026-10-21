@@ -45,6 +45,9 @@
                     Ajukan Peminjaman
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
                 </a>
+                <a href="{{ route('peminjam.jadwal', ['barang_id' => $barang->id, 'tab' => 'tanggal']) }}" class="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold text-marian-800 ring-2 ring-marian-200 transition hover:bg-marian-50">
+                    Lihat Alat Ini dalam Matriks
+                </a>
             </div>
             <p class="mt-3 text-xs text-marian-500">Ketersediaan di tanggal lain dihitung otomatis saat Anda memilih tanggal di form ajuan.</p>
         </div>

@@ -25,7 +25,7 @@ class JadwalService
 
     public function __construct(private KetersediaanService $ketersediaan) {}
 
-    /** @param  array{kategori_id?:?string, lokasi_id?:?string, q?:?string}  $filter */
+    /** @param  array{kategori_id?:?string, lokasi_id?:?string, barang_id?:?string, q?:?string}  $filter */
     public function susun(Carbon $mulai, array $filter, bool $publik): array
     {
         $mulai = $mulai->copy()->startOfDay();
@@ -35,6 +35,8 @@ class JadwalService
         $unit = UnitBarang::with(['barang.kategori', 'lokasi'])
             ->when($filter['kategori_id'] ?? null, fn ($q, $id) => $q->whereHas('barang', fn ($b) => $b->where('kategori_id', $id)))
             ->when($filter['lokasi_id'] ?? null, fn ($q, $id) => $q->where('lokasi_id', $id))
+            // Dari tombol "Lihat Alat Ini dalam Matriks" di detail alat
+            ->when($filter['barang_id'] ?? null, fn ($q, $id) => $q->where('barang_id', $id))
             ->when($filter['q'] ?? null, fn ($q, $cari) => $q->where(fn ($w) => $w
                 ->where('kode_unit', 'like', "%{$cari}%")
                 ->orWhereHas('barang', fn ($b) => $b->where('nama', 'like', "%{$cari}%")->orWhere('kode', 'like', "%{$cari}%"))))

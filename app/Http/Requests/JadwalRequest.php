@@ -21,6 +21,7 @@ class JadwalRequest extends FormRequest
             'mulai' => ['nullable', 'date', 'after_or_equal:2000-01-01', 'before_or_equal:2100-12-31'],
             'kategori_id' => ['nullable', 'ulid', 'exists:kategori,id'],
             'lokasi_id' => ['nullable', 'ulid', 'exists:lokasi,id'],
+            'barang_id' => ['nullable', 'ulid', 'exists:barang,id'],
             'q' => ['nullable', 'string', 'max:100'],
             'tab' => ['nullable', 'in:'.implode(',', array_keys(self::TAB))],
         ];
@@ -38,11 +39,11 @@ class JadwalRequest extends FormRequest
 
     public function filter(): array
     {
-        return $this->safe()->only(['kategori_id', 'lokasi_id', 'q']);
+        return $this->safe()->only(['kategori_id', 'lokasi_id', 'barang_id', 'q']);
     }
 
     public function attributes(): array
     {
-        return ['mulai' => 'tanggal', 'kategori_id' => 'kategori', 'lokasi_id' => 'lokasi'];
+        return ['mulai' => 'tanggal', 'kategori_id' => 'kategori', 'lokasi_id' => 'lokasi', 'barang_id' => 'alat'];
     }
 }

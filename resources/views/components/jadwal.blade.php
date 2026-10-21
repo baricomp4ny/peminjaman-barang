@@ -2,7 +2,7 @@
 
 @php
     // Tautan yang mempertahankan filter lain
-    $tautan = fn (array $ubah) => route($rute, array_filter(array_merge(request()->only(['mulai', 'kategori_id', 'lokasi_id', 'q', 'tab']), $ubah), fn ($v) => $v !== null && $v !== ''));
+    $tautan = fn (array $ubah) => route($rute, array_filter(array_merge(request()->only(['mulai', 'kategori_id', 'lokasi_id', 'barang_id', 'q', 'tab']), $ubah), fn ($v) => $v !== null && $v !== ''));
     $warna = [
         'dipinjam' => 'bg-marian-800 text-white',
         'terlambat' => 'bg-red-600 text-white',
@@ -11,6 +11,7 @@
     ];
     $kolom = '[grid-template-columns:8.5rem_repeat(14,4.25rem)] md:[grid-template-columns:12rem_repeat(14,minmax(4.5rem,1fr))]';
     $hariIni = today();
+    $alatDipilih = request('barang_id') && ! $errors->has('barang_id') ? \App\Models\Barang::find(request('barang_id')) : null;
 @endphp
 
 {{-- Tab --}}
@@ -24,6 +25,9 @@
 {{-- Filter --}}
 <form method="GET" action="{{ route($rute) }}" class="mt-4 grid gap-3 rounded-3xl bg-white p-4 shadow-lembut ring-1 ring-marian-100 [grid-template-columns:repeat(auto-fit,minmax(min(100%,11rem),1fr))]">
     <input type="hidden" name="tab" value="{{ $tab }}">
+    @if ($alatDipilih)
+        <input type="hidden" name="barang_id" value="{{ $alatDipilih->id }}">
+    @endif
     <label class="text-sm font-semibold text-marian-900">Mulai tanggal
         <x-text-input type="date" name="mulai" class="mt-1 block w-full" :value="$mulai->toDateString()" />
     </label>
@@ -52,6 +56,14 @@
 </form>
 
 <x-input-error :messages="$errors->all()" class="mt-2" />
+
+{{-- Matriks sedang disaring ke satu alat --}}
+@if ($alatDipilih)
+    <div class="mt-4 flex flex-wrap items-center gap-3 rounded-3xl bg-marian-50 px-4 py-3 text-sm text-marian-900 ring-1 ring-marian-200">
+        <span>Menampilkan: <strong>{{ $alatDipilih->nama }}</strong> ({{ $alatDipilih->kode }})</span>
+        <a href="{{ $tautan(['barang_id' => null]) }}" class="font-bold text-magenta hover:underline">Tampilkan semua alat</a>
+    </div>
+@endif
 
 {{-- Navigasi periode + legenda --}}
 <div class="mt-4 flex flex-wrap items-center justify-between gap-3">

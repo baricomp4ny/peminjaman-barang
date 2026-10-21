@@ -168,7 +168,7 @@ Responsif, menu aktif ditandai, pesan sukses/gagal jelas.
 - Untuk produksi: APP_DEBUG=false, APP_URL domain asli + HTTPS, php artisan storage:link, cron `php artisan schedule:run` tiap menit (kedaluwarsa & pengingat), SMTP untuk email.
 
 ## Catatan desain (Jadwal Pemakaian Alat, disetujui)
-- Halaman admin /admin/jadwal (admin.jadwal, menu Transaksi) dan publik /jadwal (peminjam.jadwal, navbar "Jadwal Alat"); komponen bersama x-jadwal, data dari JadwalService::susun(mulai, filter, publik), validasi JadwalRequest (mulai, kategori_id, lokasi_id, q, tab=tanggal|alat|minggu). Tidak ada perubahan database.
+- Halaman admin /admin/jadwal (admin.jadwal, menu Transaksi) dan publik /jadwal (peminjam.jadwal, navbar "Jadwal Alat"); komponen bersama x-jadwal, data dari JadwalService::susun(mulai, filter, publik), validasi JadwalRequest (mulai, kategori_id, lokasi_id, barang_id, q, tab=tanggal|alat|minggu); detail alat punya tombol "Lihat Alat Ini dalam Matriks" → /jadwal?barang_id=… (pita "Tampilkan semua alat"). Tidak ada perubahan database.
 - Tab Per Tanggal: baris = unit, kolom = 14 hari. Unit yang sudah diserahkan memakai data asli (dipinjam / terlambat sampai hari ini); ajuan disetujui (dan menunggu, khusus admin) ditempatkan ke unit kosong pertama dari jenisnya hanya untuk tampilan. Unit perbaikan/hilang = abu-abu "Tidak tersedia".
 - Tab Per Alat: terpakai/kapasitas per hari dari KetersediaanService (ajuan menunggu tidak dihitung). Tab Ringkasan Mingguan: tingkat pemakaian %, ajuan, unit diserahkan, kembali terlambat, sedang terlambat, 3 alat terpopuler.
 - Publik: tanpa nama peminjam, kode PJM, dan ajuan menunggu; sel kosong/sisa > 0 menaut ke /ajuan?barang_id=…&tanggal_pinjam=… (AjuanController mengisi tanggal; tanggal lampau diganti hari ini).
