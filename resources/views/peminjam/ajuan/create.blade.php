@@ -172,7 +172,13 @@
                 <legend class="flex items-center gap-3 text-base font-extrabold text-marian-900">
                     <span class="flex h-8 w-8 items-center justify-center rounded-full bg-marian-800 text-sm text-white">5</span> Syarat Peminjaman
                 </legend>
-                <div class="mt-4 max-h-48 overflow-y-auto whitespace-pre-line rounded-2xl bg-marian-50 p-4 text-sm leading-relaxed text-marian-800 ring-1 ring-marian-100">{{ $syarat }}</div>
+                {{-- Dilipat: tampil 3 baris dulu, dibuka dengan tombol supaya form tidak terasa panjang --}}
+                <div x-data="{ buka: false }" class="mt-4 rounded-2xl bg-marian-50 p-4 ring-1 ring-marian-100">
+                    <div class="whitespace-pre-line text-sm leading-relaxed text-marian-800" :class="buka || 'line-clamp-3'">{{ $syarat }}</div>
+                    <button type="button" @click="buka = ! buka" :aria-expanded="buka"
+                            class="mt-2 text-sm font-bold text-marian-800 hover:underline"
+                            x-text="buka ? 'Tutup' : 'Baca selengkapnya'">Baca selengkapnya</button>
+                </div>
                 <label class="mt-3 flex items-start gap-3 text-sm font-semibold text-marian-900">
                     <input type="checkbox" name="setuju_syarat" value="1" required @checked(old('setuju_syarat'))
                            class="mt-0.5 h-5 w-5 shrink-0 rounded border-marian-300 text-marian-800 focus:ring-marian-500">

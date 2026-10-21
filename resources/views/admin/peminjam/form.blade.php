@@ -1,14 +1,12 @@
-@php $edit = $peminjam->exists; @endphp
-
 <x-app-layout>
     <x-slot name="header"><span class="text-sm text-marian-500">Data Peminjam</span></x-slot>
 
-    <x-admin.judul :judul="$edit ? 'Ubah Peminjam' : 'Tambah Peminjam'" :kembali="route('admin.peminjam.index')" />
+    <x-admin.judul judul="Ubah Peminjam" :kembali="route('admin.peminjam.index')" />
 
     <div class="max-w-2xl rounded-3xl bg-white p-6 shadow-lembut ring-1 ring-marian-100">
-        <form method="POST" action="{{ $edit ? route('admin.peminjam.update', $peminjam) : route('admin.peminjam.store') }}" class="space-y-4">
+        <form method="POST" action="{{ route('admin.peminjam.update', $peminjam) }}" class="space-y-4">
             @csrf
-            @if ($edit) @method('PUT') @endif
+            @method('PUT')
 
             <div class="grid gap-4 sm:grid-cols-2">
                 <div>

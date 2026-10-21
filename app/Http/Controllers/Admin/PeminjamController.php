@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Enums\Peran;
-use App\Enums\StatusAkun;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\PeminjamRequest;
 use App\Models\User;
@@ -12,7 +10,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
-/** Data peminjam. Parameter {peminjam} hanya cocok dengan user ber-role peminjam (lihat RouteServiceProvider). */
+/** Data peminjam (dibuat otomatis lewat ajuan; admin hanya melihat, mengubah, menonaktifkan). Parameter {peminjam} hanya cocok dengan user ber-role peminjam (lihat RouteServiceProvider). */
 class PeminjamController extends Controller
 {
     public function index(Request $request): View
@@ -31,27 +29,6 @@ class PeminjamController extends Controller
             ->withQueryString();
 
         return view('admin.peminjam.index', compact('peminjam'));
-    }
-
-    public function create(): View
-    {
-        return view('admin.peminjam.form', ['peminjam' => (new User)->forceFill(['status' => StatusAkun::Aktif])]);
-    }
-
-    public function store(PeminjamRequest $request): RedirectResponse
-    {
-        $data = $request->validated();
-
-        $peminjam = new User(collect($data)->except('status')->all());
-        // role & status tidak ada di $fillable; peminjam tanpa password (tidak login)
-        $peminjam->forceFill([
-            'password' => null,
-            'role' => Peran::Peminjam,
-            'status' => $data['status'],
-        ])->save();
-
-        return redirect()->route('admin.peminjam.index')
-            ->with('success', "Peminjam \"{$peminjam->name}\" berhasil ditambahkan.");
     }
 
     public function show(User $peminjam, KeterlambatanService $keterlambatan): View

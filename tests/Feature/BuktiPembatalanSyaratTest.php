@@ -132,6 +132,7 @@ class BuktiPembatalanSyaratTest extends TestCase
 
         $this->get('/ajuan')->assertOk()
             ->assertSee('Alat wajib dikembalikan dalam keadaan bersih.')
+            ->assertSee('Baca selengkapnya') // teks syarat dilipat
             ->assertSee('Saya menyetujui syarat peminjaman dan bertanggung jawab atas barang yang dipinjam');
 
         $this->post('/ajuan', $this->dataAjuan(['setuju_syarat' => null]))

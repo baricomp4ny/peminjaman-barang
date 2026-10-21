@@ -76,6 +76,8 @@ class SemuaHalamanTest extends TestCase
         foreach (Peminjaman::all() as $p) {
             $this->actingAs($admin)->get(route('admin.peminjaman.show', $p))->assertOk();
             $this->get(route('admin.peminjaman.bukti', $p))->assertOk();
+            // Seeder menyertakan contoh surat peminjaman untuk setiap transaksi
+            $this->get(route('admin.peminjaman.surat', $p))->assertOk();
             $this->get(route('admin.peminjaman.serah', $p))->assertStatus($p->status->value === 'disetujui' ? 200 : 302);
             $this->get(route('admin.pengembalian.create', $p))->assertStatus($p->status->value === 'dipinjam' ? 200 : 302);
         }

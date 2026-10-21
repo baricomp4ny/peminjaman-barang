@@ -59,7 +59,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::resource('lokasi', Admin\LokasiController::class)->except('show');
     Route::resource('barang', Admin\BarangController::class);
     Route::resource('unit', Admin\UnitBarangController::class)->except('show');
-    Route::resource('peminjam', Admin\PeminjamController::class);
+    // Tanpa create/store: data peminjam dibuat otomatis saat mengajukan
+    Route::resource('peminjam', Admin\PeminjamController::class)->except(['create', 'store']);
 
     // Transaksi
     Route::get('/ajuan', [Admin\AjuanController::class, 'index'])->name('ajuan.index');

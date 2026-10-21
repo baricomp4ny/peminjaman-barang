@@ -12,6 +12,7 @@ use App\Models\UnitBarang;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * Contoh transaksi di ketujuh status. Status unit disesuaikan agar konsisten
@@ -98,8 +99,14 @@ class PeminjamanSeeder extends Seeder
         $dibuat = $mulai->copy()->subDays(2)->setTime(9, 0);
         $this->urut++;
 
+        $kode = sprintf('PJM-%s-%04d', $dibuat->format('Ymd'), $this->urut);
+        // Contoh surat peminjaman (ikut git) disalin ke disk privat agar tombol "Lihat Surat" bisa dicoba
+        $surat = "surat/{$kode}.pdf";
+        Storage::disk('local')->put($surat, file_get_contents(database_path('seeders/surat/contoh-surat.pdf')));
+
         $peminjaman = Peminjaman::create(array_merge([
-            'kode_peminjaman' => sprintf('PJM-%s-%04d', $dibuat->format('Ymd'), $this->urut),
+            'kode_peminjaman' => $kode,
+            'surat_peminjaman' => $surat,
             'user_id' => $user->id,
             'tujuan' => $tujuan,
             'tanggal_pinjam' => $mulai->toDateString(),

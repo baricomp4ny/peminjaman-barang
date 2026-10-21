@@ -1,9 +1,7 @@
 <x-app-layout>
     <x-slot name="header"><span class="text-sm text-marian-500">Data Peminjam</span></x-slot>
 
-    <x-admin.judul judul="Data Peminjam">
-        <x-link-button :href="route('admin.peminjam.create')">+ Tambah Peminjam</x-link-button>
-    </x-admin.judul>
+    <x-admin.judul judul="Data Peminjam" />
 
     <div class="rounded-3xl bg-white shadow-lembut ring-1 ring-marian-100">
         <form method="GET" class="flex flex-col gap-2 border-b p-4 sm:flex-row">
