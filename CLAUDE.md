@@ -142,6 +142,7 @@ Responsif, menu aktif ditandai, pesan sukses/gagal jelas.
 - (Dihapus) Helper `rupiah()` & app/helpers.php — tidak dipakai sejak denda dihapus. Komponen Breeze modal/nav-link/responsive-nav-link juga dihapus.
 - "Admin aktif" selalu lewat scope `User::admin()->aktif()`.
 - Kode mati dihapus: Sanctum + routes/api.php, verifikasi email & konfirmasi password Breeze, failed_jobs/personal_access_tokens.
+- Kolom users.email_verified_at di-drop lewat migration 2026_10_24_000001 (tidak dipakai sejak verifikasi email dihapus).
 - Format kode: Laravel Pint (`vendor\bin\pint`).
 
 ## Catatan desain (denda dihapus, disetujui)

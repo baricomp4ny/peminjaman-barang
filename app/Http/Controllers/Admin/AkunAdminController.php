@@ -43,7 +43,6 @@ class AkunAdminController extends Controller
             'role' => Peran::Admin,
             'status' => $data['status'],
             'password' => Hash::make($data['password']),
-            'email_verified_at' => now(),
         ])->save();
 
         return redirect()->route('admin.akun-admin.index')->with('success', "Akun admin \"{$akun->name}\" berhasil ditambahkan.");
