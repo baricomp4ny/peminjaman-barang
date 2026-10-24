@@ -14,7 +14,7 @@
             <aside :class="sidebar ? 'translate-x-0' : '-translate-x-full'"
                    class="fixed inset-y-0 left-0 z-40 w-64 transform overflow-y-auto bg-gradient-to-b from-marian-950 via-marian-900 to-marian-700 text-marian-100 transition-transform duration-200 lg:translate-x-0">
                 <div class="flex h-16 items-center gap-2 border-b border-white/10 px-5">
-                    <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/15 text-white"><x-ikon-alat nama="labu" class="h-5 w-5" /></span>
+                    <x-logo-ipb class="!h-9 !w-9 bg-white/90 p-0.5" />
                     <div class="leading-tight">
                         <div class="text-sm font-extrabold text-white">Peminjaman Alat</div>
                         <div class="text-xs text-marian-300">Panel Admin · <a href="{{ route('peminjam.katalog.index') }}" class="hover:text-white">Lihat situs</a></div>

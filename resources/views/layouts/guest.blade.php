@@ -9,7 +9,7 @@
             <section class="relative hidden overflow-hidden rounded-5xl bg-gradient-to-br from-marian-950 via-marian-800 to-marian-500 p-10 text-white md:block">
                 <div aria-hidden="true" class="absolute -right-16 -top-16 h-56 w-56 rounded-full bg-white/10"></div>
                 <a href="{{ route('peminjam.katalog.index') }}" class="relative flex items-center gap-2.5">
-                    <span class="flex h-10 w-10 items-center justify-center rounded-full bg-white/15"><x-ikon-alat nama="labu" class="h-6 w-6" /></span>
+                    <x-logo-ipb class="bg-white/90 p-0.5" />
                     <span class="leading-tight">
                         <span class="block text-sm font-extrabold">Peminjaman Alat</span>
                         <span class="block text-xs text-marian-200">{{ config('peminjaman.mitra_singkat') }}</span>
@@ -22,7 +22,7 @@
 
             <section class="w-full rounded-5xl bg-white p-6 shadow-lembut ring-1 ring-marian-100 sm:p-10">
                 <a href="{{ route('peminjam.katalog.index') }}" class="mb-6 flex items-center gap-2.5 md:hidden">
-                    <span class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-marian-900 to-marian-600 text-white"><x-ikon-alat nama="labu" class="h-6 w-6" /></span>
+                    <x-logo-ipb />
                     <span class="leading-tight">
                         <span class="block text-sm font-extrabold text-marian-900">Peminjaman Alat</span>
                         <span class="block text-xs text-marian-500">{{ config('peminjaman.mitra_singkat') }}</span>

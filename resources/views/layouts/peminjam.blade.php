@@ -19,9 +19,7 @@
             <header x-data="{ open: false }" class="sticky top-0 z-40 px-3 pt-3 sm:px-6">
                 <nav class="mx-auto flex max-w-7xl items-center justify-between gap-3 rounded-full bg-white/90 px-3 py-2 shadow-lembut ring-1 ring-marian-100 backdrop-blur sm:px-4">
                     <a href="{{ route('peminjam.katalog.index') }}" class="flex min-w-0 items-center gap-2.5">
-                        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-marian-900 to-marian-600 text-white">
-                            <x-ikon-alat nama="labu" class="h-6 w-6" />
-                        </span>
+                        <x-logo-ipb />
                         <span class="min-w-0 leading-tight">
                             <span class="block truncate text-sm font-extrabold text-marian-900">Peminjaman Alat</span>
                             <span class="block truncate text-[11px] font-medium text-marian-500">{{ config('peminjaman.mitra_singkat') }}</span>
@@ -85,7 +83,7 @@
                 <div class="mx-auto grid max-w-7xl gap-8 px-6 py-10 [grid-template-columns:repeat(auto-fit,minmax(min(100%,15rem),1fr))]">
                     <div>
                         <div class="flex items-center gap-2.5">
-                            <span class="flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-white"><x-ikon-alat nama="labu" class="h-6 w-6" /></span>
+                            <x-logo-ipb class="bg-white/90 p-0.5" />
                             <span class="text-base font-extrabold text-white">Peminjaman Alat</span>
                         </div>
                         <p class="mt-3 text-sm leading-relaxed text-marian-200">{{ config('peminjaman.mitra') }}</p>
