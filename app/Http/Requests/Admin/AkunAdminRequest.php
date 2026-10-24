@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\Admin;
 
-use App\Enums\Peran;
 use App\Enums\StatusAkun;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
@@ -45,7 +44,7 @@ class AkunAdminRequest extends FormRequest
                 // Jangan sampai admin mengunci dirinya sendiri / tidak ada admin aktif tersisa
                 if ($akun->is($this->user())) {
                     $validator->errors()->add('status', 'Anda tidak bisa menonaktifkan akun sendiri.');
-                } elseif ($akun->isAktif() && User::where('role', Peran::Admin)->where('status', StatusAkun::Aktif)->count() <= 1) {
+                } elseif ($akun->isAktif() && User::admin()->aktif()->count() <= 1) {
                     $validator->errors()->add('status', 'Minimal harus ada satu admin aktif.');
                 }
             },

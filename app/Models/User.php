@@ -120,7 +120,7 @@ class User extends Authenticatable
             $oleh !== null && $this->is($oleh) => 'akun Anda sendiri',
             // Disimpan demi jejak audit; cukup dinonaktifkan
             $this->verifikasi()->exists() => 'pernah memverifikasi ajuan',
-            $this->isAktif() && self::admin()->where('status', StatusAkun::Aktif)->count() <= 1 => 'harus ada minimal satu admin aktif',
+            $this->isAktif() && self::admin()->aktif()->count() <= 1 => 'harus ada minimal satu admin aktif',
             default => null,
         };
     }

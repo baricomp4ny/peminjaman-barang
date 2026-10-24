@@ -139,7 +139,8 @@ Responsif, menu aktif ditandai, pesan sukses/gagal jelas.
 - Nilai status/peran memakai PHP Enum di app/Enums (Peran, StatusAkun, StatusPeminjaman, StatusUnit, KondisiUnit) + cast Eloquent; Form Request memakai Rule::enum. Bandingkan dengan Enum, bukan string.
 - Kartu QR peminjam PMJ.… beserta logikanya dihapus; kode PMJ lama dianggap "QR tidak dikenal".
 - Menu sidebar admin disiapkan App\View\Composers\AdminLayoutComposer (didaftarkan di AppServiceProvider).
-- Helper global `rupiah()` di app/helpers.php (autoload files composer).
+- (Dihapus) Helper `rupiah()` & app/helpers.php — tidak dipakai sejak denda dihapus. Komponen Breeze modal/nav-link/responsive-nav-link juga dihapus.
+- "Admin aktif" selalu lewat scope `User::admin()->aktif()`.
 - Kode mati dihapus: Sanctum + routes/api.php, verifikasi email & konfirmasi password Breeze, failed_jobs/personal_access_tokens.
 - Format kode: Laravel Pint (`vendor\bin\pint`).
 

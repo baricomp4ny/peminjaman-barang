@@ -20,7 +20,7 @@ class AkunAdminController extends Controller
 
     public function index(): View
     {
-        $admin = User::where('role', Peran::Admin)
+        $admin = User::admin()
             ->withCount('verifikasi')
             ->orderBy('name')
             ->get();

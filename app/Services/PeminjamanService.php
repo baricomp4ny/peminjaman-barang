@@ -3,8 +3,6 @@
 namespace App\Services;
 
 use App\Enums\KondisiUnit;
-use App\Enums\Peran;
-use App\Enums\StatusAkun;
 use App\Enums\StatusPeminjaman;
 use App\Enums\StatusUnit;
 use App\Exceptions\PeminjamanException;
@@ -82,7 +80,7 @@ class PeminjamanService
         });
 
         Notification::send(
-            User::where('role', Peran::Admin)->where('status', StatusAkun::Aktif)->get(),
+            User::admin()->aktif()->get(),
             new AjuanBaru($peminjaman)
         );
         // Peminjam tidak login → bukti ajuan & kode dikirim ke email
