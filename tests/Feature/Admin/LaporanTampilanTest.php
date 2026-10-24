@@ -41,6 +41,18 @@ class LaporanTampilanTest extends TestCase
         }
     }
 
+    public function test_angka_kartu_menghitung_kondisi_enum_dengan_benar(): void
+    {
+        // Seeder: 30 unit = 27 baik, 2 rusak, 1 hilang (kondisi memakai cast Enum, bukan string)
+        $kartu = $this->get('/admin/laporan/inventaris')->assertOk()->viewData('laporan')['web']['kartu'];
+        $this->assertSame([30, 27, 2, 1], array_column($kartu, 1));
+
+        // Pengembalian seeder: 1 unit baik (terlambat) + 1 unit rusak
+        $kartu = $this->get('/admin/laporan/pengembalian?dari='.today()->subMonth()->toDateString().'&sampai='.today()->toDateString())
+            ->assertOk()->viewData('laporan')['web']['kartu'];
+        $this->assertSame([2, 1, 1, 1], array_column($kartu, 1));
+    }
+
     public function test_keterlambatan_berjalan_punya_tombol_whatsapp(): void
     {
         // Seeder: Eko (no. HP terisi) masih terlambat mengembalikan pH Meter

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\KondisiUnit;
 use App\Exports\LaporanExport;
 use App\Models\Barang;
 use App\Models\Peminjaman;
@@ -103,16 +104,16 @@ class LaporanService
             ])->all(),
             'ringkasan' => [
                 'Unit dikembalikan' => $data->count(),
-                'Kondisi baik' => $data->where('kondisi_kembali', 'baik')->count(),
-                'Kondisi rusak' => $data->where('kondisi_kembali', 'rusak')->count(),
-                'Hilang' => $data->where('kondisi_kembali', 'hilang')->count(),
+                'Kondisi baik' => $data->where('kondisi_kembali', KondisiUnit::Baik)->count(),
+                'Kondisi rusak' => $data->where('kondisi_kembali', KondisiUnit::Rusak)->count(),
+                'Hilang' => $data->where('kondisi_kembali', KondisiUnit::Hilang)->count(),
                 'Kembali terlambat' => $data->where('hari_terlambat', '>', 0)->count().' unit',
             ],
             'web' => $this->web(
                 kartu: [
                     ['Unit dikembalikan', $data->count(), false],
-                    ['Kondisi baik', $data->where('kondisi_kembali', 'baik')->count(), false],
-                    ['Rusak / hilang', $data->whereIn('kondisi_kembali', ['rusak', 'hilang'])->count(), true],
+                    ['Kondisi baik', $data->where('kondisi_kembali', KondisiUnit::Baik)->count(), false],
+                    ['Rusak / hilang', $data->whereIn('kondisi_kembali', [KondisiUnit::Rusak, KondisiUnit::Hilang])->count(), true],
                     ['Kembali terlambat', $data->where('hari_terlambat', '>', 0)->count(), true],
                 ],
                 utama: [1 => '1.2fr', 2 => '1.6fr', 3 => '1fr', 6 => '1.2fr', 7 => '1fr'],
@@ -149,9 +150,9 @@ class LaporanService
             'web' => $this->web(
                 kartu: [
                     ['Total unit', $data->count(), false],
-                    ['Kondisi baik', $data->where('kondisi', 'baik')->count(), false],
-                    ['Kondisi rusak', $data->where('kondisi', 'rusak')->count(), true],
-                    ['Kondisi hilang', $data->where('kondisi', 'hilang')->count(), true],
+                    ['Kondisi baik', $data->where('kondisi', KondisiUnit::Baik)->count(), false],
+                    ['Kondisi rusak', $data->where('kondisi', KondisiUnit::Rusak)->count(), true],
+                    ['Kondisi hilang', $data->where('kondisi', KondisiUnit::Hilang)->count(), true],
                 ],
                 utama: [1 => '1fr', 2 => '1.8fr', 4 => '1.5fr', 5 => '1fr', 7 => '1fr'],
                 pil: [5, 7],
